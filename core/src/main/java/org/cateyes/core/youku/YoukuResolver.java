@@ -1,64 +1,134 @@
 package org.cateyes.core.youku;
 
 import java.net.URI;
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Queue;
 import java.util.Random;
+import java.util.Set;
 
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 
-import org.apache.commons.lang.ArrayUtils;
 import org.cateyes.core.ApacheConnector;
 import org.cateyes.core.Resolver;
+import org.cateyes.core.VideoConstants.VideoType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class YoukuResolver implements Resolver {
+	static final Logger logger = LoggerFactory.getLogger(YoukuResolver.class);
+
 	public void resolv(URI url) {
 
 	}
 
-	public String getYoukuSid(URI url) {
-		String str = url.toString();
-
-		return str;
-	}
+	// public String getYoukuSid(URI url) {
+	// String str = url.toString();
+	// if(){
+	//
+	// }
+	// return str;
+	// }
 
 	ApacheConnector connetor = new ApacheConnector();
 
+	public static final String YOUKU_LIST = "http://v.youku.com/player/getPlayList/VideoIDS/";
+
+	public static final String REAL_FORMAT = "http://f.youku.com/player/getFlvPath/sid/%s_%s/st/%s/fileid/%s%s%s?K=%s&ts=%s";
+
+	 public void resolv(String yid, VideoType type) {
+	 String[] uris = getReadUriFromYID(yid,type);
+	 if (null == uris || uris.length == 0) {
+	 logger.error("no uri");
+	 return;
+	 }
+	 for (String str : uris) {
+	 logger.info("download from {} ", str);
+	
+	 }
+	
+	 }
+
+	protected String[] getReadUriFromYID(String yid, VideoType type) {
+		String flcJsonURI = YOUKU_LIST + yid;
+		logger.debug("youku paly-list {}", flcJsonURI);
+		byte[] bts = connetor.doGet(URI.create(flcJsonURI));
+		if (null == bts) {
+			logger.error("cannot get play-list json data");
+			return null;
+		}
+		String json = new String(bts);
+		if (logger.isDebugEnabled()) {
+			logger.debug("json data : {}", json);
+		}
+		JSONObject object = JSONObject.fromObject(json);
+		JSONArray dataObj = object.getJSONArray("data");
+		final JSONObject data = dataObj.getJSONObject(0);
+
+		final JSONObject segs = data.getJSONObject("segs");
+		Set<?> videoTypes = segs.keySet();
+		logger.info("{} kinds types ", videoTypes.size());
+		if (null == type) {
+			type = VideoType.FLV;
+		}
+		String sType = type.name().toLowerCase();
+		if (videoTypes.contains(sType)) {
+
+		} else {
+			logger.error("cannot get type {}", sType);
+		}
+		return getReadUriFromYID(data, sType);
+	}
+
+	private String[] getReadUriFromYID(JSONObject data, String sType) {
+		int seed = getSeed(data);
+		char[] maxStr = getMixString(seed);
+		JSONObject sf = data.getJSONObject("streamfileids");
+		String token = (String) sf.get("flv");
+		String[] vid = token.split("\\*");
+		String vv = getVid(maxStr, vid);
+		final JSONObject segs = data.getJSONObject("segs");
+		JSONArray flvSegs = segs.getJSONArray(sType);
+		String[] uris = new String[flvSegs.size()];
+		for (int i = 0; i < flvSegs.size(); i++) {
+			JSONObject fragment = flvSegs.getJSONObject(i);
+			String numSt = (String) fragment.get("no");
+			int in = Integer.parseInt(numSt);
+			String no = String.format("%02x", in);
+			String urlString = String.format(REAL_FORMAT, getSerialId(), no,
+					sType, vv.substring(0, 8), no.toUpperCase(),
+					vv.substring(10), fragment.get("k"),
+					fragment.get("seconds"));
+			logger.info("read address {} ", urlString);
+			uris[i] = urlString;
+		}
+		return uris;
+	}
+
 	public void resolvSid(String sid) {
-		String flcJsonURI = "http://v.youku.com/player/getPlayList/VideoIDS/" + sid;
+		String flcJsonURI = YOUKU_LIST + sid;
 		byte[] bts = connetor.doGet(URI.create(flcJsonURI));
 		JSONObject object = JSONObject.fromObject(new String(bts));
 		JSONArray dataObj = object.getJSONArray("data");
 		JSONObject data = dataObj.getJSONObject(0);
 		JSONObject segs = data.getJSONObject("segs");
-		for (Object key : segs.keySet()) {
-			System.out.println(key);
-		}
+
 		JSONArray flvSegs = segs.getJSONArray("flv");
-		System.out.println(flvSegs.size());
 		int seed = getSeed(data);
-		System.out.println("seed is " + seed);
 		char[] maxStr = getMixString(seed);
 		JSONObject sf = data.getJSONObject("streamfileids");
 		String token = (String) sf.get("flv");
-		System.out.println(token);
 		String[] vid = token.split("\\*");
 		String vv = getVid(maxStr, vid);
-		System.out.println(vv);
 		JSONObject fragment = flvSegs.getJSONObject(0);
+
 		String numSt = (String) fragment.get("no");
 		int in = Integer.parseInt(numSt);
-		String no = String.format("%02x",in);
-		String urlString = String.format("http://f.youku.com/player/getFlvPath/sid/%s_%s/st/%s/fileid/%s%s%s?K=%s&ts=%s",
-				getSerialId(),no,"flv",vv.substring(0, 8),no.toUpperCase(),vv.substring(10),
-				fragment.get("k"),fragment.get("seconds"));
-		System.out.println(urlString);
-		
+		String no = String.format("%02x", in);
+		String urlString = String.format(REAL_FORMAT, getSerialId(), no, "flv",
+				vv.substring(0, 8), no.toUpperCase(), vv.substring(10),
+				fragment.get("k"), fragment.get("seconds"));
+
 	}
 
 	protected int getSeed(JSONObject obj) {
@@ -83,7 +153,8 @@ public class YoukuResolver implements Resolver {
 	Random counter = new Random();
 
 	String getSerialId() {
-		return "" + System.currentTimeMillis() + (1000 + counter.nextInt(999)) + (1000 + counter.nextInt(9000));
+		return "" + System.currentTimeMillis() + (1000 + counter.nextInt(999))
+				+ (1000 + counter.nextInt(9000));
 	}
 
 	String getVid(final char[] maxStr, String[] idx) {
