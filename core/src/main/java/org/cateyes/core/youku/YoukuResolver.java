@@ -1,8 +1,13 @@
 package org.cateyes.core.youku;
 
 import java.net.URI;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 
@@ -10,46 +15,52 @@ import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 
 import org.cateyes.core.ApacheConnector;
-import org.cateyes.core.Resolver;
 import org.cateyes.core.VideoConstants.VideoType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class YoukuResolver implements Resolver {
+public class YoukuResolver {
 	static final Logger logger = LoggerFactory.getLogger(YoukuResolver.class);
 
 	public void resolv(URI url) {
 
 	}
 
-	// public String getYoukuSid(URI url) {
-	// String str = url.toString();
-	// if(){
-	//
-	// }
-	// return str;
-	// }
+	static final ApacheConnector connetor = new ApacheConnector();
 
-	ApacheConnector connetor = new ApacheConnector();
+	public static ApacheConnector getConnector() {
+		return connetor;
+	}
 
+	final static Map<String, VideoType> typeMapper = new HashMap<String, VideoType>();
+	final static Map<VideoType, String> segMapper = new HashMap<VideoType, String>();
+	static {
+		typeMapper.put("flv", VideoType.FLV);
+		typeMapper.put("mp4", VideoType.MP4);
+		typeMapper.put("hd2", VideoType.HD2);
+		segMapper.put(VideoType.FLV, "flv");
+		segMapper.put(VideoType.MP4, "mp4");
+		segMapper.put(VideoType.HD2, "flv");
+
+	}
 	public static final String YOUKU_LIST = "http://v.youku.com/player/getPlayList/VideoIDS/";
 
 	public static final String REAL_FORMAT = "http://f.youku.com/player/getFlvPath/sid/%s_%s/st/%s/fileid/%s%s%s?K=%s&ts=%s";
 
-	 public void resolv(String yid, VideoType type) {
-	 String[] uris = getReadUriFromYID(yid,type);
-	 if (null == uris || uris.length == 0) {
-	 logger.error("no uri");
-	 return;
-	 }
-	 for (String str : uris) {
-	 logger.info("download from {} ", str);
-	
-	 }
-	
-	 }
+	public static void resolv(String yid, VideoType type) {
+		String[] uris = getReadUriFromYID(yid, type);
+		if (null == uris || uris.length == 0) {
+			logger.error("no uri");
+			return;
+		}
+		for (String str : uris) {
+			logger.info("download from {} ", str);
 
-	protected String[] getReadUriFromYID(String yid, VideoType type) {
+		}
+
+	}
+
+	public static JSONObject getMetadata(String yid) {
 		String flcJsonURI = YOUKU_LIST + yid;
 		logger.debug("youku paly-list {}", flcJsonURI);
 		byte[] bts = connetor.doGet(URI.create(flcJsonURI));
@@ -61,32 +72,52 @@ public class YoukuResolver implements Resolver {
 		if (logger.isDebugEnabled()) {
 			logger.debug("json data : {}", json);
 		}
-		JSONObject object = JSONObject.fromObject(json);
-		JSONArray dataObj = object.getJSONArray("data");
-		final JSONObject data = dataObj.getJSONObject(0);
+		return JSONObject.fromObject(json);
+	}
+
+	public static JSONObject getData(String yid) {
+		JSONObject metadata = getMetadata(yid);
+		return metadata.getJSONArray("data").getJSONObject(0);
+	}
+
+	public static int getFragmentCount(VideoType type, JSONObject data) {
+		final JSONObject segs = data.getJSONObject("segs");
+		String t = segMapper.get(type);
+		if (null == t) {
+			return 0;
+		}
+		JSONArray flvSegs = segs.getJSONArray(t);
+		return flvSegs.size();
+	}
+
+	public static String[] getReadUriFromYID(String yid, VideoType type) {
+		final JSONObject data = getData(yid);
 
 		final JSONObject segs = data.getJSONObject("segs");
-		Set<?> videoTypes = segs.keySet();
-		logger.info("{} kinds types ", videoTypes.size());
+		Collection<VideoType> tlist = getVideoType(data);
+
+		// Set<?> videoTypes = segs.keySet();
+		logger.info("{} kinds types ", tlist.size());
 		if (null == type) {
 			type = VideoType.FLV;
 		}
-		String sType = type.name().toLowerCase();
-		if (videoTypes.contains(sType)) {
-
+		if (tlist.contains(type)) {
 		} else {
-			logger.error("cannot get type {}", sType);
+			logger.error("cannot get type {}", type.name());
+			throw new RuntimeException("no such type " + type.name());
 		}
-		return getReadUriFromYID(data, sType);
+		return getReadUriFromYID(data, type);
 	}
 
-	private String[] getReadUriFromYID(JSONObject data, String sType) {
+	public static String[] getReadUriFromYID(JSONObject data, VideoType type) {
 		int seed = getSeed(data);
 		char[] maxStr = getMixString(seed);
 		JSONObject sf = data.getJSONObject("streamfileids");
 		String token = (String) sf.get("flv");
 		String[] vid = token.split("\\*");
 		String vv = getVid(maxStr, vid);
+		
+		String sType = segMapper.get(type);
 		final JSONObject segs = data.getJSONObject("segs");
 		JSONArray flvSegs = segs.getJSONArray(sType);
 		String[] uris = new String[flvSegs.size()];
@@ -105,7 +136,25 @@ public class YoukuResolver implements Resolver {
 		return uris;
 	}
 
-	public void resolvSid(String sid) {
+	public static Collection<VideoType> getVideoType(JSONObject data) {
+		final JSONObject segs = data.getJSONObject("segs");
+		Set<?> videoTypes = segs.keySet();
+		if (null == videoTypes || videoTypes.isEmpty()) {
+			throw new RuntimeException("no types");
+		}
+		Iterator<?> it = videoTypes.iterator();
+		Collection<VideoType> types = new HashSet<VideoType>();
+		for (int i = 0; i < videoTypes.size(); i++) {
+			VideoType type = typeMapper.get(it.next());
+			if (null == type) {
+				continue;
+			}
+			types.add(type);
+		}
+		return types;
+	}
+
+	public static void resolvSid(String sid) {
 		String flcJsonURI = YOUKU_LIST + sid;
 		byte[] bts = connetor.doGet(URI.create(flcJsonURI));
 		JSONObject object = JSONObject.fromObject(new String(bts));
@@ -131,12 +180,12 @@ public class YoukuResolver implements Resolver {
 
 	}
 
-	protected int getSeed(JSONObject obj) {
+	protected static int getSeed(JSONObject obj) {
 		Integer value = (Integer) obj.get("seed");
 		return value;
 	}
 
-	protected String genSid() {
+	protected static String genSid() {
 		int i1 = (int) (1000 + Math.floor(Math.random() * 999));
 		int i2 = (int) (1000 + Math.floor(Math.random() * 9000));
 		return System.currentTimeMillis() + "" + i1 + "" + i2;
@@ -145,19 +194,16 @@ public class YoukuResolver implements Resolver {
 	protected static String TOKEN = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ/\\:._-1234567890";
 
 	/**
-	 * 13677 42260 459 1184 8692 13677 45216 107 1117 1572 13677 45504 891 1989
-	 * 8837
-	 * 
 	 * @return
 	 */
-	Random counter = new Random();
+	static Random counter = new Random();
 
-	String getSerialId() {
+	static String getSerialId() {
 		return "" + System.currentTimeMillis() + (1000 + counter.nextInt(999))
 				+ (1000 + counter.nextInt(9000));
 	}
 
-	String getVid(final char[] maxStr, String[] idx) {
+	static String getVid(final char[] maxStr, String[] idx) {
 		if (null == idx || idx.length == 0) {
 			return null;
 		}
@@ -173,9 +219,7 @@ public class YoukuResolver implements Resolver {
 		return new String(chs);
 	}
 
-	char[] getMixString(int seed) {
-		// List<Character> queue =
-		// Arrays.asList(ArrayUtils.toObject(TOKEN.toCharArray()));
+	static char[] getMixString(int seed) {
 		List<Character> queue = new LinkedList<Character>();
 		for (char ch : TOKEN.toCharArray()) {
 			queue.add(ch);
@@ -188,6 +232,5 @@ public class YoukuResolver implements Resolver {
 			ret[i] = queue.remove(index);
 		}
 		return ret;
-		// return new String(ret);
 	}
 }
