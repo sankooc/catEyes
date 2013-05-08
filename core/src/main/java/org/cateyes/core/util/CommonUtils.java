@@ -17,6 +17,7 @@ import org.cateyes.core.VideoConstants.VideoType;
  */
 public class CommonUtils {
 	static int cacheByte = 1024;
+	public final static String FIX = "%s-%02d.%s";
 
 	public static void mergeMedia(File parent, String title, int size,
 			VideoType type) {
@@ -27,10 +28,10 @@ public class CommonUtils {
 		case FLV:
 			File[] files = new File[size];
 			for (int i = 0; i < size; i++) {
-				File file = new File(parent, String.format("%s-%02d.%s", title,
-						(i + 1), "flv"));
+				File file = new File(parent,
+						String.format(FIX, title, i, "flv"));
 				if (!file.exists()) {
-					throw new RuntimeException("fregment " + i + " missing");
+					throw new RuntimeException("fragment " + i + " missing");
 				}
 			}
 			File file = new File(parent, String.format("%s.%s", title, "flv"));
@@ -39,7 +40,7 @@ public class CommonUtils {
 	}
 
 	public static void mergeFlv(File[] files, File file) {
-		
+
 		for (File f : files) {
 
 		}

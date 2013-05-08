@@ -25,14 +25,15 @@ import org.cateyes.core.ApacheConnector.ContentComsumer;
 import org.cateyes.core.CommonAdaptor;
 import org.cateyes.core.VideoConstants.Provider;
 import org.cateyes.core.VideoConstants.VideoType;
+import org.cateyes.core.util.CommonUtils;
 import org.cateyes.core.youku.YoukuResolver;
+import org.jsoup.nodes.Document;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class YoukuVolumn implements Volumn {
 
 	final String yid;
-	final YoukuResolver resolver;
 	String name;
 	String title;
 	File tmpFile;
@@ -52,14 +53,17 @@ public class YoukuVolumn implements Volumn {
 	//
 	// }
 
-	YoukuVolumn(String yid, YoukuResolver resolver, String name) {
-		if (null == yid || null == resolver) {
+	YoukuVolumn(String yid, File file) {
+		this(yid, null, file);
+	}
+
+	YoukuVolumn(String yid, String name, File file) {
+		if (null == yid) {
 			throw new IllegalArgumentException();
 		}
 		this.yid = yid;
-		this.resolver = resolver;
 		this.name = name;
-
+		this.tmpFile = file;
 	}
 
 	public void selfCheck(File file) {
@@ -88,9 +92,16 @@ public class YoukuVolumn implements Volumn {
 	public void write(final OutputStream out, final VideoType type) {
 		String[] uris = YoukuResolver.getReadUriFromYID(yid, type);
 		if (ArrayUtils.isEmpty(uris)) {
-			logger.error("cannote download {}", yid);
+			logger.error("cannot download {}", yid);
 			return;
 		}
+		Document page = YoukuResolver.getConnector().getPage(
+				"http://v.youku.com/v_show/id_" + yid + ".html");
+		String title = page.title();
+		title = title.replace(" - 视频 - 优酷视频 - 在线观看", "");
+		title = title.replace(" - 专辑 - 优酷视频", "");
+		title = title.replace("—优酷网，视频高清在线观看", "");
+		this.title = title;
 		if (uris.length == 1) {
 			String uri = uris[0];
 			YoukuResolver.getConnector().doGet(URI.create(uri),
@@ -146,13 +157,11 @@ public class YoukuVolumn implements Volumn {
 	public void download(final String[] uris, VideoType type) {
 		final Collection<String> taskList = new TreeSet<String>();
 		final MutableBoolean flag = new MutableBoolean(true);
-
 		for (int i = 0; i < uris.length; i++) {
 
 			final String uri = uris[i];
-			// final String fileName = title + i + ".flv";
-			final String fileName = String.format(" %s-%02d.%s", title, i,
-					".flv");
+			final String fileName = String.format(CommonUtils.FIX, title, i,
+					"flv");
 			// taskList.add(fileName);
 			final File freg = new File(tmpFile, fileName);
 			service.execute(new Runnable() {
@@ -176,7 +185,6 @@ public class YoukuVolumn implements Volumn {
 				int size = uris.length;
 				while (flag.booleanValue()) {
 					if (taskList.size() == size) {
-						
 					} else {
 						try {
 							Thread.sleep(2000);

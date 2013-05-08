@@ -27,11 +27,8 @@ public class ApacheConnectTest {
 		String[] s =  YoukuResolver.getReadUriFromYID("XNTQ2OTc0OTAw", VideoType.FLV);
 		String uriStr = s[0];
 		URI uri = URI.create(uriStr);
-//		HttpUriRequest request = new HttpGet(uri);
-//		request.addHeader("Range", "bytes=1000000-");
-//		long size = 2756502192l;
 		try {
-			File tmp = new File("d:/dd.flv");
+			File tmp = new File("target/youku/test.flv");
 			OutputStream out = new FileOutputStream(tmp,true);
 			connect.download(uri, out,tmp.length(),null);
 		} catch (Exception e) {
