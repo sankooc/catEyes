@@ -130,7 +130,7 @@ public class YoukuResolver {
 					sType, vv.substring(0, 8), no.toUpperCase(),
 					vv.substring(10), fragment.get("k"),
 					fragment.get("seconds"));
-			logger.info("read address {} ", urlString);
+//			logger.info("read address {} ", urlString);
 			uris[i] = urlString;
 		}
 		return uris;

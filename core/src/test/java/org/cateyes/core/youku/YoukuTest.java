@@ -9,7 +9,7 @@ public class YoukuTest {
 	@Test
 	public void test() {
 		try {
-			YoukuResolver.getReadUriFromYID("XNTQ2OTc0OTAw", VideoType.HD2);
+			YoukuResolver.getReadUriFromYID("XNTQ2OTc0OTAw", VideoType.FLV);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

@@ -4,10 +4,15 @@ import java.io.File;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URI;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeSet;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
@@ -15,7 +20,9 @@ import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 
 import org.apache.commons.lang.ArrayUtils;
+import org.apache.commons.lang.mutable.MutableBoolean;
 import org.cateyes.core.ApacheConnector.ContentComsumer;
+import org.cateyes.core.CommonAdaptor;
 import org.cateyes.core.VideoConstants.Provider;
 import org.cateyes.core.VideoConstants.VideoType;
 import org.cateyes.core.youku.YoukuResolver;
@@ -78,7 +85,7 @@ public class YoukuVolumn implements Volumn {
 		write(out, VideoType.FLV);
 	}
 
-	public void write(final OutputStream out, VideoType type) {
+	public void write(final OutputStream out, final VideoType type) {
 		String[] uris = YoukuResolver.getReadUriFromYID(yid, type);
 		if (ArrayUtils.isEmpty(uris)) {
 			logger.error("cannote download {}", yid);
@@ -107,14 +114,78 @@ public class YoukuVolumn implements Volumn {
 						}
 					});
 		} else {
-
+			download(uris, type);
 		}
 
 	}
 
+	public void singleDownload(String uri, final OutputStream out) {
+		YoukuResolver.getConnector().doGet(URI.create(uri),
+				new ContentComsumer() {
+					public void consume(InputStream content) throws Exception {
+						byte[] tmp = new byte[1024];
+						while (true) {
+							try {
+								int num = content.read(tmp);
+								if (num < 1) {
+									out.flush();
+									break;
+								}
+								out.write(tmp, 0, num);
+							} catch (Exception e) {
+								out.flush();
+								break;
+							}
+						}
+					}
+				});
+	}
+
 	Executor service = Executors.newCachedThreadPool();
 
-	public void download(String[] uris) {
+	public void download(final String[] uris, VideoType type) {
+		final Collection<String> taskList = new TreeSet<String>();
+		final MutableBoolean flag = new MutableBoolean(true);
 
+		for (int i = 0; i < uris.length; i++) {
+
+			final String uri = uris[i];
+			// final String fileName = title + i + ".flv";
+			final String fileName = String.format(" %s-%02d.%s", title, i,
+					".flv");
+			// taskList.add(fileName);
+			final File freg = new File(tmpFile, fileName);
+			service.execute(new Runnable() {
+				public void run() {
+					CommonAdaptor adaptor = new CommonAdaptor(fileName
+							+ " download");
+					try {
+						YoukuResolver.getConnector().download(URI.create(uri),
+								freg, adaptor);
+						taskList.add(fileName);
+					} catch (Exception e) {
+						flag.setValue(false);
+						logger.error(e.getMessage(), e);
+					}
+				}
+
+			});
+		}
+		service.execute(new Runnable() {
+			public void run() {
+				int size = uris.length;
+				while (flag.booleanValue()) {
+					if (taskList.size() == size) {
+						
+					} else {
+						try {
+							Thread.sleep(2000);
+						} catch (InterruptedException e) {
+							e.printStackTrace();
+						}
+					}
+				}
+			}
+		});
 	}
 }
