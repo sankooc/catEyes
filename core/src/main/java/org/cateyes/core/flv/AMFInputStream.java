@@ -20,6 +20,7 @@ public class AMFInputStream extends DataInputStream {
 		switch (type) {
 		case 0:
 			return readDouble();
+//			return readLong();
 		case 1:
 			return readUnsignedByte() == 1;
 		case 2:

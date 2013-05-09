@@ -8,6 +8,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -144,12 +145,32 @@ public class FlvMetadata {
 	public void setKeyframes(Map<String, List<Double>> keyframes) {
 		this.keyframes = keyframes;
 	}
-	public void update (FlvInputStream stream) throws IOException{
-		stream.readMetadata();
-	//TODO	
+
+	public void update(FlvInputStream stream) throws IOException {
+		EcmaArray<String, ?> ecma = stream.readMetadata();
+		
+		while(true){
+			stream.readTag();
+		}
+		
+//		Double duration = null;
+//		int fregCout = 0;
+//		for (String key : ecma.keySet()) {
+//			// if ("duration".equals(key)) {
+//			// duration = (Double) ecma.get(key);
+//			// }
+//			if (key.equals("keyframes")) {
+//				Map<String, ?> metaMap = (Map<String, ?>) ecma.get(key);
+//				Collection<?> list1 = (Collection<?>) metaMap.get("times");
+//				// Collection<?> list2 = (Collection<?>)
+//				// metaMap.get("filepositions");
+////				System.out.println(list1.size());
+//			}
+//		}
 	}
-	public void write(File file){
-//		int offset = compute();
+
+	public void write(File file) {
+		// int offset = compute();
 	}
 
 	private int compute() {

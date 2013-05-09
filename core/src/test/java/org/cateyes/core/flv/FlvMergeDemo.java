@@ -10,10 +10,20 @@ public class FlvMergeDemo {
 	
 	@Test
 	public void merge() throws IOException{
-		File[] files = new File[2];
+		File[] files = new File[5];
 		files[0] = new File("d:/test/test-00.flv");
 		files[1] = new File("d:/test/test-01.flv");
+		files[2] = new File("d:/test/test-02.flv");
+		files[3] = new File("d:/test/test-03.flv");
+		files[4] = new File("d:/test/test.flv");
 		File target = new File("target/tmp.flv");
 		CommonUtils.mergeFlv(files, target);
+	}
+	
+//	@Test
+	public void compute(){
+		double ret = 362.46666666666664+390.4667573696145+363.06721088435376+343.7946485260771;
+		System.out.println(ret);
+		//1459.789
 	}
 }

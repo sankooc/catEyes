@@ -15,30 +15,44 @@ public class FlvInputStream extends DataInputStream {
 
 	public FlvInputStream(InputStream in) throws IOException {
 		super(in);
-//		assert read() == 'F' && read() == 'L' && read() == 'V';
-//		assert 0x05 != readUnsignedByte();
-//		int typeFlags =readUnsignedByte();
-//		logger.debug(Integer.toBinaryString(typeFlags));
-//		assert 9 == readInt();
-	}
-
-	public void readMetadata() throws IOException {
+		// assert read() == 'F' && read() == 'L' && read() == 'V';
+		// assert 0x05 != readUnsignedByte();
+		// int typeFlags =readUnsignedByte();
+		// logger.debug(Integer.toBinaryString(typeFlags));
+		// assert 9 == readInt();
 		assert read() == 'F' && read() == 'L' && read() == 'V';
 		assert 0x05 != readUnsignedByte();
-		int typeFlags =readUnsignedByte();
-		logger.debug(Integer.toBinaryString(typeFlags));
+		int typeFlags = readUnsignedByte();
+//		logger.debug(Integer.toBinaryString(typeFlags));
 		assert 9 == readInt();
-		
 		DataStreamUtils.readUInt32(this);
+	}
+
+	
+	public void readTag() throws IOException{
+		int type = read();
+		int dataSize = DataStreamUtils.readUInt24(this);
+		long time = DataStreamUtils.readTime(this);
+		System.out.println(time);
+		DataStreamUtils.readUInt24(this);
+		byte[] data = new byte[dataSize];
+		read(data);
+//		return new FLVTag(type,time);
+	}
+	
+	@SuppressWarnings("unchecked")
+	public EcmaArray<String,?> readMetadata() throws IOException {
 		assert 0x12 == read();
 		int dataSize = DataStreamUtils.readUInt24(this); // body length
+//		System.out.println(dataSize);
 		DataStreamUtils.readUInt32(this); // timestamp
 		DataStreamUtils.readUInt24(this); // streamid
 		byte[] data = new byte[dataSize];
 		read(data);
 		AMFInputStream ais = new AMFInputStream(new ByteArrayInputStream(data));
 		Object obj = ais.getNextObject();
-		logger.info(obj.toString());
+		assert "onMetaData".equals(obj);
+		return (EcmaArray<String, ?>) ais.getNextObject();
 	}
 
 }
