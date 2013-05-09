@@ -1,5 +1,7 @@
 package org.cateyes.core;
 
-public interface Resolver {
+import java.net.URI;
 
+public interface Resolver {
+	URI[] getResource(URI uri);
 }
