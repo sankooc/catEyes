@@ -4,6 +4,7 @@
 package org.cateyes.core.util;
 
 import java.io.DataInputStream;
+import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -15,9 +16,10 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 
-
 import org.cateyes.core.MResource;
 import org.cateyes.core.VideoConstants.VideoType;
+import org.cateyes.core.flv.EcmaArray;
+import org.cateyes.core.flv.FMetadata;
 import org.cateyes.core.flv.FlvInputStream;
 import org.cateyes.core.flv.FlvMetadata;
 import org.junit.Assert;
@@ -31,7 +33,7 @@ public class CommonUtils {
 	public final static String FIX = "%s-%02d.%s";
 
 	public static void mergeMedia(File parent, String title, int size,
-			VideoType type) throws IOException {
+			VideoType type) throws Exception {
 		if (size < 2) {
 			return;
 		}
@@ -52,32 +54,37 @@ public class CommonUtils {
 
 	public static void mergeFlv(File[] files, OutputStream out) {
 		for (File f : files) {
-			
+
 		}
 
 	}
 
-	public static void mergeFlv(File[] files, File file) throws IOException {
+	public static void mergeFlv(File[] files, File file) throws Exception {
 		long pos = 0;
-		FlvMetadata metatdata = new FlvMetadata();
-		HashMap<File, Double> map = new HashMap<File, Double>();
-		List<FlvInputStream> ins = new LinkedList<FlvInputStream>();
+		FMetadata metatdata = null;
+		HashMap<FlvInputStream, Double> map = new HashMap<FlvInputStream, Double>();
+		DataOutputStream out = new DataOutputStream(new FileOutputStream(file));
+		
 		for (File f : files) {
 			Assert.assertTrue(f.exists());
-			map.put(f, metatdata.getDuration());
 			FlvInputStream fis = new FlvInputStream(new FileInputStream(f));
-			metatdata.update(fis);
-			ins.add(fis);
+			EcmaArray<String, Object> ecma = fis.readMetadata();
+			if (null == metatdata) {
+				map.put(fis, 0d);
+				metatdata = new FMetadata(ecma);
+				System.out.println(metatdata.getDoubleValue("duration"));
+			} else {
+				map.put(fis, metatdata.getDoubleValue("duration"));
+				metatdata.update(ecma);
+			}
 		}
-		metatdata.write(file);
-		
-
-		// file.getParentFile().mkdirs();
-		// OutputStream out = new FileOutputStream(file);
-		// mergeFlv(files, out);
-		// out.flush();
-		// out.close();
-
+		byte[] tmp = metatdata.toBytes();
+		out.write(tmp);
+		double pre = 0;
+		for(FlvInputStream fis : map.keySet()){
+			Double ls = map.get(fis);
+			pre = fis.copyTag(out, ls, pre);
+		}
 	}
 
 	public static void copyStream(InputStream in, OutputStream out,

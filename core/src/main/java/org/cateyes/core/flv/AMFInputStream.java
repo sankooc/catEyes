@@ -6,6 +6,7 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 
 import org.cateyes.core.util.DataStreamUtils;
 
@@ -20,7 +21,6 @@ public class AMFInputStream extends DataInputStream {
 		switch (type) {
 		case 0:
 			return readDouble();
-//			return readLong();
 		case 1:
 			return readUnsignedByte() == 1;
 		case 2:
@@ -45,7 +45,7 @@ public class AMFInputStream extends DataInputStream {
 
 	}
 
-	private ArrayList<?> readAMFStrictArray() throws IOException {
+	private List<?> readAMFStrictArray() throws IOException {
 		long count = DataStreamUtils.readUInt32(this);
 		ArrayList<Object> list = new ArrayList<Object>((int) count);
 		for (int i = 0; i < count; i++) {

@@ -3,12 +3,9 @@
  */
 package org.cateyes.core.flv;
 
-import java.io.DataOutputStream;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.util.Collection;
+import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -19,16 +16,55 @@ import java.util.Map;
  * 
  */
 public class FlvMetadata {
-	private boolean hasKeyframes = true;
+
+	private boolean hasKeyframes;
 	private double duration;
-	private double height = 288.0;
-	private boolean hasMetadata = true;
-	private boolean hasVideo = true;
-	private boolean hasAudio = true;
-	private double audiosamplerate = 22050.0;
-	private double width = 512.0;
-	private String metadatacreator = "123";
-	private double framerate = 15.0;
+	private double height;
+	private boolean hasMetadata;
+	private boolean hasVideo;
+	private boolean hasAudio;
+	private double audiosamplerate;
+	private double width;
+	private String metadatacreator;
+	private double framerate;
+
+	public FlvMetadata(EcmaArray<String, ?> arr) throws Exception {
+		init(arr);
+	}
+
+	public void init(EcmaArray<String, ?> arr) throws SecurityException,
+			NoSuchFieldException, IllegalArgumentException,
+			IllegalAccessException {
+		Field[] fields = getClass().getDeclaredFields();
+		for (Field field : fields) {
+			String key = field.getName();
+			if (key.startsWith("$")) {
+				continue;
+			}
+			Object value = arr.get(key);
+			field.set(this, value);
+		}
+	}
+
+	// void check(String key){
+	//
+	// }
+
+	public void update(EcmaArray<String, ?> arr) throws Exception {
+		for (String key : arr.keySet()) {
+			if ("keyframes".equals(key)) {
+				continue;
+			}
+			if ("duration".equals(key)) {
+				Double db = (Double) arr.get("duration");
+				duration += db;
+				continue;
+			}
+			Field field = getClass().getDeclaredField(key);
+			assert arr.get(key).equals(field.get(this));
+		}
+	}
+
 	private Map<String, List<Double>> keyframes;
 
 	public List<Double> getTimeFrame() {
@@ -147,34 +183,30 @@ public class FlvMetadata {
 	}
 
 	public void update(FlvInputStream stream) throws IOException {
-		EcmaArray<String, ?> ecma = stream.readMetadata();
-		
-		while(true){
-			stream.readTag();
-		}
-		
-//		Double duration = null;
-//		int fregCout = 0;
-//		for (String key : ecma.keySet()) {
-//			// if ("duration".equals(key)) {
-//			// duration = (Double) ecma.get(key);
-//			// }
-//			if (key.equals("keyframes")) {
-//				Map<String, ?> metaMap = (Map<String, ?>) ecma.get(key);
-//				Collection<?> list1 = (Collection<?>) metaMap.get("times");
-//				// Collection<?> list2 = (Collection<?>)
-//				// metaMap.get("filepositions");
-////				System.out.println(list1.size());
-//			}
-//		}
+//		EcmaArray<String, ?> ecma = stream.readMetadata();
+
+		// while(true){
+		// stream.readTag();
+		// }
+
+		// Double duration = null;
+		// int fregCout = 0;
+		// for (String key : ecma.keySet()) {
+		// // if ("duration".equals(key)) {
+		// // duration = (Double) ecma.get(key);
+		// // }
+		// if (key.equals("keyframes")) {
+		// Map<String, ?> metaMap = (Map<String, ?>) ecma.get(key);
+		// Collection<?> list1 = (Collection<?>) metaMap.get("times");
+		// // Collection<?> list2 = (Collection<?>)
+		// // metaMap.get("filepositions");
+		// // System.out.println(list1.size());
+		// }
+		// }
 	}
 
 	public void write(File file) {
 		// int offset = compute();
 	}
-
-	private int compute() {
-		// TODO Auto-generated method stub
-		return 0;
-	}
+	
 }

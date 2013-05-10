@@ -49,7 +49,7 @@ public class DataStreamUtils {
 		return data;
 	}
 
-	public static int copy24(DataInputStream input, DataOutputStream output,
+	protected static int copy24(DataInputStream input, DataOutputStream output,
 			int offset) throws IOException {
 		int value = input.read();
 		if (null != output) {

@@ -9,13 +9,13 @@ import org.junit.Test;
 public class FlvMergeDemo {
 	
 	@Test
-	public void merge() throws IOException{
-		File[] files = new File[5];
+	public void merge() throws Exception{
+		File[] files = new File[2];
 		files[0] = new File("d:/test/test-00.flv");
 		files[1] = new File("d:/test/test-01.flv");
-		files[2] = new File("d:/test/test-02.flv");
-		files[3] = new File("d:/test/test-03.flv");
-		files[4] = new File("d:/test/test.flv");
+//		files[2] = new File("d:/test/test-02.flv");
+//		files[3] = new File("d:/test/test-03.flv");
+//		files[4] = new File("d:/test/test.flv");
 		File target = new File("target/tmp.flv");
 		CommonUtils.mergeFlv(files, target);
 	}

@@ -118,7 +118,7 @@ public class FLVParser {
 			data = AMFUtils.readAMFData(dis, -1);
 		}
 		if (data instanceof Map) {
-			metadata = new FlvMetadata();
+			metadata = new FlvMetadata(null);
 			Map<String, Object> extractedMetadata = (Map<String, Object>) data;
 			for (Entry<String, Object> entry : extractedMetadata.entrySet()) {
 				String key = entry.getKey();

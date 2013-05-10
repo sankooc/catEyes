@@ -90,39 +90,6 @@ public class AMFUtils {
 	protected static void writeEmcaArray(FlvMetadata data, DataOutputStream os)
 			throws IOException {
 		os.writeInt(11);
-
-		// writeAMFString("metadatacreator", os);
-		// writeData(data.getMetadatacreator(), os);
-		//
-		// writeAMFString("hasKeyframes", os);
-		// writeData(data.isHasKeyframes(), os);
-		//
-		// writeAMFString("hasVideo", os);
-		// writeData(data.isHasVideo(), os);
-		//
-		// writeAMFString("hasAudio", os);
-		// writeData(data.isHasAudio(), os);
-		//
-		// writeAMFString("hasMetadata", os);
-		// writeData(data.isHasMetadata(), os);
-		//
-		// writeAMFString("width", os);
-		// writeData(data.getWidth(), os);
-		//
-		// writeAMFString("height", os);
-		// writeData(data.getHeight(), os);
-		//
-		// writeAMFString("framerate", os);
-		// writeData(data.getFramerate(), os);
-		//
-		// writeAMFString("audiosamplerate", os);
-		// writeData(data.getAudiosamplerate(), os);
-		//
-		// writeAMFString("duration", os);
-		// writeData(data.getDuration(), os);
-		//
-		// writeAMFString("keyframes", os);
-		// writeData(data.getKeyframes(), os);
 		Field[] fs = FlvMetadata.class.getDeclaredFields();
 		if (null != fs && fs.length > 0) {
 			for (Field f : fs) {

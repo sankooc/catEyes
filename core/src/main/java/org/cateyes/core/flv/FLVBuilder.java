@@ -26,8 +26,8 @@ public class FLVBuilder {
 
 	FLVParser parser = new FLVParser();
 
-	public void resolve(File target) throws IOException {
-		FlvMetadata metadata = new FlvMetadata();
+	public void resolve(File target) throws Exception {
+		FlvMetadata metadata = new FlvMetadata(null);
 		double time = 0;
 		double pos = 0;
 		if (!target.exists()) {
