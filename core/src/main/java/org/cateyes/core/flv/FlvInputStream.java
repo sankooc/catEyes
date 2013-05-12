@@ -38,8 +38,6 @@ public class FlvInputStream extends DataInputStream {
 			}
 			assert type / 2 == 4;
 			out.write(type);
-
-			// int dataSize = DataStreamUtils.readUInt24(this);
 			int dataSize = DataStreamUtils.copyAndReadUInt24(this, out);
 			presize = dataSize + TAG_INCREASE;
 

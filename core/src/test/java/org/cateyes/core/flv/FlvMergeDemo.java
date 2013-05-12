@@ -1,6 +1,7 @@
 package org.cateyes.core.flv;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 
 import org.cateyes.core.util.CommonUtils;
@@ -8,7 +9,7 @@ import org.junit.Test;
 
 public class FlvMergeDemo {
 	
-	@Test
+//	@Test
 	public void merge() throws Exception{
 		File[] files = new File[2];
 		files[0] = new File("d:/test/test-00.flv");
@@ -18,6 +19,12 @@ public class FlvMergeDemo {
 //		files[4] = new File("d:/test/test.flv");
 		File target = new File("target/tmp.flv");
 		CommonUtils.mergeFlv(files, target);
+	}
+	
+	@Test
+	public void resolv() throws FileNotFoundException, IOException{
+		File file =  new File("d:/test/test-00.flv");
+		CommonUtils.resolve(file);
 	}
 	
 //	@Test

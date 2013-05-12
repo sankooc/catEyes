@@ -27,7 +27,8 @@ public class DataStreamUtils {
 		return 0xffffffff & value;
 	}
 
-	public static void writeTime(DataOutputStream out, long time) throws IOException {
+	public static void writeTime(DataOutputStream out, long time)
+			throws IOException {
 		out.write((int) ((time >>> 16) & 0xff));
 		out.write((int) ((time >>> 8) & 0xff));
 		out.write((int) (time & 0xff));
