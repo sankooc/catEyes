@@ -115,44 +115,85 @@ public class FMetadata {
 	double presize = 0;
 	long totleSize = 0;
 
-	void copy(Queue<FlvInputStream> queue, DataOutputStream out)
+	public void copy(Queue<FlvInputStream> queue, DataOutputStream out)
 			throws IOException {
+
+		long[] sign = new long[] { 0x000000, 0x000000, 0x000002, 0x000007,
+				0x000009, 0x00000c, 0x00000f, 0x000014, 0x000016, 0x00001a,
+				0x00001d, 0x000020, 0x000023, 0x000027, 0x00002c, 0x00002f,
+				0x000032, 0x000035, 0x000036, 0x000039, 0x00003b, 0x00003d,
+				0x00003f, 0x000044, 0x000047, 0x00004b, 0x000051, 0x000053,
+				0x000055, 0x000057, 0x000059, 0x00005c, 0x00005e, 0x000063,
+				0x000064, 0x000065, 0x000068, 0x00006b, 0x00006d, 0x00006e,
+				0x000072, 0x000074, 0x000076, 0x000078, 0x00007a, 0x00007d,
+				0x00007f, 0x000082, 0x000085, 0x000087, 0x00008a, 0x00008e,
+				0x000090, 0x000092, 0x000094, 0x000097, 0x000099, 0x00009b,
+				0x00009d, 0x0000a0, 0x0000a3, 0x0000a6, 0x0000ab, 0x0000ad,
+				0x0000b0, 0x0000b2, 0x0000b7, 0x0000b9, 0x0000bc, 0x0000be,
+				0x0000c0, 0x0000c3, 0x0000c5, 0x0000c9, 0x0000cf, 0x0000d3,
+				0x0000d5, 0x0000d7, 0x0000db, 0x0000de, 0x0000e4, 0x0000e4,
+				0x0000e7, 0x0000ed, 0x0000f3, 0x0000f9, 0x0000fe, 0x000102,
+				0x000105, 0x000107, 0x00010a, 0x00010d, 0x00010f, 0x000112,
+				0x000115, 0x000118, 0x00011c, 0x00011e, 0x000120, 0x000124,
+				0x000126, 0x000129, 0x00012b, 0x00012c, 0x00012e, 0x000130,
+				0x000134, 0x000136, 0x000137, 0x00013d, 0x00013e, 0x000142,
+				0x000146, 0x000148, 0x00014b, 0x00014d, 0x000150, 0x000153,
+				0x000156, 0x000158, 0x00015a, 0x00015c, 0x00015e, 0x000160,
+				0x000162, 0x000163, 0x000166, 0x000168, 0x00016c };
+		LinkedList<Long> list = new LinkedList<Long>();
+		for (long l : sign) {
+			list.add(l);
+		}
 		FlvInputStream stream = queue.poll();
 		List<Long> times = new LinkedList<Long>();
 		List<Long> pos = new LinkedList<Long>();
-		int csize = stream.readInt();
-		out.writeInt(csize);
+		stream.readInt();
 		int pretime = 0;
 		totleSize += 4;
 		long counter = 0;
-		// TODO COPY
-		main: while (true) {
-			tag: while (true) {
-				int type = stream.read();
-				if (-1 == type) {
-					if (queue.isEmpty()) {
-						break main;
-					}
-					stream = queue.poll();
-					continue main;
+		int csize = -1;
+		totleSize += toBytes().length;
+		int test = 0;
+
+		while (true) {
+			int type = stream.read();
+			if (-1 == type) {
+				if (queue.isEmpty()) {
+					break;
 				}
-				assert (type >>> 1) == 4;
-				out.write(type);
-				int dataSize = DataStreamUtils.copyAndReadUInt24(stream, out);
-				presize = dataSize + FlvInputStream.TAG_INCREASE;
-				long time = DataStreamUtils.readTime(stream) + pretime;
-				if (counter + 3 < time) {
-					counter = time;
-					times.add(counter);
-					pos.add(totleSize);
-				}
-				DataStreamUtils.writeTime(out, time);
-				DataStreamUtils.copyAndReadUInt24(stream, out);
-				DataStreamUtils.copy(stream, out, dataSize);
+				stream = queue.poll();
+				continue;
 			}
-		
+			assert (type >>> 1) == 4;
+			out.write(type);
+			int dataSize = DataStreamUtils.copyAndReadUInt24(stream, out);
+			presize = dataSize + FlvInputStream.TAG_INCREASE;
+			long time = DataStreamUtils.readTime(stream) + pretime;
+			if (list.isEmpty()) {
+
+			} else {
+				if (list.peek().equals(time)) {
+					list.poll();
+					System.out.println(test);
+				}
+			}
+			// if (counter <= time) {
+			// System.out.printf("%06x : %06x",counter,totleSize);
+			// System.out.println();
+			// times.add(counter);
+			// pos.add(totleSize);
+			// counter = time+3;
+			// }
+			DataStreamUtils.writeTime(out, time);
+			DataStreamUtils.copyAndReadUInt24(stream, out);
+			DataStreamUtils.copy(stream, out, dataSize);
+			csize = stream.readInt();
+			out.writeInt(csize);
+			totleSize += csize;
+			totleSize += 4;
+			test++;
 		}
-		totleSize += csize;
+		
 	}
 
 	boolean copyTag(FlvInputStream fis, DataOutputStream out, long pretime,

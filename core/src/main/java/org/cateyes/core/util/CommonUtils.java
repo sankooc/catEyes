@@ -3,6 +3,7 @@
  */
 package org.cateyes.core.util;
 
+import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.File;
@@ -12,10 +13,13 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.RandomAccessFile;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Queue;
+import java.util.RandomAccess;
 
 import org.cateyes.core.MResource;
 import org.cateyes.core.VideoConstants.VideoType;
@@ -59,6 +63,18 @@ public class CommonUtils {
 
 	}
 
+	public static void test(File file) throws FileNotFoundException,
+			IOException {
+		assert file.exists();
+		FlvInputStream fis = new FlvInputStream(new FileInputStream(file));
+		EcmaArray<String, Object> ecma = fis.readMetadata();
+		FMetadata metatdata = new FMetadata(ecma);
+		Queue<FlvInputStream> queue = new LinkedList<FlvInputStream>();
+		queue.add(fis);
+		OutputStream out = new ByteArrayOutputStream();
+		metatdata.copy(queue, new DataOutputStream(out));
+	}
+
 	public static void resolve(File file) throws FileNotFoundException,
 			IOException {
 		assert file.exists();
@@ -69,15 +85,24 @@ public class CommonUtils {
 		List<Double> pos = metatdata.getPosition();
 		Iterator<Double> it = times.iterator();
 		Iterator<Double> itp = pos.iterator();
+		fis.close();
+		RandomAccessFile raf = new RandomAccessFile(file, "rw");
+		int counter =0;
 		while (it.hasNext()) {
 			double time = it.next();
-			long ttt = (long)time;
+			long ttt = (long) time;
 			double pp = itp.next();
 			long ppp = (long) pp;
-			System.out.printf("%06x : %06x",ttt,ppp);
-			System.out.println();
-			
+			raf.seek(ppp);
+			if (9 == raf.read()) {
+//				System.out.printf("%06x : %06x", ttt, ppp);
+//				System.out.println();
+				System.out.print(String.format("0x%06x,", ttt));
+				counter++;
+			}
+
 		}
+		System.out.println(counter +":"+times.size());
 	}
 
 	public static void mergeFlv(File[] files, File file) throws Exception {

@@ -24,7 +24,9 @@ public class FlvMergeDemo {
 	@Test
 	public void resolv() throws FileNotFoundException, IOException{
 		File file =  new File("d:/test/test-00.flv");
-		CommonUtils.resolve(file);
+//		CommonUtils.resolve(file);
+		CommonUtils.test(file);
+		
 	}
 	
 //	@Test
