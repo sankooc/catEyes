@@ -24,7 +24,7 @@ public class FlvInputStream extends DataInputStream {
 
 	public double copyTag(DataOutputStream out, double pretime, double presize)
 			throws IOException {
-		long pt = (long) (pretime*100);
+		long pt = (long) (pretime * 100);
 		while (true) {
 			int pr = readInt();
 			if (-1 == presize) {
@@ -33,7 +33,7 @@ public class FlvInputStream extends DataInputStream {
 			out.writeInt((int) presize);
 
 			int type = read();
-			if(-1 == type){
+			if (-1 == type) {
 				break;
 			}
 			assert type / 2 == 4;
@@ -56,20 +56,20 @@ public class FlvInputStream extends DataInputStream {
 
 	public static final int TAG_INCREASE = 11;
 
-	public void readTag() throws IOException {
+	public FLVTag readTag() throws IOException {
 		long presize = DataStreamUtils.readUInt32(this);
 		int type = read();
 		if (type == -1) {
-			return;
+			return null;
 		}
 		assert type / 2 == 4;
 		int dataSize = DataStreamUtils.readUInt24(this);
 		long time = DataStreamUtils.readTime(this);
-		System.out.println("time:" + time);
+//		System.out.println("time:" + time);
 		DataStreamUtils.readUInt24(this);
 		byte[] data = new byte[dataSize];
 		read(data);
-		// return new FLVTag(type,time);
+		return new FLVTag(type, time,data);
 	}
 
 	@SuppressWarnings("unchecked")

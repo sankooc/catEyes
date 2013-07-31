@@ -90,13 +90,27 @@ public class YoukuResolver {
 		return flvSegs.size();
 	}
 
-	public static String[] getReadUriFromYID(String yid, VideoType type) {
-		final JSONObject data = getData(yid);
-
+	public static String[] getRealUri(JSONObject data ,VideoType type){
 		final JSONObject segs = data.getJSONObject("segs");
 		Collection<VideoType> tlist = getVideoType(data);
-
-		// Set<?> videoTypes = segs.keySet();
+		
+		logger.info("{} kinds types ", tlist.size());
+		if (null == type) {
+			type = VideoType.FLV;
+		}
+		if (tlist.contains(type)) {
+		} else {
+			logger.error("cannot get type {}", type.name());
+			throw new RuntimeException("no such type " + type.name());
+		}
+		return getReadUriFromYID(data, type);
+	}
+	
+	public static String[] getReadUriFromYID(String yid, VideoType type) {
+		final JSONObject data = getData(yid);
+		final JSONObject segs = data.getJSONObject("segs");
+		Collection<VideoType> tlist = getVideoType(data);
+		
 		logger.info("{} kinds types ", tlist.size());
 		if (null == type) {
 			type = VideoType.FLV;

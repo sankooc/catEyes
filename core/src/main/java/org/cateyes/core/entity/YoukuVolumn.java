@@ -1,6 +1,8 @@
 package org.cateyes.core.entity;
 
 import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URI;
@@ -15,6 +17,7 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
@@ -39,20 +42,6 @@ public class YoukuVolumn implements Volumn {
 	File tmpFile;
 	Logger logger = LoggerFactory.getLogger(YoukuVolumn.class);
 
-	// final static Map<String, VideoType> typeMapper = new HashMap<String,
-	// VideoType>();
-	// final static Map<VideoType, String> segMapper = new HashMap<VideoType,
-	// String>();
-	// static {
-	// typeMapper.put("flv", VideoType.FLV);
-	// typeMapper.put("mp4", VideoType.MP4);
-	// typeMapper.put("hd2", VideoType.HD2);
-	// segMapper.put(VideoType.FLV, "flv");
-	// segMapper.put(VideoType.MP4, "mp4");
-	// segMapper.put(VideoType.HD2, "flv");
-	//
-	// }
-
 	YoukuVolumn(String yid, File file) {
 		this(yid, null, file);
 	}
@@ -70,11 +59,6 @@ public class YoukuVolumn implements Volumn {
 
 	}
 
-	// public VideoType[] getVideoType() {
-	// JSONObject data = YoukuResolver.getData(yid);
-	// return YoukuResolver.getVideoType(data);
-	// }
-
 	public String getName() {
 		if (null == name) {
 		}
@@ -85,25 +69,23 @@ public class YoukuVolumn implements Volumn {
 		return Provider.YOUKU;
 	}
 
-	public void write(OutputStream out) {
-		write(out, VideoType.FLV);
+	public void write() throws IOException {
+		write(VideoType.FLV);
 	}
 
-	public void write(final OutputStream out, final VideoType type) {
-		String[] uris = YoukuResolver.getReadUriFromYID(yid, type);
+	public void write(final VideoType type) throws IOException {
+		JSONObject data = YoukuResolver.getData(yid);
+		title = data.getString("title");
+		String[] uris = YoukuResolver.getRealUri(data, type);
 		if (ArrayUtils.isEmpty(uris)) {
 			logger.error("cannot download {}", yid);
 			return;
 		}
-		Document page = YoukuResolver.getConnector().getPage(
-				"http://v.youku.com/v_show/id_" + yid + ".html");
-		String title = page.title();
-		title = title.replace(" - 视频 - 优酷视频 - 在线观看", "");
-		title = title.replace(" - 专辑 - 优酷视频", "");
-		title = title.replace("—优酷网，视频高清在线观看", "");
-		this.title = title;
 		if (uris.length == 1) {
 			String uri = uris[0];
+			File file = new File(tmpFile, title + "-." + type.name());
+			file.createNewFile();
+			final OutputStream out = new FileOutputStream(file);
 			YoukuResolver.getConnector().doGet(URI.create(uri),
 					new ContentComsumer() {
 						public void consume(InputStream content)
@@ -122,6 +104,7 @@ public class YoukuVolumn implements Volumn {
 									break;
 								}
 							}
+							out.close();
 						}
 					});
 		} else {
@@ -152,48 +135,58 @@ public class YoukuVolumn implements Volumn {
 				});
 	}
 
-	Executor service = Executors.newCachedThreadPool();
+	Executor service = Executors.newFixedThreadPool(10);
 
-	public void download(final String[] uris, VideoType type) {
-		final Collection<String> taskList = new TreeSet<String>();
-		final MutableBoolean flag = new MutableBoolean(true);
+	public synchronized void download(final String[] uris, VideoType type) {
+		// final Collection<String> taskList = new TreeSet<String>();
+		// final MutableBoolean flag = new MutableBoolean(true);
+		final AtomicInteger total = new AtomicInteger(uris.length);
 		for (int i = 0; i < uris.length; i++) {
-
 			final String uri = uris[i];
 			final String fileName = String.format(CommonUtils.FIX, title, i,
 					"flv");
-			// taskList.add(fileName);
 			final File freg = new File(tmpFile, fileName);
 			service.execute(new Runnable() {
 				public void run() {
-					CommonAdaptor adaptor = new CommonAdaptor(fileName
-							+ " download");
 					try {
 						YoukuResolver.getConnector().download(URI.create(uri),
-								freg, adaptor);
-						taskList.add(fileName);
+								freg, null);
+						// taskList.add(fileName);
 					} catch (Exception e) {
-						flag.setValue(false);
+						// flag.setValue(false);
 						logger.error(e.getMessage(), e);
+					} finally {
+						if (total.decrementAndGet() == 0) {
+							YoukuVolumn clz = YoukuVolumn.this;
+							synchronized (clz) {
+								clz.notifyAll();
+							}
+						}
 					}
 				}
 
 			});
 		}
-		service.execute(new Runnable() {
-			public void run() {
-				int size = uris.length;
-				while (flag.booleanValue()) {
-					if (taskList.size() == size) {
-					} else {
-						try {
-							Thread.sleep(2000);
-						} catch (InterruptedException e) {
-							e.printStackTrace();
-						}
-					}
-				}
-			}
-		});
+
+		try {
+			wait();
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+		// service.execute(new Runnable() {
+		// public void run() {
+		// int size = uris.length;
+		// while (flag.booleanValue()) {
+		// if (taskList.size() == size) {
+		// } else {
+		// try {
+		// Thread.sleep(2000);
+		// } catch (InterruptedException e) {
+		// e.printStackTrace();
+		// }
+		// }
+		// }
+		// }
+		// });
 	}
 }

@@ -3,14 +3,7 @@
  */
 package org.cateyes.core;
 
-import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-
-import org.cateyes.core.entity.Volumn;
-import org.cateyes.core.entity.VolumnFactory;
-import org.cateyes.core.youku.YoukuResolver;
-import org.junit.Assert;
 import org.junit.Test;
 
 /**
@@ -21,12 +14,12 @@ public class ResolverTest {
 	
 	@Test
 	public void youkutest() throws FileNotFoundException{
-		File file = new File("target/youku");
-		Volumn volumn = VolumnFactory.createVolumn("http://v.youku.com/v_show/id_XNTQ2OTc0OTAw.html", file);
-		Assert.assertNotNull(volumn);
-		File tm = new File("target/tmp.flv");
-		FileOutputStream out = new FileOutputStream(tm);
-		volumn.write(out);
+//		File file = new File("target/youku");
+//		Volumn volumn = VolumnFactory.createVolumn("http://v.youku.com/v_show/id_XNTQ2OTc0OTAw.html", file);
+//		Assert.assertNotNull(volumn);
+//		File tm = new File("target/tmp.flv");
+//		FileOutputStream out = new FileOutputStream(tm);
+//		volumn.write();
 //		String[] s =  YoukuResolver.getReadUriFromYID("XNTQ2OTc0OTAw", VideoType.FLV);
 //		String uriStr = s[0];
 //		URI uri = URI.create(uriStr);

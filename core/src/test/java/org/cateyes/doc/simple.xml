@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<phonebook>
+  <entry>
+    <lastname>McLaughlin</lastname>
+    <firstname>Brett</firstname>
+    <address type="home">
+      <street>1818 Writer's Lane</street>
+      <city>Lorena</city>
+      <state>TX</state>
+      <zip>76655</zip>
+    </address>
+  </entry>
+</phonebook>

@@ -9,9 +9,9 @@ package org.cateyes.core;
  */
 public abstract class Adaptor {
 	public <T> T getAdaptor(Class<T> clz){
+		Class<?> cl = getClass();
 		while(true){
-			getClass().getInterfaces();
-			Class<?> sup = this.getClass().getSuperclass();
+			Class<?> sup = cl.getSuperclass();
 			if(sup.equals(Object.class)){
 				break;
 			}

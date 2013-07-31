@@ -2,8 +2,6 @@ package org.cateyes.core;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -13,6 +11,10 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import javax.net.ssl.SSLHandshakeException;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.xpath.XPathExpressionException;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.http.Header;
@@ -20,6 +22,7 @@ import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpRequestRetryHandler;
+import org.apache.http.client.ResponseHandler;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.conn.ConnectionPoolTimeoutException;
@@ -32,16 +35,17 @@ import org.apache.http.protocol.HttpContext;
 import org.apache.http.util.EntityUtils;
 import org.cateyes.core.util.CommonUtils;
 import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
 
-public class ApacheConnector {
+public class ApacheConnector2 {
 	final DefaultHttpClient client;
 	ExecutorService executor;
-	static Logger logger = LoggerFactory.getLogger(ApacheConnector.class);
+	static Logger logger = LoggerFactory.getLogger(ApacheConnector2.class);
 
-	public ApacheConnector() {
+	public ApacheConnector2() {
 		PoolingClientConnectionManager cm = new PoolingClientConnectionManager();
 		cm.setMaxTotal(20);
 		cm.setDefaultMaxPerRoute(10);
@@ -90,11 +94,77 @@ public class ApacheConnector {
 		return null;
 	}
 
-	public Document getPage(String addr) {
-		return getPage(URI.create(addr));
+	public <T> T getPage(URI uri, ResponseHandler<T> handler) {
+		HttpGet request = new HttpGet(uri);
+		try {
+			return client.execute(request, handler);
+		} catch (Exception e1) {
+			logger.error(e1.getMessage());
+		}
+		return null;
 	}
 
-	public Document getPage(URI uri) {
+	public String getContentAsXpath(String address, String expres)
+			throws XPathExpressionException {
+		URI uri = URI.create(address);
+
+		javax.xml.xpath.XPathFactory factory = javax.xml.xpath.XPathFactory
+				.newInstance();
+		javax.xml.xpath.XPath xpath = factory.newXPath();
+		final javax.xml.xpath.XPathExpression expression = xpath
+				.compile(expres);
+		ResponseHandler<String> handler = new ResponseHandler<String>() {
+
+			public String handleResponse(HttpResponse response)
+					throws ClientProtocolException, IOException {
+				HttpEntity entity = response.getEntity();
+				try {
+					InputStream stream = entity.getContent();
+					return expression.evaluate(new InputSource(stream));
+				} catch (Exception e) {
+					e.printStackTrace();
+				} finally {
+					EntityUtils.consume(entity);
+				}
+				return null;
+			}
+		};
+		return getPage(uri, handler);
+	}
+
+	public org.w3c.dom.Document getPageAsDoc(String addr) {
+		URI uri = URI.create(addr);
+		ResponseHandler<org.w3c.dom.Document> handler = new ResponseHandler<org.w3c.dom.Document>() {
+
+			public org.w3c.dom.Document handleResponse(HttpResponse response)
+					throws ClientProtocolException, IOException {
+				HttpEntity entity = response.getEntity();
+				try {
+					InputStream stream = entity.getContent();
+					DocumentBuilderFactory factory = DocumentBuilderFactory
+							.newInstance();
+					// Turn on validation, and turn off namespaces
+					factory.setValidating(false);
+					factory.setNamespaceAware(false);
+					DocumentBuilder builder = factory.newDocumentBuilder();
+					return builder.parse(stream);
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} finally {
+					EntityUtils.consume(entity);
+				}
+				return null;
+			}
+		};
+		return getPage(uri, handler);
+	}
+
+	public org.jsoup.nodes.Document getPageAsJsoup(String addr) {
+		return getPageAsJsoup(URI.create(addr));
+	}
+
+	public org.jsoup.nodes.Document getPageAsJsoup(URI uri) {
 		HttpGet request = new HttpGet(uri);
 		HttpResponse response = null;
 		try {
@@ -106,8 +176,8 @@ public class ApacheConnector {
 		HttpEntity entity = response.getEntity();
 		try {
 			if (null != entity) {
-				Document document = Jsoup.parse(entity.getContent(), "UTF-8",
-						uri.toString());
+				org.jsoup.nodes.Document document = Jsoup.parse(
+						entity.getContent(), "UTF-8", uri.toString());
 				return document;
 			}
 		} catch (Exception e) {
@@ -151,27 +221,9 @@ public class ApacheConnector {
 
 		}
 
-		public void display(long content) {
-			int m = 0;
-			int k = 0;
-			int b = 0;
-			b = (int) (content & 0x02ffl);
-			content = content >> 10;
-			if (content > 0) {
-				k = (int) (content & 0x02ffl);
-				content = content >> 10;
-			}
-			if (content > 0) {
-				m = (int) (content & 0x02ffl);
-				content = content >> 10;
-			}
-			b = (int) (len & 0x02ffl);
-			logger.debug("current length {}MB {}KB {}B ", new Object[] { m, k,
-					b });
-		}
-
 		public synchronized void setContent(long content) {
 			len = content;
+			logger.debug("current length {} ", len);
 		}
 
 		int timer = 0;
@@ -179,7 +231,7 @@ public class ApacheConnector {
 		public synchronized void addContent(long increase) {
 			len += increase;
 			if (timer-- < 0) {
-				display(len);
+				logger.debug("current length {} ", len);
 				timer = 50;
 			}
 		}

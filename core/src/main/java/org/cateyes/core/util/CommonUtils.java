@@ -24,6 +24,7 @@ import java.util.RandomAccess;
 import org.cateyes.core.MResource;
 import org.cateyes.core.VideoConstants.VideoType;
 import org.cateyes.core.flv.EcmaArray;
+import org.cateyes.core.flv.FLVTag;
 import org.cateyes.core.flv.FMetadata;
 import org.cateyes.core.flv.FlvInputStream;
 import org.cateyes.core.flv.FlvMetadata;
@@ -69,10 +70,58 @@ public class CommonUtils {
 		FlvInputStream fis = new FlvInputStream(new FileInputStream(file));
 		EcmaArray<String, Object> ecma = fis.readMetadata();
 		FMetadata metatdata = new FMetadata(ecma);
-		Queue<FlvInputStream> queue = new LinkedList<FlvInputStream>();
-		queue.add(fis);
-		OutputStream out = new ByteArrayOutputStream();
-		metatdata.copy(queue, new DataOutputStream(out));
+		List<Double> list = metatdata.getTimes();
+		List<Double> list2 = metatdata.getPosition();
+		for (Double d : list) {
+			int ct = (int) (d * 300);
+			System.out.print(ct / 20 + ",");
+		}
+		System.out.println();
+		for (Double d : list2) {
+			System.out.print(d + ",");
+		}
+		System.out.println();
+		long v = 0;
+		long a = 0;
+		int vcount = 0;
+		int acount = 0;
+		FLVTag atag = null;
+		FLVTag vtag = null;
+		while (true) {
+			FLVTag tag = fis.readTag();
+			if (null == tag) {
+				break;
+			}
+			switch (tag.getType()) {
+			case AUDIO:
+				vcount += 1;
+				a = tag.getTime();
+				System.out.print(a+",");
+				atag = tag;
+				break;
+			case VIDEO:
+				acount += 1;
+				v = tag.getTime();
+//				long akb = v % 200;
+//				if (akb != 66 && akb != 133 && akb != 0) {
+//					System.err.println(akb + "-->" + v);
+//				}
+				vtag = tag;
+				break;
+			}
+		}
+		System.out.println();
+		System.out.println(vtag + "" + atag);
+		System.out.println("video tag count" + vcount);
+		System.out.println("audio tag count" + acount);
+		System.out.println("video tag count" + vcount * 46);
+		System.out.println("audio tag count" + acount * 66);
+		System.out.println(v);
+		// System.out.println(a);
+		// Queue<FlvInputStream> queue = new LinkedList<FlvInputStream>();
+		// queue.add(fis);
+		// OutputStream out = new ByteArrayOutputStream();
+		// metatdata.copy(queue, new DataOutputStream(out));
 	}
 
 	public static void resolve(File file) throws FileNotFoundException,
@@ -87,7 +136,7 @@ public class CommonUtils {
 		Iterator<Double> itp = pos.iterator();
 		fis.close();
 		RandomAccessFile raf = new RandomAccessFile(file, "rw");
-		int counter =0;
+		int counter = 0;
 		while (it.hasNext()) {
 			double time = it.next();
 			long ttt = (long) time;
@@ -95,14 +144,14 @@ public class CommonUtils {
 			long ppp = (long) pp;
 			raf.seek(ppp);
 			if (9 == raf.read()) {
-//				System.out.printf("%06x : %06x", ttt, ppp);
-//				System.out.println();
+				// System.out.printf("%06x : %06x", ttt, ppp);
+				// System.out.println();
 				System.out.print(String.format("0x%06x,", ttt));
 				counter++;
 			}
 
 		}
-		System.out.println(counter +":"+times.size());
+		System.out.println(counter + ":" + times.size());
 	}
 
 	public static void mergeFlv(File[] files, File file) throws Exception {

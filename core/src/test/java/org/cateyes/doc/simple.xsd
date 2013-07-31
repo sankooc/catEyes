@@ -1,0 +1,29 @@
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+
+  <xsd:complexType name="AddressType">
+    <xsd:sequence>
+      <xsd:element name="street" type="xsd:string" maxOccurs="2" />
+      <xsd:element name="city" type="xsd:string" />
+      <xsd:element name="state" type="xsd:string" />
+      <xsd:element name="zip" type="xsd:string" />
+    </xsd:sequence>
+    <xsd:attribute name="type" type="xsd:string" />
+  </xsd:complexType>
+
+  <xsd:complexType name="EntryType">
+    <xsd:sequence>
+      <xsd:element name="lastname" type="xsd:string" />
+      <xsd:element name="firstname" type="xsd:string" />
+      <xsd:element name="address" type="AddressType" />
+    </xsd:sequence>
+  </xsd:complexType>
+
+  <xsd:element name="phonebook">
+    <xsd:complexType>
+      <xsd:sequence>
+        <xsd:element name="entry" type="EntryType" maxOccurs="unbounded" />
+      </xsd:sequence>
+    </xsd:complexType>
+  </xsd:element>
+
+</xsd:schema>

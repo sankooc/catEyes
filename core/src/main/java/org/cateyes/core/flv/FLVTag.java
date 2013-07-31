@@ -7,6 +7,7 @@ public class FLVTag {
 		VIDEO, AUDIO, SCRIPTDATA
 	}
 	private TagType type;
+	private byte[] data;
 //	private FLVTag preTag;
 	private long time;
 	
@@ -14,8 +15,9 @@ public class FLVTag {
 //		
 //	}
 	
-	public FLVTag(int type,long time) {
+	public FLVTag(int type,long time,byte[] data) {
 		this.time = time;
+		this.data = data;
 		switch (type) {
 		case 0x09:
 			this.type = TagType.VIDEO;
@@ -27,5 +29,21 @@ public class FLVTag {
 			this.type = TagType.SCRIPTDATA;
 			break;
 		}
+	}
+
+	public TagType getType() {
+		return type;
+	}
+
+	public void setType(TagType type) {
+		this.type = type;
+	}
+
+	public long getTime() {
+		return time;
+	}
+
+	public void setTime(long time) {
+		this.time = time;
 	}
 }
