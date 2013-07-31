@@ -16,6 +16,7 @@ import net.sf.json.JSONObject;
 
 import org.cateyes.core.ApacheConnector;
 import org.cateyes.core.VideoConstants.VideoType;
+import org.cateyes.core.entity.Volumn;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -168,6 +169,18 @@ public class YoukuResolver {
 		return types;
 	}
 
+	public static Volumn[] getVolumns(JSONObject data){
+		JSONArray array = data.getJSONArray("list");
+		if(null == array){
+			return null;
+		}
+		
+		
+		
+		return null;
+	}
+	
+	
 	public static void resolvSid(String sid) {
 		String flcJsonURI = YOUKU_LIST + sid;
 		byte[] bts = connetor.doGet(URI.create(flcJsonURI));
