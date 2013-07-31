@@ -7,5 +7,6 @@
 	<packaging>pom</packaging>
 	<modules>
 		<module>core</module>
+		<module>eye.webtoon</module>
 	</modules>
 </project>
