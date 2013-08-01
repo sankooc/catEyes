@@ -20,6 +20,7 @@ import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpRequestRetryHandler;
+import org.apache.http.client.ResponseHandler;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.conn.ConnectionPoolTimeoutException;
@@ -76,6 +77,7 @@ public class ApacheConnector {
 		HttpGet request = new HttpGet(uri);
 		try {
 			HttpResponse response = client.execute(request);
+			request.addHeader("User-Agent", "chrome");
 			HttpEntity entity = response.getEntity();
 			if (null != entity) {
 				ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -266,6 +268,7 @@ public class ApacheConnector {
 			request.abort();
 		} else {
 			control.setContent(size);
+			request.addHeader("User-Agent", "chrome");
 			request.addHeader("Range", "bytes=" + size + "-");
 			response = client.execute(request);
 			if (logger.isDebugEnabled()) {
@@ -328,10 +331,17 @@ public class ApacheConnector {
 	// }
 	// }
 
+	public <T> T doGet(final URI uri, final ResponseHandler<T> hander) throws ClientProtocolException, IOException {
+		HttpGet request = new HttpGet(uri);
+		request.addHeader("User-Agent", "chrome");
+		return client.execute(request, hander);
+	}
+
 	public void doGet(final URI uri, final ContentComsumer consumer) {
 		executor.execute(new Runnable() {
 			public void run() {
 				HttpGet request = new HttpGet(uri);
+				request.addHeader("User-Agent", "chrome");
 				try {
 					HttpResponse response = client.execute(request);
 					HttpEntity entity = response.getEntity();
