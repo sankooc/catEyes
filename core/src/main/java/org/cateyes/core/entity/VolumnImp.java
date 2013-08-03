@@ -21,17 +21,17 @@ import org.cateyes.core.util.CommonUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class YoukuVolumn implements Volumn {
+public class VolumnImp implements Volumn {
 
 	private String yid;
 	private String title;
 	private File tmpFile;
-	static Logger logger = LoggerFactory.getLogger(YoukuVolumn.class);
+	static Logger logger = LoggerFactory.getLogger(VolumnImp.class);
 	String[] uris;
 	private ApacheConnector connector;
 	private String subfix = "flv";
 
-	YoukuVolumn(String yid, File file, ApacheConnector connector) {
+	VolumnImp(String yid, File file, ApacheConnector connector) {
 		if (null == yid) {
 			throw new IllegalArgumentException();
 		}
@@ -117,7 +117,7 @@ public class YoukuVolumn implements Volumn {
 						logger.error(e.getMessage(), e);
 					} finally {
 						if (total.decrementAndGet() == 0) {
-							YoukuVolumn clz = YoukuVolumn.this;
+							VolumnImp clz = VolumnImp.this;
 							synchronized (clz) {
 								clz.notifyAll();
 							}

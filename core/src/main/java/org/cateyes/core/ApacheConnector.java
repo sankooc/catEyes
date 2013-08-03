@@ -17,6 +17,7 @@ import javax.net.ssl.SSLHandshakeException;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
+import org.apache.http.HttpMessage;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpRequestRetryHandler;
@@ -26,6 +27,7 @@ import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.conn.ConnectionPoolTimeoutException;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.impl.conn.PoolingClientConnectionManager;
+import org.apache.http.message.AbstractHttpMessage;
 import org.apache.http.params.BasicHttpParams;
 import org.apache.http.params.CoreConnectionPNames;
 import org.apache.http.params.HttpParams;
@@ -73,11 +75,16 @@ public class ApacheConnector {
 		executor = Executors.newCachedThreadPool();
 	}
 
+	protected void swap(HttpMessage request){
+		request.addHeader("User-Agent", "Mozilla/5.0 (Windows; U; Windows NT 5.1; en-GB; rv:1.9.0.3) Gecko/2008092417 Firefox/3.0.3");
+	}
+	
+	
 	public byte[] doGet(URI uri) {
 		HttpGet request = new HttpGet(uri);
 		try {
+			swap(request);
 			HttpResponse response = client.execute(request);
-			request.addHeader("User-Agent", "chrome");
 			HttpEntity entity = response.getEntity();
 			if (null != entity) {
 				ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -268,7 +275,7 @@ public class ApacheConnector {
 			request.abort();
 		} else {
 			control.setContent(size);
-			request.addHeader("User-Agent", "chrome");
+			swap(request);
 			request.addHeader("Range", "bytes=" + size + "-");
 			response = client.execute(request);
 			if (logger.isDebugEnabled()) {
@@ -333,7 +340,7 @@ public class ApacheConnector {
 
 	public <T> T doGet(final URI uri, final ResponseHandler<T> hander) throws ClientProtocolException, IOException {
 		HttpGet request = new HttpGet(uri);
-		request.addHeader("User-Agent", "chrome");
+		swap(request);
 		return client.execute(request, hander);
 	}
 
@@ -341,7 +348,7 @@ public class ApacheConnector {
 		executor.execute(new Runnable() {
 			public void run() {
 				HttpGet request = new HttpGet(uri);
-				request.addHeader("User-Agent", "chrome");
+				swap(request);
 				try {
 					HttpResponse response = client.execute(request);
 					HttpEntity entity = response.getEntity();

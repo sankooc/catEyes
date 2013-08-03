@@ -38,7 +38,7 @@ public class VolumnFactory {
 				logger.error("cannot download {}", yid);
 				return null;
 			}
-			volumn = new YoukuVolumn(yid,file,YoukuResolver.getConnector());
+			volumn = new VolumnImp(yid,file,YoukuResolver.getConnector());
 			volumn.setTitle(title);
 			volumn.setUris(uris);
 			

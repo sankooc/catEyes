@@ -14,6 +14,7 @@ import javax.xml.xpath.XPathExpression;
 import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
 
+import org.apache.http.Header;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.ResponseHandler;
@@ -106,6 +107,10 @@ public class TudouResolver implements Resolver {
 					new ResponseHandler<String>() {
 						public String handleResponse(HttpResponse response)
 								throws ClientProtocolException, IOException {
+							Header[] headers = response.getAllHeaders();
+							for (Header header : headers) {
+								System.out.println("key:"+header.getName()+" value:"+header.getValue());
+							}
 							InputStream stream = response.getEntity()
 									.getContent();
 							return getIIdFrom(stream);
