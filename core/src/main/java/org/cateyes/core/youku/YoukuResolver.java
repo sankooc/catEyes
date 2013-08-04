@@ -20,6 +20,7 @@ import org.cateyes.core.entity.Volumn;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+@Deprecated
 public class YoukuResolver {
 	static final Logger logger = LoggerFactory.getLogger(YoukuResolver.class);
 
@@ -27,7 +28,7 @@ public class YoukuResolver {
 
 	}
 
-	static final ApacheConnector connetor = new ApacheConnector();
+	static final ApacheConnector connetor = ApacheConnector.getInstance();
 
 	public static ApacheConnector getConnector() {
 		return connetor;
@@ -64,7 +65,7 @@ public class YoukuResolver {
 	public static JSONObject getMetadata(String yid) {
 		String flcJsonURI = YOUKU_LIST + yid;
 		logger.debug("youku paly-list {}", flcJsonURI);
-		byte[] bts = connetor.doGet(URI.create(flcJsonURI));
+		byte[] bts = connetor.doGet(flcJsonURI);
 		if (null == bts) {
 			logger.error("cannot get play-list json data");
 			return null;
@@ -109,7 +110,7 @@ public class YoukuResolver {
 	
 	public static String[] getReadUriFromYID(String yid, VideoType type) {
 		final JSONObject data = getData(yid);
-		final JSONObject segs = data.getJSONObject("segs");
+//		final JSONObject segs = data.getJSONObject("segs");
 		Collection<VideoType> tlist = getVideoType(data);
 		
 		logger.info("{} kinds types ", tlist.size());
@@ -138,7 +139,7 @@ public class YoukuResolver {
 		String[] uris = new String[flvSegs.size()];
 		for (int i = 0; i < flvSegs.size(); i++) {
 			JSONObject fragment = flvSegs.getJSONObject(i);
-			String numSt = (String) fragment.get("no");
+			String numSt = fragment.get("no").toString();
 			int in = Integer.parseInt(numSt);
 			String no = String.format("%02x", in);
 			String urlString = String.format(REAL_FORMAT, getSerialId(), no,
@@ -183,7 +184,7 @@ public class YoukuResolver {
 	
 	public static void resolvSid(String sid) {
 		String flcJsonURI = YOUKU_LIST + sid;
-		byte[] bts = connetor.doGet(URI.create(flcJsonURI));
+		byte[] bts = connetor.doGet(flcJsonURI);
 		JSONObject object = JSONObject.fromObject(new String(bts));
 		JSONArray dataObj = object.getJSONArray("data");
 		JSONObject data = dataObj.getJSONObject(0);

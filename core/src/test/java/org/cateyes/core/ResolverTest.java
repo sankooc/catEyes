@@ -4,6 +4,11 @@
 package org.cateyes.core;
 
 import java.io.FileNotFoundException;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import junit.framework.Assert;
+
 import org.junit.Test;
 
 /**
@@ -14,6 +19,14 @@ public class ResolverTest {
 	
 	@Test
 	public void youkutest() throws FileNotFoundException{
+		
+		String str = "var vid=\"736167\";";
+		Pattern pattern = Pattern.compile("var vid=\"(\\d+)\";");
+		
+		
+		Matcher mathcer = pattern.matcher(str);
+//		System.out.println(mathcer.find());
+		Assert.assertTrue(mathcer.find());
 //		File file = new File("target/youku");
 //		Volumn volumn = VolumnFactory.createVolumn("http://v.youku.com/v_show/id_XNTQ2OTc0OTAw.html", file);
 //		Assert.assertNotNull(volumn);

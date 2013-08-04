@@ -9,8 +9,6 @@ public abstract class AbstractResolver implements Resolver {
 
 	private Pattern[] patterns;
 
-	// private ApacheConnector connector;
-
 	protected AbstractResolver() {
 		String[] regx = getRegexStrings();
 		if (null == regx) {

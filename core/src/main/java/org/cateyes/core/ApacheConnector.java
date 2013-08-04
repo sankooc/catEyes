@@ -1,18 +1,27 @@
 package org.cateyes.core;
 
+import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.URI;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.net.ssl.SSLHandshakeException;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.xpath.XPathConstants;
+import javax.xml.xpath.XPathExpression;
+import javax.xml.xpath.XPathExpressionException;
+
+import net.sf.json.JSONObject;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.http.Header;
@@ -27,7 +36,6 @@ import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.conn.ConnectionPoolTimeoutException;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.impl.conn.PoolingClientConnectionManager;
-import org.apache.http.message.AbstractHttpMessage;
 import org.apache.http.params.BasicHttpParams;
 import org.apache.http.params.CoreConnectionPNames;
 import org.apache.http.params.HttpParams;
@@ -38,13 +46,20 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.xml.sax.InputSource;
 
-public class ApacheConnector {
+public class ApacheConnector implements HttpConnector {
 	final DefaultHttpClient client;
 	ExecutorService executor;
 	static Logger logger = LoggerFactory.getLogger(ApacheConnector.class);
 
-	public ApacheConnector() {
+	private static ApacheConnector INSTANCE = new ApacheConnector();
+
+	public static ApacheConnector getInstance() {
+		return INSTANCE;
+	}
+
+	private ApacheConnector() {
 		PoolingClientConnectionManager cm = new PoolingClientConnectionManager();
 		cm.setMaxTotal(20);
 		cm.setDefaultMaxPerRoute(10);
@@ -56,8 +71,7 @@ public class ApacheConnector {
 		client = new DefaultHttpClient(cm, params);
 
 		HttpRequestRetryHandler retryHandler = new HttpRequestRetryHandler() {
-			public boolean retryRequest(IOException exception,
-					int executionCount, HttpContext context) {
+			public boolean retryRequest(IOException exception, int executionCount, HttpContext context) {
 				if (executionCount >= 5) {
 					// 超过重试次数
 					return false;
@@ -75,12 +89,96 @@ public class ApacheConnector {
 		executor = Executors.newCachedThreadPool();
 	}
 
-	protected void swap(HttpMessage request){
-		request.addHeader("User-Agent", "Mozilla/5.0 (Windows; U; Windows NT 5.1; en-GB; rv:1.9.0.3) Gecko/2008092417 Firefox/3.0.3");
+	protected void swap(HttpMessage request) {
+		// request.addHeader("Accept","text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8");
+		request.addHeader("User-Agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_8_4) AppleWebKit/537.22 (KHTML, like Gecko) Chrome/25.0.1364.172 Safari/537.22");
+		// request.addHeader("Accept-Encoding","gzip,deflate,sdch");
+		// request.addHeader("Accept-Language","en-US,en;q=0.8,zh-CN;q=0.6,zh;q=0.4");
+		// request.addHeader("Accept-Charset","ISO-8859-1,utf-8;q=0.7,*;q=0.3");
+		// request.addHeader("Connection","keep-alive");
+		// request.addHeader("Cookie","key1=value1; key2=value2");
+
 	}
-	
-	
-	public byte[] doGet(URI uri) {
+
+	public String getPageRegix(String uri, final Pattern pattern) throws Exception {
+		ResponseHandler<String> handler = new ResponseHandler<String>() {
+			public String handleResponse(HttpResponse response) throws ClientProtocolException, IOException {
+				InputStream stream = response.getEntity().getContent();
+				BufferedReader reader = new BufferedReader(new InputStreamReader(stream));
+				while (true) {
+					try {
+						String line = reader.readLine();
+						if (null == line) {
+							break;
+						}
+						Matcher matcher = pattern.matcher(line);
+						if (matcher.find()) {
+							return matcher.group(1);
+						}
+					} catch (IOException e) {
+						logger.error(e.getMessage());
+						break;
+					}
+				}
+				return null;
+			}
+		};
+		return doGet(uri, handler);
+	}
+
+	public String getPageXpath(String uri, final XPathExpression expression) throws Exception {
+		ResponseHandler<String> handler = new ResponseHandler<String>() {
+			public String handleResponse(HttpResponse response) throws ClientProtocolException, IOException {
+				InputStream stream = response.getEntity().getContent();
+				try {
+					return (String) expression.evaluate(new InputSource(stream), XPathConstants.STRING);
+				} catch (XPathExpressionException e) {
+					logger.error(e.getMessage(), e);
+				}
+				return null;
+			}
+		};
+
+		return doGet(uri, handler);
+	}
+
+	public JSONObject getPageAsJson(String uri) throws Exception {
+		ResponseHandler<JSONObject> handler = new ResponseHandler<JSONObject>() {
+			public JSONObject handleResponse(HttpResponse response) throws ClientProtocolException, IOException {
+				InputStream stream = response.getEntity().getContent();
+				String content = IOUtils.toString(stream);
+				return JSONObject.fromObject(content);
+				// return null;
+			}
+		};
+		return doGet(uri, handler);
+	}
+
+	public org.w3c.dom.Document getPageAsDoc(String addr) throws Exception {
+		ResponseHandler<org.w3c.dom.Document> handler = new ResponseHandler<org.w3c.dom.Document>() {
+			public org.w3c.dom.Document handleResponse(HttpResponse response) throws ClientProtocolException, IOException {
+				HttpEntity entity = response.getEntity();
+				try {
+					InputStream stream = entity.getContent();
+					DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+					// Turn on validation, and turn off namespaces
+					factory.setValidating(false);
+					factory.setNamespaceAware(false);
+					DocumentBuilder builder = factory.newDocumentBuilder();
+					return builder.parse(stream);
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} finally {
+					EntityUtils.consume(entity);
+				}
+				return null;
+			}
+		};
+		return doGet(addr, handler);
+	}
+
+	public byte[] doGet(String uri) {
 		HttpGet request = new HttpGet(uri);
 		try {
 			swap(request);
@@ -115,8 +213,7 @@ public class ApacheConnector {
 		HttpEntity entity = response.getEntity();
 		try {
 			if (null != entity) {
-				Document document = Jsoup.parse(entity.getContent(), "UTF-8",
-						uri.toString());
+				Document document = Jsoup.parse(entity.getContent(), "UTF-8", uri.toString());
 				return document;
 			}
 		} catch (Exception e) {
@@ -131,76 +228,74 @@ public class ApacheConnector {
 		return null;
 	}
 
-	final MResource cont = new MResource() {
-		public void init() {
-			logger.debug("init");
-		}
+//	final MResource cont = new MResource() {
+//		public void init() {
+//			logger.debug("init");
+//		}
+//
+//		public void start() {
+//			logger.debug("start");
+//
+//		}
+//
+//		public void error(String msg) {
+//			// TODO Auto-generated method stub
+//
+//		}
+//
+//		public void finish() {
+//			logger.debug("finish");
+//
+//		}
+//
+//		volatile long len;
+//		volatile long total;
+//
+//		public void setLength(long size) {
+//			logger.debug("total length is {}", size);
+//			total = size;
+//
+//		}
+//
+//		public void display(long content) {
+//			int m = 0;
+//			int k = 0;
+//			int b = 0;
+//			b = (int) (content & 0x02ffl);
+//			content = content >> 10;
+//			if (content > 0) {
+//				k = (int) (content & 0x02ffl);
+//				content = content >> 10;
+//			}
+//			if (content > 0) {
+//				m = (int) (content & 0x02ffl);
+//				content = content >> 10;
+//			}
+//			b = (int) (len & 0x02ffl);
+//			logger.debug("current length {}MB {}KB {}B ", new Object[] { m, k, b });
+//		}
+//
+//		public synchronized void setContent(long content) {
+//			len = content;
+//		}
+//
+//		int timer = 0;
+//
+//		public synchronized void addContent(long increase) {
+//			len += increase;
+//			if (timer-- < 0) {
+//				display(len);
+//				timer = 50;
+//			}
+//		}
+//
+//		public boolean isError() {
+//			// TODO Auto-generated method stub
+//			return false;
+//		}
+//	};
 
-		public void start() {
-			logger.debug("start");
-
-		}
-
-		public void error(String msg) {
-			// TODO Auto-generated method stub
-
-		}
-
-		public void finish() {
-			logger.debug("finish");
-
-		}
-
-		volatile long len;
-		volatile long total;
-
-		public void setLength(long size) {
-			logger.debug("total length is {}", size);
-			total = size;
-
-		}
-
-		public void display(long content) {
-			int m = 0;
-			int k = 0;
-			int b = 0;
-			b = (int) (content & 0x02ffl);
-			content = content >> 10;
-			if (content > 0) {
-				k = (int) (content & 0x02ffl);
-				content = content >> 10;
-			}
-			if (content > 0) {
-				m = (int) (content & 0x02ffl);
-				content = content >> 10;
-			}
-			b = (int) (len & 0x02ffl);
-			logger.debug("current length {}MB {}KB {}B ", new Object[] { m, k,
-					b });
-		}
-
-		public synchronized void setContent(long content) {
-			len = content;
-		}
-
-		int timer = 0;
-
-		public synchronized void addContent(long increase) {
-			len += increase;
-			if (timer-- < 0) {
-				display(len);
-				timer = 50;
-			}
-		}
-
-		public boolean isError() {
-			// TODO Auto-generated method stub
-			return false;
-		}
-	};
-
-	public void download(final URI uri, File file, Adaptor adaptor)
-			throws Exception {
+	public void download(final String uri, File file, Adaptor adaptor) throws Exception {
 		long size = 0;
 		OutputStream out = null;
 		file.getParentFile().mkdirs();
@@ -214,90 +309,103 @@ public class ApacheConnector {
 		out.close();
 	}
 
-	public void download(final URI uri, OutputStream out, long size,
-			Adaptor adaptor) throws Exception {
-		long totalLenth = 0;
+	void readHeaders(HttpMessage message) {
+		Header[] headers = message.getAllHeaders();
+		if (null == headers) {
+			return;
+		}
+		for (Header head : headers) {
+			logger.info("header key [{}]  value [{}]", head.getName(), head.getValue());
+		}
+	}
 
+	long getResourceLength(String uri) {
+		HttpUriRequest request = new HttpGet(uri);
+		swap(request);
+		HttpEntity entity = null;
+		try {
+			HttpResponse response = client.execute(request);
+			int code = response.getStatusLine().getStatusCode();
+			if (200 != code) {
+				logger.error("response error : {}", code);
+				return 0;
+			}
+			if (logger.isDebugEnabled()) {
+				readHeaders(response);
+			}
+			entity = response.getEntity();
+			if (null != entity) {
+				return entity.getContentLength();
+			}
+		} catch (Exception e) {
+			logger.error(e.getMessage(), e);
+		} finally {
+			try {
+				EntityUtils.consume(entity);
+				request.abort();
+			} catch (IOException e) {
+				logger.error(e.getMessage(), e);
+			}
+		}
+		return 0;
+	}
+
+	public void download(final String uri, OutputStream out, long size, Adaptor adaptor) throws Exception {
+		long totalLenth = getResourceLength(uri);
+		//check suffix video/x-flv  video/mp4
+		logger.info("content length {}",totalLenth);
+		if (totalLenth == 0) {
+			throw new RuntimeException("no resource");
+		}
 		MResource control = null;
 		if (null != adaptor) {
 			control = adaptor.getAdaptor(MResource.class);
 		}
 		if (null == control) {
-			control = cont;
+			control = ConsoleOuputer.getInstance().createConsoler("");
 		}
 		control.init();
+		control.setLength(totalLenth);
 		long begin = System.currentTimeMillis();
-		HttpUriRequest request = new HttpGet(uri);
-		HttpResponse response = client.execute(request);
-		HttpEntity entity = response.getEntity();
-		if (null != entity) {
-			totalLenth = entity.getContentLength();
-			control.setLength(totalLenth);
-			EntityUtils.consume(entity);
-			logger.info("target resource length {}", totalLenth);
-		}
-		request.abort();
-		long end = System.currentTimeMillis();
-
-		logger.info("spend time {}", (end - begin));
-		if (totalLenth == 0) {
-			control.error("no resource");
-			throw new RuntimeException("no resource");
-		}
 
 		if (totalLenth == size) {
 			logger.info("downloaded");
 			control.finish();
 			return;
 		}
-		control.start();
-		request = new HttpGet(uri);
-		if (size < 1) {
-			// control.setPercent(0);
-			control.setContent(0);
+		HttpGet request = new HttpGet(uri);
+		swap(request);
+		HttpResponse response = null;
+		HttpEntity entity = null;
+
+		try {
+			if (size < 1) {
+				control.setContent(0);
+			} else {
+				control.setContent(size);
+				request.addHeader("Range", "bytes=" + size + "-");
+			}
+			control.start();
 			response = client.execute(request);
-			if (logger.isDebugEnabled()) {
-				logger.debug("response code {}", response.getStatusLine()
-						.getStatusCode());
-				Header[] headers = response.getAllHeaders();
-				if (null != headers && headers.length != 0) {
-					for (Header head : headers) {
-						logger.info("response headers key[{}] - value[{}]",
-								head.getName(), head.getValue());
-					}
-				}
-			}
-			entity = response.getEntity();
-			if (null != entity) {
-				CommonUtils.copyStream(entity.getContent(), out, control);
-				EntityUtils.consume(entity);
-			}
-			request.abort();
-		} else {
-			control.setContent(size);
-			swap(request);
-			request.addHeader("Range", "bytes=" + size + "-");
-			response = client.execute(request);
-			if (logger.isDebugEnabled()) {
-				logger.debug("response code {}", response.getStatusLine()
-						.getStatusCode());
-				Header[] headers = response.getAllHeaders();
-				if (null != headers && headers.length != 0) {
-					for (Header head : headers) {
-						logger.info("response headers key[{}] - value[{}]",
-								head.getName(), head.getValue());
-					}
-				}
-			}
 			entity = response.getEntity();
 			logger.info("headlength {} ", entity.getContentLength());
 			if (null != entity) {
 				CommonUtils.copyStream(entity.getContent(), out, control);
-				EntityUtils.consume(entity);
 			}
-			request.abort();
+		} catch (Exception e) {
+			e.printStackTrace();
+		} finally {
+			try {
+				EntityUtils.consume(entity);
+				request.abort();
+			} catch (Exception e) {
+			}
 		}
 		control.finish();
+
+		long end = System.currentTimeMillis();
+
+		logger.info("spend time {}", (end - begin));
 	}
 
 	public void download(final HttpUriRequest request, OutputStream out) {
@@ -305,13 +413,11 @@ public class ApacheConnector {
 		try {
 			HttpResponse response = client.execute(request);
 			if (logger.isDebugEnabled()) {
-				logger.debug("response code {}", response.getStatusLine()
-						.getStatusCode());
+				logger.debug("response code {}", response.getStatusLine().getStatusCode());
 				Header[] headers = response.getAllHeaders();
 				if (null != headers && headers.length != 0) {
 					for (Header head : headers) {
-						logger.info("response headers key[{}] - value[{}]",
-								head.getName(), head.getValue());
+						logger.info("response headers key[{}] - value[{}]", head.getName(), head.getValue());
 					}
 				}
 			}
@@ -327,44 +433,9 @@ public class ApacheConnector {
 		}
 	}
 
-	// public void downloadFile(final URI uri, File file) {
-	// HttpUriRequest request;
-	// if (null == file || !file.exists()) {
-	// request = new HttpGet(uri);
-	// } else {
-	// long ext = file.length();
-	// request = new HttpGet(uri);
-	// request.addHeader("", "");
-	// }
-	// }
-
-	public <T> T doGet(final URI uri, final ResponseHandler<T> hander) throws ClientProtocolException, IOException {
+	public <T> T doGet(final String uri, final ResponseHandler<T> hander) throws Exception {
 		HttpGet request = new HttpGet(uri);
 		swap(request);
 		return client.execute(request, hander);
-	}
-
-	public void doGet(final URI uri, final ContentComsumer consumer) {
-		executor.execute(new Runnable() {
-			public void run() {
-				HttpGet request = new HttpGet(uri);
-				swap(request);
-				try {
-					HttpResponse response = client.execute(request);
-					HttpEntity entity = response.getEntity();
-					if (null != entity) {
-						consumer.consume(entity.getContent());
-						request.abort();
-						EntityUtils.consume(entity);
-					}
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-			}
-		});
-	}
-
-	public interface ContentComsumer {
-		public void consume(InputStream content) throws Exception;
 	}
 }

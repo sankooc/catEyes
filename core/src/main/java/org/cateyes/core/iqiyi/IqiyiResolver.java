@@ -4,7 +4,6 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.net.URI;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -14,101 +13,94 @@ import javax.xml.xpath.XPathExpression;
 import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
 
-import org.apache.http.Header;
+import net.sf.json.JSONObject;
+
+import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.ResponseHandler;
+import org.cateyes.core.AbstractResolver;
 import org.cateyes.core.ApacheConnector;
 import org.cateyes.core.Resolver;
+import org.cateyes.core.entity.Volumn;
+import org.cateyes.core.entity.VolumnImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 
-public class IqiyiResolver implements Resolver {
+public class IqiyiResolver extends AbstractResolver implements Resolver {
 
-	static XPathExpression expression;
-	private ApacheConnector connector = new ApacheConnector();
+	static XPathExpression expression1;
+	static XPathExpression expression2;
+	private ApacheConnector connector = ApacheConnector.getInstance();
 	static {
 		XPathFactory xfactory = javax.xml.xpath.XPathFactory.newInstance();
 		XPath xpath = xfactory.newXPath();
 		try {
-			expression = xpath.compile("/root/video/fileUrl/file");
+			expression1 = xpath.compile("/root/video/fileUrl/file");
+			expression2 = xpath.compile("/root/video/title");
 		} catch (XPathExpressionException e) {
 			e.printStackTrace();
 		}
 	}
 
-	public String[] getResource(String uri) {
-		try {
-			String videoId = connector.doGet(URI.create(uri),
-					new ResponseHandler<String>() {
-						public String handleResponse(HttpResponse response)
-								throws ClientProtocolException, IOException {
-							InputStream stream = response.getEntity()
-									.getContent();
-							return getVideoId(stream);
-						}
-					});
-
-			return getRealURI(videoId);
-		} catch (ClientProtocolException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		return null;
+	public String[] getResource(String uri) throws Exception {
+		String videoId = connector.doGet(uri, new ResponseHandler<String>() {
+			public String handleResponse(HttpResponse response) throws ClientProtocolException, IOException {
+				InputStream stream = response.getEntity().getContent();
+				return getVideoId(stream);
+			}
+		});
+		logger.debug("the {} videoId is {}", uri, videoId);
+		return getRealURI(videoId);
 	}
 
-	public static final String xmlformat = "http://cache.video.qiyi.com/v/%s";
+	private static final String xmlformat = "http://cache.video.qiyi.com/v/%s";
 
-	protected String[] getRealURI(String videoId) {
+	private final static int mask = 0x96283bc0;
+
+	public long suffix() {
+		long time = System.currentTimeMillis() / 1000;
+		time = time ^ mask;
+		time += 0x100000000l;
+		return time;
+	}
+
+	protected String[] getRealURI(String videoId) throws Exception {
 		String desc = String.format(xmlformat, videoId);
-		try {
-			connector.doGet(URI.create(desc), new ResponseHandler<String>() {
-				public String handleResponse(HttpResponse response)
-						throws ClientProtocolException, IOException {
-					InputStream stream = response.getEntity().getContent();
-					try {
-						NodeList list =  (NodeList) expression.evaluate(new InputSource(
-								stream), XPathConstants.NODESET);
-						
-						for(int i = 0 ;i < list.getLength();i++){
-							Node node = list.item(i);
-							String uri = node.getTextContent();
-							uri = uri.substring(0,uri.length()-3);
-							uri += "hml?v=";
-							int time = (int) (System.currentTimeMillis()/1000);
-							uri += (time+1921658928);
-							System.out.println(uri);
-							
-						}
-					} catch (XPathExpressionException e) {
-						e.printStackTrace();
+		return connector.doGet(desc, new ResponseHandler<String[]>() {
+			public String[] handleResponse(HttpResponse response) throws ClientProtocolException, IOException {
+				InputStream stream = response.getEntity().getContent();
+				try {
+					NodeList list = (NodeList) expression1.evaluate(new InputSource(stream), XPathConstants.NODESET);
+					String[] uris = new String[list.getLength()];
+					for (int i = 0; i < list.getLength(); i++) {
+						Node node = list.item(i);
+						String uri = node.getTextContent();
+						uri = uri.substring(0, uri.length() - 3);
+						uri += "hml?v=";
+						uri += suffix();
+						byte[] data = connector.doGet(uri);
+						JSONObject obj = JSONObject.fromObject(new String(data));
+						uris[i] = obj.getString("l");
 					}
-					return null;
+					return uris;
+				} catch (XPathExpressionException e) {
+					logger.error(e.getMessage(), e);
 				}
-			});
-
-		} catch (ClientProtocolException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		return null;
+				return null;
+			}
+		});
 	}
 
 	final static Logger logger = LoggerFactory.getLogger(IqiyiResolver.class);
-	final static Pattern pattern = Pattern
-			.compile("data-player-videoid=\"([\\w]+)\"");
+	final static Pattern pattern = Pattern.compile("data-player-videoid=\"([\\w]+)\"");
 
 	protected String getVideoId(InputStream stream) {
-		BufferedReader reader = new BufferedReader(
-				new InputStreamReader(stream));
+		BufferedReader reader = new BufferedReader(new InputStreamReader(stream));
 		while (true) {
 			try {
 				String line = reader.readLine();
@@ -127,8 +119,44 @@ public class IqiyiResolver implements Resolver {
 		return null;
 	}
 
-	public boolean isPrefer(String uri) {
-		return true;
+	public Volumn createVolumn(String uri) throws Exception {
+		String videoId = connector.doGet(uri, new ResponseHandler<String>() {
+			public String handleResponse(HttpResponse arg0) throws ClientProtocolException, IOException {
+				HttpEntity entity = arg0.getEntity();
+				InputStream stream = entity.getContent();
+				return getVideoId(stream);
+			}
+		});
+		logger.info("video id is {}", videoId);
+		if (null == videoId) {
+			return null;
+		}
+
+		String desc = String.format(xmlformat, videoId);
+		logger.info(desc);
+		Document doc = connector.getPageAsDoc(desc);
+		String title = (String) expression2.evaluate(doc, XPathConstants.STRING);
+		logger.info("video title {}", title);
+		NodeList list = (NodeList) expression1.evaluate(doc, XPathConstants.NODESET);
+		String[] uris = new String[list.getLength()];
+		for (int i = 0; i < list.getLength(); i++) {
+			Node node = list.item(i);
+			String newURL = node.getTextContent();
+			newURL = newURL.substring(0, newURL.length() - 3);
+			newURL += "hml?v=";
+			newURL += suffix();
+			byte[] data = connector.doGet(newURL);
+			JSONObject obj = JSONObject.fromObject(new String(data));
+			uris[i] = obj.getString("l");
+		}
+		VolumnImpl volumn = new VolumnImpl();
+		volumn.setTitle(title);
+		volumn.setUris(uris);
+		return volumn;
 	}
 
+	@Override
+	protected String[] getRegexStrings() {
+		return new String[]{"iqiyi\\.com\\/"};
+	}
 }

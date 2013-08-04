@@ -1,8 +1,10 @@
 package org.cateyes.core;
 
-public interface Resolver {
-	
-	String[] getResource(String uri);
+import org.cateyes.core.entity.Volumn;
 
+public interface Resolver {
+
+	Volumn createVolumn(String uri) throws Exception;
+	
 	boolean isPrefer(String uri);
 }

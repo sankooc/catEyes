@@ -14,24 +14,23 @@ import net.sf.json.JSONObject;
 
 import org.apache.commons.lang.ArrayUtils;
 import org.cateyes.core.ApacheConnector;
-import org.cateyes.core.ApacheConnector.ContentComsumer;
 import org.cateyes.core.VideoConstants.Provider;
 import org.cateyes.core.VideoConstants.VideoType;
 import org.cateyes.core.util.CommonUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class VolumnImp implements Volumn {
+public class YoukuVolumnImp implements Volumn {
 
 	private String yid;
 	private String title;
 	private File tmpFile;
-	static Logger logger = LoggerFactory.getLogger(VolumnImp.class);
+	static Logger logger = LoggerFactory.getLogger(YoukuVolumnImp.class);
 	String[] uris;
 	private ApacheConnector connector;
 	private String subfix = "flv";
 
-	VolumnImp(String yid, File file, ApacheConnector connector) {
+	YoukuVolumnImp(String yid, File file, ApacheConnector connector) {
 		if (null == yid) {
 			throw new IllegalArgumentException();
 		}
@@ -54,51 +53,31 @@ public class VolumnImp implements Volumn {
 			File file = new File(tmpFile, title + "-." + subfix);
 			file.createNewFile();
 			final OutputStream out = new FileOutputStream(file);
-			connector.doGet(URI.create(uri), new ContentComsumer() {
-				public void consume(InputStream content) throws Exception {
-					byte[] tmp = new byte[1024];
-					while (true) {
-						try {
-							int num = content.read(tmp);
-							if (num < 1) {
-								out.flush();
-								break;
-							}
-							out.write(tmp, 0, num);
-						} catch (Exception e) {
-							out.flush();
-							break;
-						}
-					}
-					out.close();
-				}
-			});
+//			connector.doGet(URI.create(uri), new ContentComsumer() {
+//				public void consume(InputStream content) throws Exception {
+//					byte[] tmp = new byte[1024];
+//					while (true) {
+//						try {
+//							int num = content.read(tmp);
+//							if (num < 1) {
+//								out.flush();
+//								break;
+//							}
+//							out.write(tmp, 0, num);
+//						} catch (Exception e) {
+//							out.flush();
+//							break;
+//						}
+//					}
+//					out.close();
+//				}
+//			});
 		} else {
 			download(uris);
 		}
 
 	}
 
-	public void singleDownload(String uri, final OutputStream out) {
-		connector.doGet(URI.create(uri), new ContentComsumer() {
-			public void consume(InputStream content) throws Exception {
-				byte[] tmp = new byte[1024];
-				while (true) {
-					try {
-						int num = content.read(tmp);
-						if (num < 1) {
-							out.flush();
-							break;
-						}
-						out.write(tmp, 0, num);
-					} catch (Exception e) {
-						out.flush();
-						break;
-					}
-				}
-			}
-		});
-	}
 
 	static Executor service = Executors.newFixedThreadPool(10);
 
@@ -112,12 +91,12 @@ public class VolumnImp implements Volumn {
 			service.execute(new Runnable() {
 				public void run() {
 					try {
-						connector.download(URI.create(uri), freg, null);
+						connector.download(uri, freg, null);
 					} catch (Exception e) {
 						logger.error(e.getMessage(), e);
 					} finally {
 						if (total.decrementAndGet() == 0) {
-							VolumnImp clz = VolumnImp.this;
+							YoukuVolumnImp clz = YoukuVolumnImp.this;
 							synchronized (clz) {
 								clz.notifyAll();
 							}
@@ -173,6 +152,11 @@ public class VolumnImp implements Volumn {
 
 	public void setConnector(ApacheConnector connector) {
 		this.connector = connector;
+	}
+
+	public void write(File dir) throws Exception {
+		// TODO Auto-generated method stub
+		
 	}
 
 }
