@@ -19,13 +19,11 @@ import org.slf4j.LoggerFactory;
 
 public class YoukuResolver extends AbstractResolver implements Resolver {
 
-	final ApacheConnector connetor = ApacheConnector.getInstance();
-
 	private final static Pattern pattern = Pattern
 			.compile("var videoId2= \'(\\w+)\';");
 
 	public Volumn createVolumn(String uri) throws Exception {
-		String vid = connetor.getPageRegix(uri, pattern);
+		String vid = connector.getPageRegix(uri, pattern);
 		return createVolumnFromVid(vid);
 	}
 
@@ -40,7 +38,7 @@ public class YoukuResolver extends AbstractResolver implements Resolver {
 
 	public Volumn createVolumnFromVid(String vid) throws Exception {
 		String desc = String.format(YOUKU_LIST, vid);
-		JSONObject metadata = connetor.getPageAsJson(desc);
+		JSONObject metadata = connector.getPageAsJson(desc);
 
 		JSONObject data = metadata.getJSONArray("data").getJSONObject(0);
 

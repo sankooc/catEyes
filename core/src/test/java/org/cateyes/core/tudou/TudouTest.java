@@ -24,12 +24,12 @@ public class TudouTest {
 	
 //	@Test
 	public void truch() throws Exception {
-		String url = "http://www.tudou.com/listplay/8Jr659zJxA4/Dyhg3Ucl1mQ.html";
-		Assert.assertTrue(resolver.isPrefer(url));
-		String[] uris = resolver.getResource(url);
-		Assert.assertNotNull(uris);
-		byte[] data =resolver.getConnector().doGet(uris[0]);
-		System.out.println(new String(data));
+//		String url = "http://www.tudou.com/listplay/8Jr659zJxA4/Dyhg3Ucl1mQ.html";
+//		Assert.assertTrue(resolver.isPrefer(url));
+//		String[] uris = resolver.getResource(url);
+//		Assert.assertNotNull(uris);
+//		byte[] data =resolver.getConnector().doGet(uris[0]);
+//		System.out.println(new String(data));
 	}
 
 	// @Test

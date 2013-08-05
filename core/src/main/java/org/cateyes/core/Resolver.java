@@ -6,5 +6,7 @@ public interface Resolver {
 
 	Volumn createVolumn(String uri) throws Exception;
 	
+	Volumn createVolumnFromVid(String vid) throws Exception;
+	
 	boolean isPrefer(String uri);
 }

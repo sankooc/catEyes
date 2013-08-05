@@ -10,6 +10,7 @@ import org.cateyes.core.entity.VolumnFactory;
 import org.cateyes.core.iqiyi.IqiyiResolver;
 import org.cateyes.core.sohu.SohuResolver;
 import org.cateyes.core.tudou.TudouResolver;
+import org.cateyes.core.wuliu.WulResolver;
 import org.cateyes.core.youku.YoukuResolver;
 import org.junit.Test;
 
@@ -17,7 +18,6 @@ public class VolumnTest {
 	ApacheConnector connector = ConnectorProvider.getCommonConnector();
 
 	protected void test(Resolver resolver, String url) {
-
 		try {
 			Volumn volumn = resolver.createVolumn(url);
 			Assert.assertNotNull(volumn);
@@ -35,6 +35,16 @@ public class VolumnTest {
 
 	}
 
+	@Test
+	public void test56(){
+		String uri = "http://www.56.com/u69/v_ODg5MTIzNTQ.html";
+		Resolver resolver = new WulResolver();
+		
+		test(resolver,uri);
+		
+	}
+	
+	
 	// @Test
 	public void testyouku() {
 		String uri = "http://v.youku.com/v_show/id_XNTQ2OTc0OTAw.html";
@@ -63,11 +73,13 @@ public class VolumnTest {
 		test(resolver, uri);
 	}
 
-	@Test
+//	@Test
 	public void blibli(){
 		String uri = "http://www.bilibili.tv/video/av685174/";
 		Resolver resolver = new BlibliResolver();
 		test(resolver,uri);
 	}
+	
+	
 	
 }

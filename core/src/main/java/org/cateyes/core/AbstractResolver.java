@@ -7,6 +7,9 @@ public abstract class AbstractResolver implements Resolver {
 
 	abstract protected String[] getRegexStrings();
 
+
+	protected ApacheConnector connector = ConnectorProvider.getCommonConnector();
+	
 	private Pattern[] patterns;
 
 	protected AbstractResolver() {

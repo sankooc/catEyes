@@ -17,6 +17,7 @@ import org.apache.http.Header;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.ResponseHandler;
+import org.cateyes.core.AbstractResolver;
 import org.cateyes.core.ApacheConnector;
 import org.cateyes.core.Resolver;
 import org.cateyes.core.VideoConstants.Provider;
@@ -26,12 +27,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 
-public class TudouResolver implements Resolver {
+public class TudouResolver extends AbstractResolver implements Resolver {
 	public static final String xmlformat = "http://v2.tudou.com/v?it=%s&st=1,2,3,4,99";
 	static XPathExpression expression_src;
 	static XPathExpression expression_title;
 	static XPathExpression expression_size;
-	private ApacheConnector connector = ApacheConnector.getInstance();
 	static {
 		XPathFactory xfactory = javax.xml.xpath.XPathFactory.newInstance();
 		XPath xpath = xfactory.newXPath();
@@ -48,8 +48,7 @@ public class TudouResolver implements Resolver {
 	static Logger logger = LoggerFactory.getLogger(TudouResolver.class);
 
 	protected String getIIdFrom(InputStream stream) {
-		BufferedReader reader = new BufferedReader(
-				new InputStreamReader(stream));
+		BufferedReader reader = new BufferedReader(new InputStreamReader(stream));
 		while (true) {
 			try {
 				String line = reader.readLine();
@@ -75,23 +74,13 @@ public class TudouResolver implements Resolver {
 		return (String) expression_src.evaluate(doc, XPathConstants.STRING);
 	}
 
-	public ApacheConnector getConnector() {
-		return connector;
-	}
-
-	public void setConnector(ApacheConnector connector) {
-		this.connector = connector;
-	}
-
 	public String[] getResource(String uri) throws Exception {
 		try {
 			String iid = connector.doGet(uri, new ResponseHandler<String>() {
-				public String handleResponse(HttpResponse response)
-						throws ClientProtocolException, IOException {
+				public String handleResponse(HttpResponse response) throws ClientProtocolException, IOException {
 					Header[] headers = response.getAllHeaders();
 					for (Header header : headers) {
-						System.out.println("key:" + header.getName()
-								+ " value:" + header.getValue());
+						System.out.println("key:" + header.getName() + " value:" + header.getValue());
 					}
 					InputStream stream = response.getEntity().getContent();
 					return getIIdFrom(stream);
@@ -109,35 +98,33 @@ public class TudouResolver implements Resolver {
 		return null;
 	}
 
-	public boolean isPrefer(String uri) {
-		String p1 = "tudou\\.com\\/";
-		Pattern pattern = Pattern.compile(p1);
-		Matcher matcher = pattern.matcher(uri);
-		return matcher.find();
-	}
-
 	public Volumn createVolumn(String uri) throws Exception {
 		String iid = connector.doGet(uri, new ResponseHandler<String>() {
-			public String handleResponse(HttpResponse arg0)
-					throws ClientProtocolException, IOException {
+			public String handleResponse(HttpResponse arg0) throws ClientProtocolException, IOException {
 				InputStream stream = arg0.getEntity().getContent();
 				return getIIdFrom(stream);
 			}
 		});
 		logger.info("tudou iid {}", iid);
 
-		String desc = String.format(xmlformat, iid);
+		return createVolumnFromVid(iid);
+	}
+
+	public Volumn createVolumnFromVid(String vid) throws Exception {
+		String desc = String.format(xmlformat, vid);
 		logger.info(desc);
 		Document doc = connector.getPageAsDoc(desc);
-		String source = (String) expression_src.evaluate(doc,
-				XPathConstants.STRING);
-		String title = (String) expression_title.evaluate(doc,
-				XPathConstants.STRING);
-		VolumnImpl volumn = new VolumnImpl(title, iid, Provider.TUDOU);
+		String source = (String) expression_src.evaluate(doc, XPathConstants.STRING);
+		String title = (String) expression_title.evaluate(doc, XPathConstants.STRING);
+		VolumnImpl volumn = new VolumnImpl(title, vid, Provider.TUDOU);
 		logger.info("title is {}", title);
-		Long size = Long.parseLong((String) expression_size.evaluate(doc,
-				XPathConstants.STRING));
+		Long size = Long.parseLong((String) expression_size.evaluate(doc, XPathConstants.STRING));
 		volumn.addUrl(source, size);
 		return volumn;
+	}
+
+	@Override
+	protected String[] getRegexStrings() {
+		return new String[] { "tudou\\.com\\/" };
 	}
 }

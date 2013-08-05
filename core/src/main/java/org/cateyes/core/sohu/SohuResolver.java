@@ -49,8 +49,6 @@ public class SohuResolver extends AbstractResolver implements Resolver {
 
 	private static String urlFormat2 = "%s%s?key=%s";
 
-	ApacheConnector connector = ConnectorProvider.getCommonConnector();
-
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -60,10 +58,10 @@ public class SohuResolver extends AbstractResolver implements Resolver {
 		String vid = connector.getPageRegix(uri, pattern);// getVid
 		logger.info("sohu vid {}" + vid);
 
-		return createVolumnWithVid(vid);
+		return createVolumnFromVid(vid);
 	}
 
-	public Volumn createVolumnWithVid(String vid) throws Exception {
+	public Volumn createVolumnFromVid(String vid) throws Exception {
 		String desc = String.format(format, vid);
 
 		JSONObject data = connector.getPageAsJson(desc);

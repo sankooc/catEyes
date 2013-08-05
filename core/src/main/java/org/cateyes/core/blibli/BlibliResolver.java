@@ -32,7 +32,7 @@ public class BlibliResolver extends AbstractResolver implements Resolver {
 		return null;
 	}
 
-	private Volumn createVolumnFromVid(String vid) {
+	public Volumn createVolumnFromVid(String vid) {
 		
 		// TODO Auto-generated method stub
 		return null;
