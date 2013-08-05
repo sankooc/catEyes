@@ -2,6 +2,7 @@ package org.cateyes.core;
 
 import javax.xml.xpath.XPathExpressionException;
 
+import org.cateyes.core.deprecated.ApacheConnector2;
 import org.junit.Test;
 
 public class Connector2 {

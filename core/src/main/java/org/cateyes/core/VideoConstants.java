@@ -7,6 +7,6 @@ public interface VideoConstants {
 	}
 	
 	public enum Provider {
-		YOUKU, TUDOU, SOHO
+		YOUKU, TUDOU, SOHO,IQIYI;
 	}
 }

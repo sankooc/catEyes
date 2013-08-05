@@ -1,4 +1,4 @@
-package org.cateyes.core;
+package org.cateyes.core.deprecated;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -33,6 +33,8 @@ import org.apache.http.params.CoreConnectionPNames;
 import org.apache.http.params.HttpParams;
 import org.apache.http.protocol.HttpContext;
 import org.apache.http.util.EntityUtils;
+import org.cateyes.core.Adaptor;
+import org.cateyes.core.MResource;
 import org.cateyes.core.util.CommonUtils;
 import org.jsoup.Jsoup;
 import org.slf4j.Logger;

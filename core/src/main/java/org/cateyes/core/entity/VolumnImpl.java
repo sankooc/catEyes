@@ -1,13 +1,15 @@
 package org.cateyes.core.entity;
 
 import java.io.File;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.cateyes.core.ApacheConnector;
 import org.cateyes.core.VideoConstants.Provider;
-import org.cateyes.core.VideoConstants.VideoType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -17,31 +19,34 @@ public class VolumnImpl implements Volumn {
 
 	String orginal;
 
-	String[] uris;
+	Map<String, Long> urlSet = new LinkedHashMap<String, Long>();
 
-	VideoType type = VideoType.FLV;
+	// VideoType type = VideoType.FLV;
+
+	String suffix = "flv";
 
 	static Logger logger = LoggerFactory.getLogger(VolumnImpl.class);
-
+	Provider provider;
 	ApacheConnector connector = ApacheConnector.getInstance();
 	public final static String MULTIFIX = "%s-%02d.%s";
 
 	public Provider getProvider() {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
 	public VolumnImpl() {
 	}
-	
-	
-	public VolumnImpl(String title, String orginal, String[] uris) {
+
+	public VolumnImpl(String title, String orginal, Provider provider) {
 		super();
 		this.title = title;
 		this.orginal = orginal;
-		this.uris = uris;
+		this.provider = provider;
 	}
 
+	public void addUrl(String url, long size) {
+		urlSet.put(url, size);
+	}
 
 	public void write(File dir) throws Exception {
 		if (dir.isFile()) {
@@ -50,21 +55,21 @@ public class VolumnImpl implements Volumn {
 		if (!dir.exists()) {
 			dir.mkdirs();
 		}
-		if (null == uris || uris.length == 0) {
+		if (urlSet.isEmpty()) {
 			throw new Exception("no source address");
 		}
 
-		if (uris.length == 1) {
-			String fileName = title + ".flv";
+		if (urlSet.size() == 1) {
+			String fileName = title + "." + suffix;
 			download(dir, new String[] { fileName });
 		} else {
 			File root = new File(dir, title);
 			if (!root.exists()) {
 				root.mkdirs();
 			}
-			String[] names = new String[uris.length];
-			for (int i = 0; i < uris.length; i++) {
-				String fileName = String.format(MULTIFIX, title, i + 1, "flv");
+			String[] names = new String[urlSet.size()];
+			for (int i = 0; i < urlSet.size(); i++) {
+				String fileName = String.format(MULTIFIX, title, i + 1, suffix);
 				names[i] = fileName;
 			}
 			download(root, names);
@@ -76,14 +81,16 @@ public class VolumnImpl implements Volumn {
 
 	protected synchronized void download(File dir, String[] names) {
 		final AtomicInteger counter = new AtomicInteger(names.length);
-		for (int i = 0; i < uris.length; i++) {
-			final String uri = uris[i];
+		Iterator<String> ite = urlSet.keySet().iterator();
+		for (int i = 0; ite.hasNext(); i++) {
+			final String uri = ite.next();
+			final long size = urlSet.get(uri);// TODO
 			final String fileName = names[i];
 			final File target = new File(dir, fileName);
 			service.execute(new Runnable() {
 				public void run() {
 					try {
-						connector.download(uri, target, null);
+						connector.download(uri,size, target, null);
 					} catch (Exception e) {
 						logger.error(e.getMessage(), e);
 					} finally {
@@ -105,11 +112,6 @@ public class VolumnImpl implements Volumn {
 
 	}
 
-	public void write() throws Exception {
-		// TODO Auto-generated method stub
-
-	}
-
 	public String getTitle() {
 		return title;
 	}
@@ -118,12 +120,16 @@ public class VolumnImpl implements Volumn {
 		this.title = title;
 	}
 
-	public String[] getUris() {
-		return uris;
+	public String getSuffix() {
+		return suffix;
 	}
 
-	public void setUris(String[] uris) {
-		this.uris = uris;
+	public void setSuffix(String suffix) {
+		this.suffix = suffix;
+	}
+
+	public Map<String, Long> getUrlSet() {
+		return urlSet;
 	}
 
 }

@@ -18,7 +18,6 @@ package org.cateyes.core.sohu;
 
 import java.util.regex.Pattern;
 
-
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 
@@ -26,6 +25,7 @@ import org.cateyes.core.AbstractResolver;
 import org.cateyes.core.ApacheConnector;
 import org.cateyes.core.ConnectorProvider;
 import org.cateyes.core.Resolver;
+import org.cateyes.core.VideoConstants.Provider;
 import org.cateyes.core.entity.Volumn;
 import org.cateyes.core.entity.VolumnImpl;
 import org.slf4j.Logger;
@@ -71,19 +71,26 @@ public class SohuResolver extends AbstractResolver implements Resolver {
 		String rot = data.getString("prot");
 		data = data.getJSONObject("data");
 		String title = data.getString("tvName");
-//		JSONArray arry = data.getJSONArray("clipsBytes");
+		JSONArray clipsSize = data.getJSONArray("clipsBytes");
 		JSONArray clipsURLS = data.getJSONArray("clipsURL");
 		JSONArray suffixs = data.getJSONArray("su");
-		String[] uris = new String[clipsURLS.size()];
+		VolumnImpl volumn = new VolumnImpl(title, vid, Provider.SOHO);
 		for (int i = 0; i < clipsURLS.size(); i++) {
-			String uri = String.format(urlFormat, host, rot, clipsURLS.getString(i), suffixs.getString(i));
+			String clips = clipsURLS.getString(i);
+			String suffix = clips.substring(clips.lastIndexOf('.') + 1);
+			String uri = String.format(urlFormat, host, rot, clips,
+					suffixs.getString(i));
 			byte[] content = connector.doGet(uri);
 			String ss = new String(content);
 			String[] tokens = ss.split("\\|");
-			uris[i] = String.format(urlFormat2, tokens[0].substring(0, tokens[0].length() - 1), suffixs.getString(i), tokens[3]);
-			// System.err.println(uri);
+			String url = String.format(urlFormat2,
+					tokens[0].substring(0, tokens[0].length() - 1),
+					suffixs.getString(i), tokens[3]);
+			int size = clipsSize.getInt(i);
+			volumn.addUrl(url, size - 13);// 为什么 少13字节
+			volumn.setSuffix(suffix);
 		}
-		return new VolumnImpl(title, vid, uris);
+		return volumn;
 	}
 
 	/*

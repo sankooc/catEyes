@@ -13,9 +13,9 @@ import java.net.URI;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.cateyes.core.VideoConstants.VideoType;
+import org.cateyes.core.deprecated.YoukuResolver;
 import org.cateyes.core.entity.Volumn;
 import org.cateyes.core.entity.VolumnFactory;
-import org.cateyes.core.youku.YoukuResolver;
 import org.junit.Test;
 
 /**
@@ -25,12 +25,12 @@ import org.junit.Test;
 public class Demo {
 	// ApacheConnector connect = new ApacheConnector();
 
-//	@Test
+	@Test
 	public void sohuTest(){
 		String uri = "http://tv.sohu.com/20120726/n349111647.shtml";
 		try {
 			Volumn volum = VolumnFactory.createVolumn(uri);
-			volum.write(new File("target/sohu"));
+//			volum.write(new File("target/sohu"));
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -48,7 +48,7 @@ public class Demo {
 	}
 
 	
-	@Test
+//	@Test
 	public void tudouDemo(){
 		String uri = "http://www.tudou.com/listplay/8Jr659zJxA4/Dyhg3Ucl1mQ.html";
 		try {

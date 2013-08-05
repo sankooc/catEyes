@@ -6,7 +6,7 @@ import org.cateyes.core.Resolver;
 import org.cateyes.core.iqiyi.IqiyiResolver;
 import org.cateyes.core.sohu.SohuResolver;
 import org.cateyes.core.tudou.TudouResolver;
-import org.cateyes.core.youku.YoukuResolver2;
+import org.cateyes.core.youku.YoukuResolver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,7 +26,7 @@ public class VolumnFactory {
 		rList.add(new TudouResolver());
 		rList.add(new IqiyiResolver());
 		rList.add(new SohuResolver());
-		rList.add(new YoukuResolver2());
+		rList.add(new YoukuResolver());
 	}
 	
 	
