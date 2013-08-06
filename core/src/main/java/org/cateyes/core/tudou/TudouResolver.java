@@ -26,7 +26,9 @@ import org.cateyes.core.entity.VolumnImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
-
+/**
+ * @author sankooc
+ */
 public class TudouResolver extends AbstractResolver implements Resolver {
 	public static final String xmlformat = "http://v2.tudou.com/v?it=%s&st=1,2,3,4,99";
 	static XPathExpression expression_src;

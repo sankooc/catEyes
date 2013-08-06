@@ -9,7 +9,9 @@ import java.io.InputStream;
 import org.cateyes.core.util.DataStreamUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
+/**
+ * @author sankooc
+ */
 public class FlvInputStream extends DataInputStream {
 	int offSet;
 	static Logger logger = LoggerFactory.getLogger(FlvInputStream.class);

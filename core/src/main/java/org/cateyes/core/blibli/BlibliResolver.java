@@ -11,7 +11,7 @@ import ch.qos.logback.classic.Logger;
 
 /**
  * 暂无意义 貌似都是转的
- * @author changguopiao
+ * @author sankooc
  *
  */
 public class BlibliResolver extends AbstractResolver implements Resolver {

@@ -11,7 +11,9 @@ import java.util.List;
 import java.util.Map;
 
 import org.cateyes.core.flv.FlvMetadata;
-
+/**
+ * @author sankooc
+ */
 public class AMFUtils {
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public static void writeData(Object obj, DataOutputStream os)

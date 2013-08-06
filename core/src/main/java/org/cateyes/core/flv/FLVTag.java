@@ -1,7 +1,8 @@
 package org.cateyes.core.flv;
 
-import java.io.DataInputStream;
-
+/**
+ * @author sankooc
+ */
 public class FLVTag {
 	public enum TagType {
 		VIDEO, AUDIO, SCRIPTDATA

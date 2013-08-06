@@ -9,25 +9,31 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.cateyes.core.ApacheConnector;
+import org.cateyes.core.ApacheConnector.VideoInfo;
 import org.cateyes.core.VideoConstants.Provider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * @author sankooc
+ */
 public class VolumnImpl implements Volumn {
 
+	//video title
 	String title;
 
+	//video unique id
 	String orginal;
-
+	
+	//video fragments
 	Map<String, Long> urlSet = new LinkedHashMap<String, Long>();
 
-	// VideoType type = VideoType.FLV;
-
+	//video suffix
 	String suffix = "flv";
 
 	static Logger logger = LoggerFactory.getLogger(VolumnImpl.class);
 	Provider provider;
-	ApacheConnector connector = ApacheConnector.getInstance();
+	static ApacheConnector connector = ApacheConnector.getInstance();
 	public final static String MULTIFIX = "%s-%02d.%s";
 
 	public Provider getProvider() {
@@ -79,18 +85,19 @@ public class VolumnImpl implements Volumn {
 
 	static Executor service = Executors.newFixedThreadPool(10);
 
-	protected synchronized void download(File dir, String[] names) {
+	protected synchronized void download(final File dir, String[] names) {
 		final AtomicInteger counter = new AtomicInteger(names.length);
 		Iterator<String> ite = urlSet.keySet().iterator();
 		for (int i = 0; ite.hasNext(); i++) {
 			final String uri = ite.next();
 			final long size = urlSet.get(uri);// TODO
 			final String fileName = names[i];
-			final File target = new File(dir, fileName);
 			service.execute(new Runnable() {
 				public void run() {
 					try {
-						connector.download(uri,size, target, null);
+						VideoInfo info = connector.getVideoInfo(uri);
+						 File target = new File(dir, fileName);
+						connector.download(uri, size, target, null);
 					} catch (Exception e) {
 						logger.error(e.getMessage(), e);
 					} finally {

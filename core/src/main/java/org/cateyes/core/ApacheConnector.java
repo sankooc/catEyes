@@ -49,6 +49,39 @@ import org.slf4j.LoggerFactory;
 import org.xml.sax.InputSource;
 
 public class ApacheConnector implements HttpConnector {
+
+	public static class VideoInfo {
+		long size;
+		String type;
+
+		public long getSize() {
+			return size;
+		}
+
+		public void setSize(long size) {
+			this.size = size;
+		}
+
+		public String getType() {
+			return type;
+		}
+
+		public void setType(String type) {
+			this.type = type;
+		}
+
+		public VideoInfo(long size, String type) {
+			super();
+			this.size = size;
+			this.type = type;
+		}
+
+		public VideoInfo() {
+			super();
+		}
+
+	}
+
 	final DefaultHttpClient client;
 	ExecutorService executor;
 	static Logger logger = LoggerFactory.getLogger(ApacheConnector.class);
@@ -166,6 +199,22 @@ public class ApacheConnector implements HttpConnector {
 		return doGet(uri, handler);
 	}
 
+	public VideoInfo getVideoInfo(String uri) throws Exception {
+		return doGet(uri, new ResponseHandler<VideoInfo>() {
+			public VideoInfo handleResponse(HttpResponse response)
+					throws ClientProtocolException, IOException {
+				if (response.getStatusLine().getStatusCode() != 200) {
+					logger.error("error response");
+					return null;
+				}
+				String type = response.getHeaders("Content-Type")[0].getValue();
+				String length = response.getHeaders("Content-Length")[0]
+						.getValue();
+				return new VideoInfo(Long.parseLong(length), type);
+			}
+		});
+	}
+
 	public org.w3c.dom.Document getPageAsDoc(String addr) throws Exception {
 		ResponseHandler<org.w3c.dom.Document> handler = new ResponseHandler<org.w3c.dom.Document>() {
 			public org.w3c.dom.Document handleResponse(HttpResponse response)
@@ -243,73 +292,6 @@ public class ApacheConnector implements HttpConnector {
 		return null;
 	}
 
-	// final MResource cont = new MResource() {
-	// public void init() {
-	// logger.debug("init");
-	// }
-	//
-	// public void start() {
-	// logger.debug("start");
-	//
-	// }
-	//
-	// public void error(String msg) {
-	// // TODO Auto-generated method stub
-	//
-	// }
-	//
-	// public void finish() {
-	// logger.debug("finish");
-	//
-	// }
-	//
-	// volatile long len;
-	// volatile long total;
-	//
-	// public void setLength(long size) {
-	// logger.debug("total length is {}", size);
-	// total = size;
-	//
-	// }
-	//
-	// public void display(long content) {
-	// int m = 0;
-	// int k = 0;
-	// int b = 0;
-	// b = (int) (content & 0x02ffl);
-	// content = content >> 10;
-	// if (content > 0) {
-	// k = (int) (content & 0x02ffl);
-	// content = content >> 10;
-	// }
-	// if (content > 0) {
-	// m = (int) (content & 0x02ffl);
-	// content = content >> 10;
-	// }
-	// b = (int) (len & 0x02ffl);
-	// logger.debug("current length {}MB {}KB {}B ", new Object[] { m, k, b });
-	// }
-	//
-	// public synchronized void setContent(long content) {
-	// len = content;
-	// }
-	//
-	// int timer = 0;
-	//
-	// public synchronized void addContent(long increase) {
-	// len += increase;
-	// if (timer-- < 0) {
-	// display(len);
-	// timer = 50;
-	// }
-	// }
-	//
-	// public boolean isError() {
-	// // TODO Auto-generated method stub
-	// return false;
-	// }
-	// };
-
 	public void download(final String uri, final long contentSize, File file,
 			Adaptor adaptor) throws Exception {
 		long size = 0;
@@ -358,7 +340,6 @@ public class ApacheConnector implements HttpConnector {
 			logger.error(e.getMessage(), e);
 		} finally {
 			try {
-				// EntityUtils.consume(entity);//very slow
 				request.abort();
 			} catch (Exception e) {
 				logger.error(e.getMessage(), e);
@@ -370,8 +351,10 @@ public class ApacheConnector implements HttpConnector {
 	public void download(final String uri, OutputStream out,
 			final long contentSize, long size, Adaptor adaptor)
 			throws Exception {
-		// long totalLenth = getResourceLength(uri);
 		long totalLenth = contentSize;
+		if (contentSize < 1) {
+			totalLenth = getResourceLength(uri);
+		}
 		// check suffix video/x-flv video/mp4
 		logger.info("content length {}", totalLenth);
 		if (totalLenth == 0) {

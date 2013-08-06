@@ -9,7 +9,9 @@ import java.util.HashMap;
 import java.util.List;
 
 import org.cateyes.core.util.DataStreamUtils;
-
+/**
+ * @author sankooc
+ */
 public class AMFInputStream extends DataInputStream {
 
 	public AMFInputStream(InputStream in) {

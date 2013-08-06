@@ -3,7 +3,9 @@ package org.cateyes.core.util;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
-
+/**
+ * @author sankooc
+ */
 public class DataStreamUtils {
 	public static long readUInt32(DataInputStream input) throws IOException {
 		return input.readInt() & 0xFFFFFFFFL;

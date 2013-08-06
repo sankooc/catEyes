@@ -14,7 +14,9 @@ import java.util.Map.Entry;
 
 import org.cateyes.core.util.AMFUtils;
 import org.cateyes.core.util.DataStreamUtils;
-
+/**
+ * @author sankooc
+ */
 public class FLVParser {
 
 	protected static boolean checkSignature(DataInputStream fis)

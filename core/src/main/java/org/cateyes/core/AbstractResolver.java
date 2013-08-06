@@ -7,8 +7,11 @@ public abstract class AbstractResolver implements Resolver {
 
 	abstract protected String[] getRegexStrings();
 
-
 	protected ApacheConnector connector = ConnectorProvider.getCommonConnector();
+	
+
+	//video quality
+	protected int quality =-1;
 	
 	private Pattern[] patterns;
 

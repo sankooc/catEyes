@@ -11,8 +11,9 @@ public class Main {
 	 * @param args
 	 */
 	public static void main(String[] args) {
+		System.out.println("flv downloading");
 		if (null == args || args.length < 2) {
-
+			useage();
 		} else {
 			String uri = args[0];
 			String folder = args[1];
@@ -33,7 +34,7 @@ public class Main {
 	}
 
 	static void useage() {
-		System.out.println(" downflv  [url]  [folder]");
+		System.out.println("command error /r downflv  [video url]  [store folder]");
 	}
 
 }

@@ -1,6 +1,5 @@
 package org.cateyes.core.wuliu;
 
-import java.security.Provider;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -8,12 +7,14 @@ import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 
 import org.cateyes.core.AbstractResolver;
-import org.cateyes.core.ApacheConnector;
-import org.cateyes.core.ConnectorProvider;
 import org.cateyes.core.Resolver;
+import org.cateyes.core.VideoConstants.Provider;
 import org.cateyes.core.entity.Volumn;
 import org.cateyes.core.entity.VolumnImpl;
 
+/**
+ * @author sankooc
+ */
 public class WulResolver extends AbstractResolver implements Resolver {
 
 	Pattern pattern = Pattern.compile("http://www.56.com/u\\d+/v_(\\w+).html");
@@ -36,7 +37,7 @@ public class WulResolver extends AbstractResolver implements Resolver {
 
 		String title = data.getJSONObject("info").getString("Subject");
 
-		Volumn volumn = new VolumnImpl(title, vid, org.cateyes.core.VideoConstants.Provider.WULIU);
+		Volumn volumn = new VolumnImpl(title, vid,Provider.WULIU);
 
 		String type = types[data.getJSONObject("info").getInt("hd")];
 
@@ -45,7 +46,8 @@ public class WulResolver extends AbstractResolver implements Resolver {
 		for (int i = 0; i < arrays.size(); i++) {
 			JSONObject profile = arrays.getJSONObject(i);
 			if (type.equals(profile.getString("type"))) {
-				volumn.addUrl(profile.getString("url"), profile.getInt("filesize"));
+				volumn.addUrl(profile.getString("url"),
+						profile.getInt("filesize"));
 				break;
 			}
 		}

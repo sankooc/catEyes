@@ -15,7 +15,6 @@
  * limitations under the License.
  */
 package org.cateyes.core.sohu;
-
 import java.util.regex.Pattern;
 
 import net.sf.json.JSONArray;

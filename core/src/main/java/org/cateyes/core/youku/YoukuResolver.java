@@ -9,14 +9,15 @@ import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 
 import org.cateyes.core.AbstractResolver;
-import org.cateyes.core.ApacheConnector;
 import org.cateyes.core.Resolver;
 import org.cateyes.core.VideoConstants.Provider;
 import org.cateyes.core.entity.Volumn;
 import org.cateyes.core.entity.VolumnImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
+/**
+ * @author sankooc
+ */
 public class YoukuResolver extends AbstractResolver implements Resolver {
 
 	private final static Pattern pattern = Pattern

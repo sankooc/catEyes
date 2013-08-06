@@ -7,6 +7,9 @@
 		<version>0.0.1-SNAPSHOT</version>
 		<relativePath>..</relativePath>
 	</parent>
+	<properties>
+		<mainclass>org.cateyes.core.Main</mainclass>
+	</properties>
 	<groupId>core</groupId>
 	<artifactId>eye.core</artifactId>
 	<dependencies>
@@ -62,6 +65,38 @@
 			<groupId>io.netty</groupId>
 			<artifactId>netty</artifactId>
 			<version>3.6.6.Final</version>
+			<scope>test</scope>
 		</dependency>
 	</dependencies>
+
+	<build>
+		<resources>
+			<resource>
+				<directory>src/main/assembly</directory>
+				<filtering>true</filtering>
+				<includes>
+					<include>**/*.bat</include>
+					<include>**/*.sh</include>
+				</includes>
+			</resource>
+		</resources>
+		<plugins>
+			<plugin>
+				<artifactId>maven-assembly-plugin</artifactId>
+				<configuration>
+					<archive>
+						<manifest>
+							<mainClass>${mainclass}</mainClass>
+							<packageName>cateyes</packageName>
+							<addClasspath>true</addClasspath>
+						</manifest>
+					</archive>
+					<descriptors>
+						<descriptor>src/main/assembly/assembly.xml</descriptor>
+					</descriptors>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+
 </project>

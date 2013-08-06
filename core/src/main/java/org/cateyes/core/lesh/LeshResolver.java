@@ -21,7 +21,9 @@ import org.cateyes.core.entity.Volumn;
 import org.cateyes.core.entity.VolumnImpl;
 import org.w3c.dom.Document;
 import org.xml.sax.InputSource;
-
+/**
+ * @author sankooc
+ */
 public class LeshResolver extends AbstractResolver implements Resolver {
 
 	Pattern pattern = Pattern.compile("  vid:(\\d+),");
@@ -68,7 +70,7 @@ public class LeshResolver extends AbstractResolver implements Resolver {
 			JSONObject obj = jsonarry.getJSONObject(i);
 			volumn.addUrl(obj.getString("url"), -1);
 		}
-		return null;
+		return volumn;
 	}
 
 	@Override

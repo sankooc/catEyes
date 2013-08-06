@@ -5,7 +5,9 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.util.List;
 import java.util.Map;
-
+/**
+ * @author sankooc
+ */
 public class AMFOutputStream extends DataOutputStream {
 
 	public AMFOutputStream(OutputStream out) throws IOException {
