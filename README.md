@@ -14,15 +14,15 @@ Use and distribution of licensed under the Apache license. See the [LICENSE](htt
 
 ##ChangeLog
 
-youku available
-tudou available
-ifeng available
-sohu available
-iqiyi available
+* youku available
+* tudou available
+* ifeng available
+* sohu available
+* iqiyi available
 
-56 available
-leshi available
-yinyuetai available
-cntv available
-ku6 unavailable
+* 56 available
+* leshi available
+* yinyuetai available
+* cntv available
+* ku6 unavailable
 
