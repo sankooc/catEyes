@@ -23,7 +23,9 @@ import net.sf.json.JSONObject;
 
 import org.cateyes.core.AbstractResolver;
 import org.cateyes.core.Resolver;
+import org.cateyes.core.VideoConstants.Provider;
 import org.cateyes.core.entity.Volumn;
+import org.cateyes.core.entity.VolumnImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -64,10 +66,11 @@ public class Ku6Resolver extends AbstractResolver implements Resolver {
 		JSONObject data = connector.getPageAsJson(desc);
 		JSONObject obj = data.getJSONObject("data");
 		String url = obj.getString("f");
+		String title = obj.getString("t");
+		Volumn volumn = new VolumnImpl(title,vid,Provider.KU6);
 		String size = obj.getString("videosize");
-		// TODO no title
-		// TODO Auto-generated method stub
-		return null;
+		volumn.addUrl(url, Long.parseLong(size));
+		return volumn;
 	}
 
 	/*

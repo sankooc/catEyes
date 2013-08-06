@@ -68,15 +68,16 @@ public class LeshResolver extends AbstractResolver implements Resolver {
 		JSONArray jsonarry = json.getJSONObject("bean").getJSONArray("video");
 		for (int i = 0; i < jsonarry.size(); i++) {
 			JSONObject obj = jsonarry.getJSONObject(i);
-			volumn.addUrl(obj.getString("url"), -1);
+			String url = obj.getString("url");
+			obj = connector.getPageAsJson(url);
+			volumn.addUrl(obj.getString("location"), -1);
 		}
 		return volumn;
 	}
 
 	@Override
 	protected String[] getRegexStrings() {
-		// TODO Auto-generated method stub
-		return null;
+		return new String[]{"http://www.letv.com"};
 	}
 
 }

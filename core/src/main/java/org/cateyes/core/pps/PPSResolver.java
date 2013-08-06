@@ -53,7 +53,7 @@ public class PPSResolver extends AbstractResolver implements Resolver {
 		String desc = String.format(format, vid);
 		byte[] data = connector.doGet(desc);
 		String uri = new String(data);
-		Matcher matcher = pattern.matcher(uri);
+		Matcher matcher = pattern_title.matcher(uri);
 		if (matcher.find()) {
 			String title = matcher.group(1);
 			Volumn volumn = new VolumnImpl(title, vid, Provider.PPS);

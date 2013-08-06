@@ -19,22 +19,22 @@ import org.slf4j.LoggerFactory;
  */
 public class VolumnImpl implements Volumn {
 
-	//video title
+	// video title
 	String title;
 
-	//video unique id
+	// video unique id
 	String orginal;
-	
-	//video fragments
+
+	// video fragments
 	Map<String, Long> urlSet = new LinkedHashMap<String, Long>();
 
-	//video suffix
+	// video suffix
 	String suffix = "flv";
 
 	static Logger logger = LoggerFactory.getLogger(VolumnImpl.class);
 	Provider provider;
 	static ApacheConnector connector = ApacheConnector.getInstance();
-	public final static String MULTIFIX = "%s-%02d.%s";
+	public final static String MULTIFIX = "%s-%02d";
 
 	public Provider getProvider() {
 		return null;
@@ -66,7 +66,7 @@ public class VolumnImpl implements Volumn {
 		}
 
 		if (urlSet.size() == 1) {
-			String fileName = title + "." + suffix;
+			String fileName = title;
 			download(dir, new String[] { fileName });
 		} else {
 			File root = new File(dir, title);
@@ -75,7 +75,7 @@ public class VolumnImpl implements Volumn {
 			}
 			String[] names = new String[urlSet.size()];
 			for (int i = 0; i < urlSet.size(); i++) {
-				String fileName = String.format(MULTIFIX, title, i + 1, suffix);
+				String fileName = String.format(MULTIFIX, title, i + 1);
 				names[i] = fileName;
 			}
 			download(root, names);
@@ -95,9 +95,24 @@ public class VolumnImpl implements Volumn {
 			service.execute(new Runnable() {
 				public void run() {
 					try {
+						Thread.sleep(500);
 						VideoInfo info = connector.getVideoInfo(uri);
-						 File target = new File(dir, fileName);
-						connector.download(uri, size, target, null);
+						if (null == info) {
+							connector.download(uri, size, new File(dir, fileName + "." + suffix), null);
+						} else {
+							String suf = ".";
+							if ("video/x-flv".equals(info.getType())) {
+								suf += "flv";
+							} else if ("video/f4v".equals(info.getType())){
+								suf += "flv";
+							}else if ("video/mp4".equals(info.getType())) {
+								suf += "mp4";
+							}else if ("application/octet-stream".equals(info.getType())) {
+								suf += suffix;
+							}
+							File target = new File(dir, fileName + suf);
+							connector.download(uri, info.getSize(), target, null);
+						}
 					} catch (Exception e) {
 						logger.error(e.getMessage(), e);
 					} finally {

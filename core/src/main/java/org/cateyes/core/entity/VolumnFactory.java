@@ -3,10 +3,23 @@ package org.cateyes.core.entity;
 import java.util.Collection;
 import java.util.LinkedList;
 import org.cateyes.core.Resolver;
+import org.cateyes.core.acfun.AcfunResolver;
+import org.cateyes.core.cntv.CntvResolver;
+import org.cateyes.core.feng.FengResolver;
 import org.cateyes.core.iqiyi.IqiyiResolver;
+import org.cateyes.core.ku6.Ku6Resolver;
+import org.cateyes.core.lesh.LeshResolver;
+import org.cateyes.core.pps.PPSResolver;
+import org.cateyes.core.pptv.PPTVResolver;
+import org.cateyes.core.sina.SinaResolver;
 import org.cateyes.core.sohu.SohuResolver;
+import org.cateyes.core.tencent.TencentResolver;
 import org.cateyes.core.tudou.TudouResolver;
+import org.cateyes.core.wuliu.WulResolver;
+import org.cateyes.core.xlkk.XLkkResolver;
 import org.cateyes.core.youku.YoukuResolver;
+import org.cateyes.core.youtube.YoutubeResolver;
+import org.cateyes.core.yyt.YinyuetaiResolver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -24,10 +37,27 @@ public class VolumnFactory {
 
 	static {
 		rList = new LinkedList<Resolver>();
+		
 		rList.add(new TudouResolver());
 		rList.add(new IqiyiResolver());
 		rList.add(new SohuResolver());
 		rList.add(new YoukuResolver());
+		rList.add(new FengResolver());
+		
+		rList.add(new LeshResolver());
+		rList.add(new WulResolver());
+		rList.add(new YoutubeResolver());
+		rList.add(new AcfunResolver());
+		rList.add(new CntvResolver());
+		
+		rList.add(new PPSResolver());
+		rList.add(new PPTVResolver());
+		rList.add(new SinaResolver());
+		rList.add(new TencentResolver());
+		rList.add(new XLkkResolver());
+		
+		rList.add(new YinyuetaiResolver());
+		rList.add(new Ku6Resolver());
 	}
 
 	public static Volumn createVolumn(String uri) throws Exception {

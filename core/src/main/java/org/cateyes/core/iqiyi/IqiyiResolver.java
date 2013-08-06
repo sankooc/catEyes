@@ -20,7 +20,6 @@ import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.ResponseHandler;
 import org.cateyes.core.AbstractResolver;
-import org.cateyes.core.ApacheConnector;
 import org.cateyes.core.Resolver;
 import org.cateyes.core.VideoConstants.Provider;
 import org.cateyes.core.entity.Volumn;
@@ -32,6 +31,8 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 /**
+ * 
+ * application/octet-stream must set suffix
  * @author sankooc
  */
 public class IqiyiResolver extends AbstractResolver implements Resolver {
