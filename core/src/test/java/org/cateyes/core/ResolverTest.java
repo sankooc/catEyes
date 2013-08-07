@@ -9,6 +9,7 @@ import junit.framework.Assert;
 
 import org.cateyes.core.entity.Volumn;
 import org.cateyes.core.feng.FengResolver;
+import org.cateyes.core.pptv.PPTVResolver;
 import org.junit.Test;
 
 /**
@@ -39,8 +40,9 @@ public class ResolverTest {
 
 	@Test
 	public void test() {
-		String uri = "http://v.ifeng.com/mil/arms/201308/09e7f40c-c591-46e8-8df0-3f926043e7e9.shtml";
-		Resolver resolver = new FengResolver();
+		String uri = "http://v.pptv.com/show/Oaq5N58FdbMWlPw.html";
+//		String uri = "http://v.ifeng.com/mil/arms/201308/09e7f40c-c591-46e8-8df0-3f926043e7e9.shtml";
+		Resolver resolver = new PPTVResolver();
 		test(resolver, uri);
 	}
 

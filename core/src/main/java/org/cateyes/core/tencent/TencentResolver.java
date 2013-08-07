@@ -16,6 +16,8 @@
  */
 package org.cateyes.core.tencent;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.regex.Pattern;
 
 import javax.xml.xpath.XPath;
@@ -26,7 +28,9 @@ import javax.xml.xpath.XPathFactory;
 
 import org.cateyes.core.AbstractResolver;
 import org.cateyes.core.Resolver;
+import org.cateyes.core.VideoConstants.Provider;
 import org.cateyes.core.entity.Volumn;
+import org.cateyes.core.entity.VolumnImpl;
 import org.w3c.dom.Document;
 /**
  * @author sankooc
@@ -48,29 +52,35 @@ public class TencentResolver extends AbstractResolver implements Resolver {
 		}
 	}
 
+	
+	Map<Thread,String> maps = new HashMap<Thread,String>();
 	public Volumn createVolumn(String uri) throws Exception {
 		String vid = connector.getPageRegix(uri, pattern);
 		if (null == vid) {
 			return null;
 		}
+		Pattern pattern_title  =Pattern.compile("title=\"([^\"]*)\"  sv=\""+vid+"\"");
+		String title = connector.getPageRegix(uri, pattern_title);
+		maps.put(Thread.currentThread(), title);
 		return createVolumnFromVid(vid);
 	}
 
 	public Volumn createVolumnFromVid(String vid) throws Exception {
+		String title = maps.get(Thread.currentThread());
+		Volumn volumn = new VolumnImpl(title,vid,Provider.TENCENT);
 		String desc = String.format(descFormat, vid);
 		Document doc = connector.getPageAsDoc(desc);
-		//TODO 无法 获取 title
 		String url = expression_src.evaluate(doc, XPathConstants.STRING)
 				.toString();
 		long size = Long.parseLong(expression_size.evaluate(doc,
 				XPathConstants.STRING).toString());
-		return null;
+		volumn.addUrl(url, size);
+		return volumn;
 	}
 
 	@Override
 	protected String[] getRegexStrings() {
-		// TODO Auto-generated method stub
-		return null;
+		return new String[]{"v.qq.com"};
 	}
 
 }

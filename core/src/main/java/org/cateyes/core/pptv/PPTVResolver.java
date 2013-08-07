@@ -16,38 +16,112 @@
  */
 package org.cateyes.core.pptv;
 
+import java.security.MessageDigest;
+import java.util.regex.Pattern;
+
+import javax.xml.xpath.XPath;
+import javax.xml.xpath.XPathConstants;
+import javax.xml.xpath.XPathExpression;
+import javax.xml.xpath.XPathExpressionException;
+import javax.xml.xpath.XPathFactory;
+
 import org.cateyes.core.AbstractResolver;
 import org.cateyes.core.Resolver;
+import org.cateyes.core.VideoConstants.Provider;
 import org.cateyes.core.entity.Volumn;
+import org.cateyes.core.entity.VolumnImpl;
+import org.w3c.dom.Document;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 
 /**
  * @author sankooc
  */
 public class PPTVResolver extends AbstractResolver implements Resolver {
 
-	/* (non-Javadoc)
+	static String format = "http://web-play.pptv.com/webplay3-151-%s.xml";
+	Pattern pattern = Pattern.compile("\"id\":(\\d+),");
+
+	static XPathExpression expression_host;
+	static XPathExpression expression_time;
+	static XPathExpression expression_rid;
+	static XPathExpression expression_title;
+	static {
+		XPathFactory xfactory = javax.xml.xpath.XPathFactory.newInstance();
+		XPath xpath = xfactory.newXPath();
+		try {
+			expression_host = xpath.compile("/root/dt/sh/text()");
+			expression_time = xpath.compile("/root/dt/st/text()");
+			expression_rid = xpath.compile("/root/dragdata/sgm");
+			expression_title = xpath.compile("/root/channel/@nm");
+		} catch (XPathExpressionException e) {
+			e.printStackTrace();
+		}
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see org.cateyes.core.Resolver#createVolumn(java.lang.String)
 	 */
 	public Volumn createVolumn(String uri) throws Exception {
-		// TODO Auto-generated method stub
-		return null;
+		String vid = connector.getPageRegix(uri, pattern);
+
+		return createVolumnFromVid(vid);
 	}
 
-	/* (non-Javadoc)
+	String getToken(byte[] data) {
+		StringBuilder builder = new StringBuilder();
+		for (byte b : data) {
+			builder.append(String.format("%02x", b));
+		}
+		return builder.toString();
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see org.cateyes.core.Resolver#createVolumnFromVid(java.lang.String)
 	 */
 	public Volumn createVolumnFromVid(String vid) throws Exception {
-		// TODO Auto-generated method stub
-		return null;
+		if (null == vid) {
+			return null;
+		}
+		String desc = String.format(format, vid);
+		Document doc = connector.getPageAsDoc(desc);
+		String title = expression_title.evaluate(doc, XPathConstants.STRING).toString();
+		Volumn volumn = new VolumnImpl(title, vid, Provider.PPTV);
+		int port = 8080;
+		MessageDigest degest = MessageDigest.getInstance("MD5");
+		String host = expression_host.evaluate(doc, XPathConstants.STRING).toString();
+		String st = expression_time.evaluate(doc, XPathConstants.STRING).toString();
+		st = st.replace("Wed", "Sat");
+		degest.update(st.getBytes());
+//		degest.digest();
+		NodeList rids = (NodeList) expression_rid.evaluate(doc, XPathConstants.NODESET);
+//		String urlFormat = "http://%s:%s/%s/%s?key=%s";
+		String urlFormat = "http://pptv.vod.lxdns.com/%s/%s?key=%s";
+		String key = getToken(degest.digest());
+		for (int i = 0; i < rids.getLength(); i++) {
+			Node node = rids.item(i);
+			String rid = node.getAttributes().getNamedItem("rid").getNodeValue();
+			String no = node.getAttributes().getNamedItem("no").getNodeValue();
+			String url  = String.format(urlFormat,no,rid+".mp4",key);
+//			long size = Long.par//incorrect//TODO fix it
+			volumn.addUrl(url, -1);
+		}
+
+		return volumn;
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see org.cateyes.core.AbstractResolver#getRegexStrings()
 	 */
 	@Override
 	protected String[] getRegexStrings() {
-		// TODO Auto-generated method stub
-		return null;
+		return new String[] { "v.pptv.com" };
 	}
 
 }

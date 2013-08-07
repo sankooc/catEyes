@@ -103,7 +103,7 @@ public class VolumnImpl implements Volumn {
 							String suf = ".";
 							if ("video/x-flv".equals(info.getType())) {
 								suf += "flv";
-							} else if ("video/f4v".equals(info.getType())){
+							} else if (info.getType().startsWith("video/f4v")){
 								suf += "flv";
 							}else if ("video/mp4".equals(info.getType())) {
 								suf += "mp4";

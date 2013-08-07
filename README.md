@@ -18,7 +18,7 @@ Use and distribution of licensed under the Apache license. See the [LICENSE](htt
 * ifeng available
 * sohu available
 * iqiyi available
-
+* tencent available
 * 56 available
 * leshi available
 * yinyuetai available

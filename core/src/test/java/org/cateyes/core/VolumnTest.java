@@ -39,13 +39,13 @@ public class VolumnTest {
 			Assert.assertFalse(set.isEmpty());
 			for (String uri : set.keySet()) {
 				long size = set.get(uri);
+				VideoInfo info = connector.getVideoInfo(uri);
+				long ret  = info.getSize();
+				System.out.println(info.getType());
 				if(size <1){
 					continue;
 				}
 //				long ret = connector.getResourceLength(uri);
-				VideoInfo info = connector.getVideoInfo(uri);
-				long ret  = info.getSize();
-				System.out.println(info.getType());
 				// System.out.println(size + ":" + ret + " =" + (size == ret));
 				Assert.assertEquals(ret, size);
 			}
@@ -81,14 +81,14 @@ public class VolumnTest {
 		test(resolver, uri);
 	}
 
-//	@Test
+	@Test
 	public void testTencent() {
 		String uri = "http://v.qq.com/cover/q/qk8vyb5drwnn174.html";
 		Resolver resolver = new TencentResolver();
 		test(resolver, uri);
 	}
 
-	@Test
+//	@Test
 	public void testPps() {
 		String uri = "http://v.pps.tv/play_36ASVO.html#from_www";
 		Resolver resolver = new PPSResolver();

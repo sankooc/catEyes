@@ -20,6 +20,7 @@ import org.cateyes.core.entity.VolumnFactory;
 import org.cateyes.core.feng.FengResolver;
 import org.cateyes.core.ku6.Ku6Resolver;
 import org.cateyes.core.lesh.LeshResolver;
+import org.cateyes.core.pps.PPSResolver;
 import org.cateyes.core.wuliu.WulResolver;
 import org.cateyes.core.yyt.YinyuetaiResolver;
 import org.junit.Test;
@@ -108,7 +109,15 @@ public class Demo {
 		String uri = "http://v.ku6.com/show/Gahx_fVJ5bFGzG3eD1cLDw...html";
 		download(uri,"target/ku6");
 	}
+	
 	@Test
+	public void testPps() {
+		String uri = "http://v.pps.tv/play_36ASVO.html#from_www";
+		download(uri,"target/pps");
+	}
+	
+	
+//	@Test
 	public void testYyt() {
 		String uri = "http://www.yinyuetai.com/video/731011";
 		download(uri,"target/yyt");
