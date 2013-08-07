@@ -3,9 +3,8 @@
 Cat eyes is a stream media downloader include youku,tudou
 
 ## Quick Start
-Install Git
-Install JAVA
-Install Maven
+
+* [Tutorial](https://github.com/sankooc/catEyes/wiki/Tutorial)
 
 ## License
 
