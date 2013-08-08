@@ -2,8 +2,8 @@ package org.cateyes.core;
 
 import java.io.File;
 
-import org.cateyes.core.entity.Volumn;
-import org.cateyes.core.entity.VolumnFactory;
+import org.cateyes.core.volumn.Volumn;
+import org.cateyes.core.volumn.VolumnFactory;
 
 public class Main {
 

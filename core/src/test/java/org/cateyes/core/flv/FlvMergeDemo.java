@@ -4,7 +4,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 
-import org.cateyes.core.util.CommonUtils;
+import org.cateyes.core.flv.util.CommonUtils;
 import org.junit.Test;
 
 public class FlvMergeDemo {

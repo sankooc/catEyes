@@ -14,9 +14,9 @@ import java.util.Set;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 
-import org.cateyes.core.ApacheConnector;
 import org.cateyes.core.VideoConstants.VideoType;
-import org.cateyes.core.entity.Volumn;
+import org.cateyes.core.conn.ApacheConnector;
+import org.cateyes.core.volumn.Volumn;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

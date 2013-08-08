@@ -4,7 +4,7 @@ import java.util.regex.Matcher;
 
 import junit.framework.Assert;
 
-import org.cateyes.core.pps.PPSResolver;
+import org.cateyes.core.resolver.pps.PPSResolver;
 import org.junit.Test;
 
 public class RegexTest {

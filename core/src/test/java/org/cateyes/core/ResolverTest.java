@@ -7,9 +7,12 @@ import java.util.Map;
 
 import junit.framework.Assert;
 
-import org.cateyes.core.entity.Volumn;
-import org.cateyes.core.feng.FengResolver;
-import org.cateyes.core.pptv.PPTVResolver;
+import org.cateyes.core.conn.ApacheConnector;
+import org.cateyes.core.conn.ConnectorProvider;
+import org.cateyes.core.resolver.Resolver;
+import org.cateyes.core.resolver.feng.FengResolver;
+import org.cateyes.core.resolver.pptv.PPTVResolver;
+import org.cateyes.core.volumn.Volumn;
 import org.junit.Test;
 
 /**

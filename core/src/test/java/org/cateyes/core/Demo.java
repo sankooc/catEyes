@@ -4,25 +4,9 @@
 package org.cateyes.core;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.net.URI;
 
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpUriRequest;
-import org.cateyes.core.VideoConstants.VideoType;
-import org.cateyes.core.cntv.CntvResolver;
-import org.cateyes.core.deprecated.YoukuResolver;
-import org.cateyes.core.entity.Volumn;
-import org.cateyes.core.entity.VolumnFactory;
-import org.cateyes.core.feng.FengResolver;
-import org.cateyes.core.ku6.Ku6Resolver;
-import org.cateyes.core.lesh.LeshResolver;
-import org.cateyes.core.pps.PPSResolver;
-import org.cateyes.core.wuliu.WulResolver;
-import org.cateyes.core.yyt.YinyuetaiResolver;
+import org.cateyes.core.volumn.Volumn;
+import org.cateyes.core.volumn.VolumnFactory;
 import org.junit.Test;
 
 /**

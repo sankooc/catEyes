@@ -3,6 +3,7 @@
  */
 package org.cateyes.core;
 
+import org.cateyes.core.conn.MResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

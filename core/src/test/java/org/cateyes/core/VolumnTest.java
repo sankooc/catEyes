@@ -5,23 +5,26 @@ import java.util.Map;
 
 import junit.framework.Assert;
 
-import org.cateyes.core.ApacheConnector.VideoInfo;
-import org.cateyes.core.blibli.BlibliResolver;
-import org.cateyes.core.cntv.CntvResolver;
-import org.cateyes.core.entity.Volumn;
-import org.cateyes.core.entity.VolumnFactory;
-import org.cateyes.core.feng.FengResolver;
-import org.cateyes.core.iqiyi.IqiyiResolver;
-import org.cateyes.core.ku6.Ku6Resolver;
-import org.cateyes.core.lesh.LeshResolver;
-import org.cateyes.core.pps.PPSResolver;
-import org.cateyes.core.sina.SinaResolver;
-import org.cateyes.core.sohu.SohuResolver;
-import org.cateyes.core.tencent.TencentResolver;
-import org.cateyes.core.tudou.TudouResolver;
-import org.cateyes.core.wuliu.WulResolver;
-import org.cateyes.core.youku.YoukuResolver;
-import org.cateyes.core.yyt.YinyuetaiResolver;
+import org.cateyes.core.conn.ApacheConnector;
+import org.cateyes.core.conn.ConnectorProvider;
+import org.cateyes.core.conn.ApacheConnector.VideoInfo;
+import org.cateyes.core.resolver.Resolver;
+import org.cateyes.core.resolver.blibli.BlibliResolver;
+import org.cateyes.core.resolver.cntv.CntvResolver;
+import org.cateyes.core.resolver.feng.FengResolver;
+import org.cateyes.core.resolver.iqiyi.IqiyiResolver;
+import org.cateyes.core.resolver.ku6.Ku6Resolver;
+import org.cateyes.core.resolver.lesh.LeshResolver;
+import org.cateyes.core.resolver.pps.PPSResolver;
+import org.cateyes.core.resolver.sina.SinaResolver;
+import org.cateyes.core.resolver.sohu.SohuResolver;
+import org.cateyes.core.resolver.tencent.TencentResolver;
+import org.cateyes.core.resolver.tudou.TudouResolver;
+import org.cateyes.core.resolver.wuliu.WulResolver;
+import org.cateyes.core.resolver.youku.YoukuResolver;
+import org.cateyes.core.resolver.yyt.YinyuetaiResolver;
+import org.cateyes.core.volumn.Volumn;
+import org.cateyes.core.volumn.VolumnFactory;
 import org.junit.Test;
 
 public class VolumnTest {
