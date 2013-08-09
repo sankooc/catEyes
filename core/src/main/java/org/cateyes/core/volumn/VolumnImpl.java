@@ -35,12 +35,12 @@ public class VolumnImpl implements Volumn {
 
 	static Logger logger = LoggerFactory.getLogger(VolumnImpl.class);
 	Provider provider;
-	static ApacheConnector connector = ApacheConnector.getInstance();
+	transient ApacheConnector connector = ApacheConnector.getInstance();
 	
 	public final static String MULTIFIX = "%s-%02d";
 
 	public Provider getProvider() {
-		return null;
+		return provider;
 	}
 
 	public VolumnImpl() {

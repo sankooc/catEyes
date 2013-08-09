@@ -13,6 +13,8 @@ public abstract class AbstractResolver implements Resolver {
 	protected ApacheConnector connector = ConnectorProvider.getCommonConnector();
 	
 
+	protected ThreadLocal<String> threadlocal = new ThreadLocal<String>();
+	
 	//video quality
 	protected int quality =-1;
 	

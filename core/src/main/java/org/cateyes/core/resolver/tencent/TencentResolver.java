@@ -16,8 +16,6 @@
  */
 package org.cateyes.core.resolver.tencent;
 
-import java.util.HashMap;
-import java.util.Map;
 import java.util.regex.Pattern;
 
 import javax.xml.xpath.XPath;
@@ -51,9 +49,7 @@ public class TencentResolver extends AbstractResolver implements Resolver {
 			e.printStackTrace();
 		}
 	}
-
 	
-	Map<Thread,String> maps = new HashMap<Thread,String>();
 	public Volumn createVolumn(String uri) throws Exception {
 		String vid = connector.getPageRegix(uri, pattern);
 		if (null == vid) {
@@ -61,12 +57,12 @@ public class TencentResolver extends AbstractResolver implements Resolver {
 		}
 		Pattern pattern_title  =Pattern.compile("title=\"([^\"]*)\"  sv=\""+vid+"\"");
 		String title = connector.getPageRegix(uri, pattern_title);
-		maps.put(Thread.currentThread(), title);
+		threadlocal.set(title);
 		return createVolumnFromVid(vid);
 	}
 
 	public Volumn createVolumnFromVid(String vid) throws Exception {
-		String title = maps.get(Thread.currentThread());
+		String title = threadlocal.get();
 		Volumn volumn = new VolumnImpl(title,vid,Provider.TENCENT);
 		String desc = String.format(descFormat, vid);
 		Document doc = connector.getPageAsDoc(desc);

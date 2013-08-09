@@ -9,5 +9,7 @@
 		<module>core</module>
 		<module>eye.webtoon</module>
 		<module>assembly</module>
+		<module>server</module>
+		<module>local</module>
 	</modules>
 </project>

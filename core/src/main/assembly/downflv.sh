@@ -173,7 +173,6 @@ detectJVM() {
 setupDebugOptions() {
     if [ "x$JAVA_OPTS" = "x" ]; then
         JAVA_OPTS="$DEFAULT_JAVA_OPTS"
-    fi
     export JAVA_OPTS
     fi
 }
@@ -244,7 +243,7 @@ run() {
         CEYE_HOME=`cygpath --path --windows "$CEYE_HOME"`
         CLASSPATH=`cygpath --path --windows "$CLASSPATH"`
     fi
-    cd $SSHD_BASE
+    cd $CEYE_HOME
     exec $JAVA $JAVA_OPTS -Dsshd.home="$CEYE_HOME" $OPTS -classpath "$CLASSPATH" ${mainclass} "$@"
 }
 

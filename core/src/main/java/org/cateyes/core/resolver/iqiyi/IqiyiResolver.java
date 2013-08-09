@@ -52,16 +52,16 @@ public class IqiyiResolver extends AbstractResolver implements Resolver {
 		}
 	}
 
-	public String[] getResource(String uri) throws Exception {
-		String videoId = connector.doGet(uri, new ResponseHandler<String>() {
-			public String handleResponse(HttpResponse response) throws ClientProtocolException, IOException {
-				InputStream stream = response.getEntity().getContent();
-				return getVideoId(stream);
-			}
-		});
-		logger.debug("the {} videoId is {}", uri, videoId);
-		return getRealURI(videoId);
-	}
+//	public String[] getResource(String uri) throws Exception {
+//		String videoId = connector.doGet(uri, new ResponseHandler<String>() {
+//			public String handleResponse(HttpResponse response) throws ClientProtocolException, IOException {
+//				InputStream stream = response.getEntity().getContent();
+//				return getVideoId(stream);
+//			}
+//		});
+//		logger.debug("the {} videoId is {}", uri, videoId);
+//		return getRealURI(videoId);
+//	}
 
 	private static final String xmlformat = "http://cache.video.qiyi.com/v/%s";
 
@@ -104,34 +104,35 @@ public class IqiyiResolver extends AbstractResolver implements Resolver {
 	final static Logger logger = LoggerFactory.getLogger(IqiyiResolver.class);
 	final static Pattern pattern = Pattern.compile("data-player-videoid=\"([\\w]+)\"");
 
-	protected String getVideoId(InputStream stream) {
-		BufferedReader reader = new BufferedReader(new InputStreamReader(stream));
-		while (true) {
-			try {
-				String line = reader.readLine();
-				if (null == line) {
-					break;
-				}
-				Matcher matcher = pattern.matcher(line);
-				if (matcher.find()) {
-					return matcher.group(1);
-				}
-			} catch (IOException e) {
-				logger.error(e.getMessage());
-				break;
-			}
-		}
-		return null;
-	}
+//	protected String getVideoId(InputStream stream) {
+//		BufferedReader reader = new BufferedReader(new InputStreamReader(stream));
+//		while (true) {
+//			try {
+//				String line = reader.readLine();
+//				if (null == line) {
+//					break;
+//				}
+//				Matcher matcher = pattern.matcher(line);
+//				if (matcher.find()) {
+//					return matcher.group(1);
+//				}
+//			} catch (IOException e) {
+//				logger.error(e.getMessage());
+//				break;
+//			}
+//		}
+//		return null;
+//	}
 
 	public Volumn createVolumn(String uri) throws Exception {
-		String videoId = connector.doGet(uri, new ResponseHandler<String>() {
-			public String handleResponse(HttpResponse arg0) throws ClientProtocolException, IOException {
-				HttpEntity entity = arg0.getEntity();
-				InputStream stream = entity.getContent();
-				return getVideoId(stream);
-			}
-		});
+//		String videoId = connector.doGet(uri, new ResponseHandler<String>() {
+//			public String handleResponse(HttpResponse arg0) throws ClientProtocolException, IOException {
+//				HttpEntity entity = arg0.getEntity();
+//				InputStream stream = entity.getContent();
+//				return getVideoId(stream);
+//			}
+//		});
+		String videoId = connector.getPageRegix(uri, pattern);
 		logger.info("video id is {}", videoId);
 		if (null == videoId) {
 			return null;

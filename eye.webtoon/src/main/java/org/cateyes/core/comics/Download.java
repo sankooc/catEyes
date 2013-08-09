@@ -22,7 +22,7 @@ import java.util.StringTokenizer;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 
-import org.cateyes.core.ApacheConnector;
+import org.cateyes.core.conn.ApacheConnector;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
@@ -244,7 +244,7 @@ public class Download {
 
 	// @Test
 	public void commons() {
-		ApacheConnector connetor = new ApacheConnector();
+		ApacheConnector connetor = ApacheConnector.getInstance();
 		int pInx = 1;
 		int inx = 1;
 		File dir = new File("d:/mong");
@@ -263,10 +263,9 @@ public class Download {
 				if ("img".equalsIgnoreCase(ele.tagName())) {
 					String imgSrc = ele.attr("src");
 					String prefix = imgSrc.substring(imgSrc.lastIndexOf("."));
-					URI uri = URI.create(imgSrc);
 					File temp = new File(dir, "lights-" + (inx++) + prefix);
 					try {
-						connetor.download(uri, temp, null);
+						connetor.download(imgSrc,-1l, temp, null);
 					} catch (Exception e) {
 						e.printStackTrace();
 					}

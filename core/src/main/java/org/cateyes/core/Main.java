@@ -11,7 +11,6 @@ public class Main {
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		System.out.println("flv downloading");
 		if (null == args || args.length < 2) {
 			useage();
 		} else {
@@ -30,11 +29,10 @@ public class Main {
 				e.printStackTrace();
 			}
 		}
-
 	}
 
 	static void useage() {
-		System.out.println("command error /r downflv  [video url]  [store folder]");
+		System.out.println("command error! /r downflv  [video url]  [store folder]");
 	}
 
 }

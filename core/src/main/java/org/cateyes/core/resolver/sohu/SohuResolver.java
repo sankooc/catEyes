@@ -21,8 +21,6 @@ import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 
 import org.cateyes.core.VideoConstants.Provider;
-import org.cateyes.core.conn.ApacheConnector;
-import org.cateyes.core.conn.ConnectorProvider;
 import org.cateyes.core.resolver.AbstractResolver;
 import org.cateyes.core.resolver.Resolver;
 import org.cateyes.core.volumn.Volumn;

@@ -45,7 +45,6 @@ public class YoukuResolver extends AbstractResolver implements Resolver {
 
 		String title = data.getString("title");
 		VolumnImpl volumn = new VolumnImpl(title, vid, Provider.YOUKU);
-//		volumn.setSuffix("flv");
 		addUrlAndSize(data, volumn);
 		return volumn;
 

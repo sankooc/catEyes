@@ -13,8 +13,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import javax.net.ssl.SSLHandshakeException;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.xpath.XPathConstants;
@@ -32,8 +30,8 @@ import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpRequestRetryHandler;
 import org.apache.http.client.ResponseHandler;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.client.methods.HttpUriRequest;
-import org.apache.http.conn.ConnectionPoolTimeoutException;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.impl.conn.PoolingClientConnectionManager;
 import org.apache.http.params.BasicHttpParams;
@@ -41,7 +39,6 @@ import org.apache.http.params.CoreConnectionPNames;
 import org.apache.http.params.HttpParams;
 import org.apache.http.protocol.HttpContext;
 import org.apache.http.util.EntityUtils;
-import org.cateyes.core.Adaptor;
 import org.cateyes.core.flv.util.CommonUtils;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -105,15 +102,10 @@ public class ApacheConnector implements HttpConnector {
 		client = new DefaultHttpClient(cm, params);
 
 		HttpRequestRetryHandler retryHandler = new HttpRequestRetryHandler() {
-			public boolean retryRequest(IOException exception, int executionCount, HttpContext context) {
+			public boolean retryRequest(IOException exception,
+					int executionCount, HttpContext context) {
 				if (executionCount >= 5) {
 					// 超过重试次数
-					return false;
-				}
-				if (exception instanceof ConnectionPoolTimeoutException) {
-					return false;
-				}
-				if (exception instanceof SSLHandshakeException) {
 					return false;
 				}
 				return true;
@@ -125,7 +117,9 @@ public class ApacheConnector implements HttpConnector {
 
 	protected void swap(HttpMessage request) {
 		// request.addHeader("Accept","text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8");
-		request.addHeader("User-Agent", "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/27.0.1453.94 Safari/537.36");
+		request.addHeader(
+				"User-Agent",
+				"Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/27.0.1453.94 Safari/537.36");
 		// request.addHeader("User-Agent",
 		// "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_8_4) AppleWebKit/537.22 (KHTML, like Gecko) Chrome/25.0.1364.172 Safari/537.22");
 		// request.addHeader("Accept-Encoding","gzip,deflate,sdch");
@@ -136,11 +130,14 @@ public class ApacheConnector implements HttpConnector {
 
 	}
 
-	public String getPageRegix(String uri, final Pattern pattern) throws Exception {
+	public String getPageRegix(String uri, final Pattern pattern)
+			throws Exception {
 		ResponseHandler<String> handler = new ResponseHandler<String>() {
-			public String handleResponse(HttpResponse response) throws ClientProtocolException, IOException {
+			public String handleResponse(HttpResponse response)
+					throws ClientProtocolException, IOException {
 				InputStream stream = response.getEntity().getContent();
-				BufferedReader reader = new BufferedReader(new InputStreamReader(stream));
+				BufferedReader reader = new BufferedReader(
+						new InputStreamReader(stream));
 				while (true) {
 					try {
 						String line = reader.readLine();
@@ -162,12 +159,15 @@ public class ApacheConnector implements HttpConnector {
 		return doGet(uri, handler);
 	}
 
-	public String getPageXpath(String uri, final XPathExpression expression) throws Exception {
+	public String getPageXpath(String uri, final XPathExpression expression)
+			throws Exception {
 		ResponseHandler<String> handler = new ResponseHandler<String>() {
-			public String handleResponse(HttpResponse response) throws ClientProtocolException, IOException {
+			public String handleResponse(HttpResponse response)
+					throws ClientProtocolException, IOException {
 				InputStream stream = response.getEntity().getContent();
 				try {
-					return (String) expression.evaluate(new InputSource(stream), XPathConstants.STRING);
+					return (String) expression.evaluate(
+							new InputSource(stream), XPathConstants.STRING);
 				} catch (XPathExpressionException e) {
 					logger.error(e.getMessage(), e);
 				}
@@ -180,7 +180,8 @@ public class ApacheConnector implements HttpConnector {
 
 	public JSONObject getPageAsJson(String uri) throws Exception {
 		ResponseHandler<JSONObject> handler = new ResponseHandler<JSONObject>() {
-			public JSONObject handleResponse(HttpResponse response) throws ClientProtocolException, IOException {
+			public JSONObject handleResponse(HttpResponse response)
+					throws ClientProtocolException, IOException {
 				InputStream stream = response.getEntity().getContent();
 				String content = IOUtils.toString(stream);
 				return JSONObject.fromObject(content);
@@ -191,8 +192,7 @@ public class ApacheConnector implements HttpConnector {
 	}
 
 	public VideoInfo getVideoInfo(String uri) throws Exception {
-		HttpUriRequest request = new HttpGet(uri);
-		swap(request);
+		HttpRequestBase request = createRequest(uri);
 		HttpEntity entity = null;
 		try {
 			HttpResponse response = client.execute(request);
@@ -218,36 +218,23 @@ public class ApacheConnector implements HttpConnector {
 			}
 		}
 		return null;
-		// return doGet(uri, new ResponseHandler<VideoInfo>() {
-		// public VideoInfo handleResponse(HttpResponse response)
-		// throws ClientProtocolException, IOException {
-		// if (response.getStatusLine().getStatusCode() != 200) {
-		// logger.error("error response");
-		// return null;
-		// }
-		// String type = response.getHeaders("Content-Type")[0].getValue();
-		// String length = response.getHeaders("Content-Length")[0]
-		// .getValue();
-		// return new VideoInfo(Long.parseLong(length), type);
-		// }
-		// });
 	}
 
 	public org.w3c.dom.Document getPageAsDoc(String addr) throws Exception {
 		ResponseHandler<org.w3c.dom.Document> handler = new ResponseHandler<org.w3c.dom.Document>() {
-			public org.w3c.dom.Document handleResponse(HttpResponse response) throws ClientProtocolException, IOException {
+			public org.w3c.dom.Document handleResponse(HttpResponse response)
+					throws ClientProtocolException, IOException {
 				HttpEntity entity = response.getEntity();
 				try {
 					InputStream stream = entity.getContent();
-					DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-					// Turn on validation, and turn off namespaces
+					DocumentBuilderFactory factory = DocumentBuilderFactory
+							.newInstance();
 					factory.setValidating(false);
 					factory.setNamespaceAware(false);
 					DocumentBuilder builder = factory.newDocumentBuilder();
 					return builder.parse(stream);
 				} catch (Exception e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+					logger.error(e.getMessage(),e);
 				} finally {
 					EntityUtils.consume(entity);
 				}
@@ -257,21 +244,38 @@ public class ApacheConnector implements HttpConnector {
 		return doGet(addr, handler);
 	}
 
-	public byte[] doGet(String uri) {
+	HttpRequestBase createRequest(String uri) {
 		HttpGet request = new HttpGet(uri);
+		swap(request);
+		return request;
+	}
+
+	void consume(HttpResponse response) {
+		if (null != response) {
+			HttpEntity entity = response.getEntity();
+			try {
+				EntityUtils.consume(entity);
+			} catch (IOException e) {
+				logger.error(e.getMessage(), e);
+			}
+		}
+	}
+
+	public byte[] doGet(String uri) {
+		HttpRequestBase request = createRequest(uri);
+		HttpResponse response = null;
 		try {
-			swap(request);
-			HttpResponse response = client.execute(request);
+			response = client.execute(request);
 			HttpEntity entity = response.getEntity();
 			if (null != entity) {
 				ByteArrayOutputStream baos = new ByteArrayOutputStream();
 				IOUtils.copy(entity.getContent(), baos);
-				request.abort();
-				EntityUtils.consume(entity);
 				return baos.toByteArray();
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
+		} finally {
+			consume(response);
 		}
 		return null;
 	}
@@ -292,7 +296,8 @@ public class ApacheConnector implements HttpConnector {
 		HttpEntity entity = response.getEntity();
 		try {
 			if (null != entity) {
-				Document document = Jsoup.parse(entity.getContent(), "UTF-8", uri.toString());
+				Document document = Jsoup.parse(entity.getContent(), "UTF-8",
+						uri.toString());
 				return document;
 			}
 		} catch (Exception e) {
@@ -307,7 +312,8 @@ public class ApacheConnector implements HttpConnector {
 		return null;
 	}
 
-	public void download(final String uri, final long contentSize, File file, MResource adaptor) throws Exception {
+	public void download(final String uri, final long contentSize, File file,
+			MResource adaptor) throws Exception {
 		long size = 0;
 		OutputStream out = null;
 		file.getParentFile().mkdirs();
@@ -327,13 +333,13 @@ public class ApacheConnector implements HttpConnector {
 			return;
 		}
 		for (Header head : headers) {
-			logger.info("header key [{}]  value [{}]", head.getName(), head.getValue());
+			logger.info("header key [{}]  value [{}]", head.getName(),
+					head.getValue());
 		}
 	}
 
 	public long getResourceLength(String uri) {
-		HttpUriRequest request = new HttpGet(uri);
-		swap(request);
+		HttpRequestBase request = createRequest(uri);
 		HttpEntity entity = null;
 		try {
 			HttpResponse response = client.execute(request);
@@ -359,20 +365,17 @@ public class ApacheConnector implements HttpConnector {
 		return 0;
 	}
 
-	public void download(final String uri, OutputStream out, final long contentSize, long size, MResource control) throws Exception {
+	public void download(final String uri, OutputStream out,
+			final long contentSize, long size, MResource control)
+			throws Exception {
 		long totalLenth = contentSize;
 		if (contentSize < 1) {
 			totalLenth = getResourceLength(uri);
 		}
-		// check suffix video/x-flv video/mp4
 		logger.info("content length {}", totalLenth);
 		if (totalLenth == 0) {
 			throw new RuntimeException("no resource");
 		}
-//		MResource control = null;
-//		if (null != adaptor) {
-//			control = adaptor.getAdaptor(MResource.class);
-//		}
 		if (null == control) {
 			control = ConsoleOuputer.getInstance().createConsoler("");
 		}
@@ -385,10 +388,8 @@ public class ApacheConnector implements HttpConnector {
 			control.finish();
 			return;
 		}
-		HttpGet request = new HttpGet(uri);
-		swap(request);
+		HttpRequestBase request = createRequest(uri);
 		HttpResponse response = null;
-		HttpEntity entity = null;
 
 		try {
 			if (size < 1) {
@@ -399,19 +400,15 @@ public class ApacheConnector implements HttpConnector {
 			}
 			control.start();
 			response = client.execute(request);
-			entity = response.getEntity();
+			HttpEntity entity = response.getEntity();
 			logger.info("headlength {} ", entity.getContentLength());
 			if (null != entity) {
 				CommonUtils.copyStream(entity.getContent(), out, control);
 			}
 		} catch (Exception e) {
-			e.printStackTrace();
+			logger.error(e.getMessage(), e);
 		} finally {
-			try {
-				EntityUtils.consume(entity);
-				request.abort();
-			} catch (Exception e) {
-			}
+			consume(response);
 		}
 		control.finish();
 
@@ -425,11 +422,13 @@ public class ApacheConnector implements HttpConnector {
 		try {
 			HttpResponse response = client.execute(request);
 			if (logger.isDebugEnabled()) {
-				logger.debug("response code {}", response.getStatusLine().getStatusCode());
+				logger.debug("response code {}", response.getStatusLine()
+						.getStatusCode());
 				Header[] headers = response.getAllHeaders();
 				if (null != headers && headers.length != 0) {
 					for (Header head : headers) {
-						logger.info("response headers key[{}] - value[{}]", head.getName(), head.getValue());
+						logger.info("response headers key[{}] - value[{}]",
+								head.getName(), head.getValue());
 					}
 				}
 			}
@@ -445,9 +444,9 @@ public class ApacheConnector implements HttpConnector {
 		}
 	}
 
-	public <T> T doGet(final String uri, final ResponseHandler<T> hander) throws Exception {
-		HttpGet request = new HttpGet(uri);
-		swap(request);
+	public <T> T doGet(final String uri, final ResponseHandler<T> hander)
+			throws Exception {
+		HttpRequestBase request = createRequest(uri);
 		return client.execute(request, hander);
 	}
 }

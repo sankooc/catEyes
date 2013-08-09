@@ -7,6 +7,7 @@ import org.cateyes.core.resolver.Resolver;
 import org.cateyes.core.resolver.acfun.AcfunResolver;
 import org.cateyes.core.resolver.cntv.CntvResolver;
 import org.cateyes.core.resolver.feng.FengResolver;
+import org.cateyes.core.resolver.gametrailers.GTResolver;
 import org.cateyes.core.resolver.iqiyi.IqiyiResolver;
 import org.cateyes.core.resolver.ku6.Ku6Resolver;
 import org.cateyes.core.resolver.lesh.LeshResolver;
@@ -59,6 +60,7 @@ public class VolumnFactory {
 		
 		rList.add(new YinyuetaiResolver());
 		rList.add(new Ku6Resolver());
+		rList.add(new GTResolver());
 	}
 
 	public static Volumn createVolumn(String uri) throws Exception {
