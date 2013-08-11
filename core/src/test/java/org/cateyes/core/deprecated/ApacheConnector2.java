@@ -33,7 +33,6 @@ import org.apache.http.params.CoreConnectionPNames;
 import org.apache.http.params.HttpParams;
 import org.apache.http.protocol.HttpContext;
 import org.apache.http.util.EntityUtils;
-import org.cateyes.core.Adaptor;
 import org.cateyes.core.conn.MResource;
 import org.cateyes.core.flv.util.CommonUtils;
 import org.jsoup.Jsoup;
@@ -244,105 +243,105 @@ public class ApacheConnector2 {
 		}
 	};
 
-	public void download(final URI uri, File file, Adaptor adaptor)
-			throws Exception {
-		long size = 0;
-		OutputStream out = null;
-		file.getParentFile().mkdirs();
-		if (file.exists()) {
-			size = file.length();
-			out = new FileOutputStream(file, true);
-		} else {
-			out = new FileOutputStream(file);
-		}
-		download(uri, out, size, adaptor);
-		out.close();
-	}
-
-	public void download(final URI uri, OutputStream out, long size,
-			Adaptor adaptor) throws Exception {
-		long totalLenth = 0;
-
-		MResource control = null;
-		if (null != adaptor) {
-			control = adaptor.getAdaptor(MResource.class);
-		}
-		if (null == control) {
-			control = cont;
-		}
-		control.init();
-		long begin = System.currentTimeMillis();
-		HttpUriRequest request = new HttpGet(uri);
-		HttpResponse response = client.execute(request);
-		HttpEntity entity = response.getEntity();
-		if (null != entity) {
-			totalLenth = entity.getContentLength();
-			control.setLength(totalLenth);
-			EntityUtils.consume(entity);
-			logger.info("target resource length {}", totalLenth);
-		}
-		request.abort();
-		long end = System.currentTimeMillis();
-
-		logger.info("spend time {}", (end - begin));
-		if (totalLenth == 0) {
-			control.error("no resource");
-			throw new RuntimeException("no resource");
-		}
-
-		if (totalLenth == size) {
-			logger.info("downloaded");
-			control.finish();
-			return;
-		}
-		control.start();
-		request = new HttpGet(uri);
-		if (size < 1) {
-			// control.setPercent(0);
-			control.setContent(0);
-			response = client.execute(request);
-			if (logger.isDebugEnabled()) {
-				logger.debug("response code {}", response.getStatusLine()
-						.getStatusCode());
-				Header[] headers = response.getAllHeaders();
-				if (null != headers && headers.length != 0) {
-					for (Header head : headers) {
-						logger.info("response headers key[{}] - value[{}]",
-								head.getName(), head.getValue());
-					}
-				}
-			}
-			entity = response.getEntity();
-			if (null != entity) {
-				CommonUtils.copyStream(entity.getContent(), out, control);
-				EntityUtils.consume(entity);
-			}
-			request.abort();
-		} else {
-			control.setContent(size);
-			request.addHeader("Range", "bytes=" + size + "-");
-			response = client.execute(request);
-			if (logger.isDebugEnabled()) {
-				logger.debug("response code {}", response.getStatusLine()
-						.getStatusCode());
-				Header[] headers = response.getAllHeaders();
-				if (null != headers && headers.length != 0) {
-					for (Header head : headers) {
-						logger.info("response headers key[{}] - value[{}]",
-								head.getName(), head.getValue());
-					}
-				}
-			}
-			entity = response.getEntity();
-			logger.info("headlength {} ", entity.getContentLength());
-			if (null != entity) {
-				CommonUtils.copyStream(entity.getContent(), out, control);
-				EntityUtils.consume(entity);
-			}
-			request.abort();
-		}
-		control.finish();
-	}
+//	public void download(final URI uri, File file, Adaptor adaptor)
+//			throws Exception {
+//		long size = 0;
+//		OutputStream out = null;
+//		file.getParentFile().mkdirs();
+//		if (file.exists()) {
+//			size = file.length();
+//			out = new FileOutputStream(file, true);
+//		} else {
+//			out = new FileOutputStream(file);
+//		}
+//		download(uri, out, size, adaptor);
+//		out.close();
+//	}
+//
+//	public void download(final URI uri, OutputStream out, long size,
+//			Adaptor adaptor) throws Exception {
+//		long totalLenth = 0;
+//
+//		MResource control = null;
+//		if (null != adaptor) {
+//			control = adaptor.getAdaptor(MResource.class);
+//		}
+//		if (null == control) {
+//			control = cont;
+//		}
+//		control.init();
+//		long begin = System.currentTimeMillis();
+//		HttpUriRequest request = new HttpGet(uri);
+//		HttpResponse response = client.execute(request);
+//		HttpEntity entity = response.getEntity();
+//		if (null != entity) {
+//			totalLenth = entity.getContentLength();
+//			control.setLength(totalLenth);
+//			EntityUtils.consume(entity);
+//			logger.info("target resource length {}", totalLenth);
+//		}
+//		request.abort();
+//		long end = System.currentTimeMillis();
+//
+//		logger.info("spend time {}", (end - begin));
+//		if (totalLenth == 0) {
+//			control.error("no resource");
+//			throw new RuntimeException("no resource");
+//		}
+//
+//		if (totalLenth == size) {
+//			logger.info("downloaded");
+//			control.finish();
+//			return;
+//		}
+//		control.start();
+//		request = new HttpGet(uri);
+//		if (size < 1) {
+//			// control.setPercent(0);
+//			control.setContent(0);
+//			response = client.execute(request);
+//			if (logger.isDebugEnabled()) {
+//				logger.debug("response code {}", response.getStatusLine()
+//						.getStatusCode());
+//				Header[] headers = response.getAllHeaders();
+//				if (null != headers && headers.length != 0) {
+//					for (Header head : headers) {
+//						logger.info("response headers key[{}] - value[{}]",
+//								head.getName(), head.getValue());
+//					}
+//				}
+//			}
+//			entity = response.getEntity();
+//			if (null != entity) {
+//				CommonUtils.copyStream(entity.getContent(), out, control);
+//				EntityUtils.consume(entity);
+//			}
+//			request.abort();
+//		} else {
+//			control.setContent(size);
+//			request.addHeader("Range", "bytes=" + size + "-");
+//			response = client.execute(request);
+//			if (logger.isDebugEnabled()) {
+//				logger.debug("response code {}", response.getStatusLine()
+//						.getStatusCode());
+//				Header[] headers = response.getAllHeaders();
+//				if (null != headers && headers.length != 0) {
+//					for (Header head : headers) {
+//						logger.info("response headers key[{}] - value[{}]",
+//								head.getName(), head.getValue());
+//					}
+//				}
+//			}
+//			entity = response.getEntity();
+//			logger.info("headlength {} ", entity.getContentLength());
+//			if (null != entity) {
+//				CommonUtils.copyStream(entity.getContent(), out, control);
+//				EntityUtils.consume(entity);
+//			}
+//			request.abort();
+//		}
+//		control.finish();
+//	}
 
 	public void download(final HttpUriRequest request, OutputStream out) {
 		HttpEntity entity;

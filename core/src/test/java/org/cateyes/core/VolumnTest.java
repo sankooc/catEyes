@@ -40,15 +40,15 @@ public class VolumnTest {
 					Assert.assertTrue(resolver.isPrefer(url));
 					Volumn volumn = resolver.createVolumn(url);
 					Assert.assertNotNull(volumn);
-					System.out.println("-------"+volumn.getProvider()+" testing-------");
+					System.out.println("-------" + volumn.getProvider() + " testing-------");
 					Assert.assertNotNull(volumn.getTitle());
-					System.out.println("title is :"+volumn.getTitle());
+					System.out.println("title is :" + volumn.getTitle());
 					Map<String, Long> set = volumn.getUrlSet();
 					Assert.assertFalse(set.isEmpty());
 					for (String uri : set.keySet()) {
 						VideoInfo info = connector.getVideoInfo(uri);
-						System.out.println("uri:"+uri);
-						System.out.println("video fragment size:"+info.getSize()+" type:"+info.getType());
+						System.out.println("uri:" + uri);
+						System.out.println("video fragment size:" + info.getSize() + " type:" + info.getType());
 					}
 					return;
 				}
@@ -56,28 +56,35 @@ public class VolumnTest {
 			Assert.fail("add resolver to factory");
 		} catch (Exception e) {
 			e.printStackTrace();
-		    Assert.fail(e.getMessage());
+			Assert.fail(e.getMessage());
 		}
 	}
 
-	 @Test
-	public void testYyt() {
-		String uri = "http://www.yinyuetai.com/video/731011";
-		Resolver resolver = new YinyuetaiResolver();
+	@Test
+	public void testKu6() {
+		String uri = "http://v.ku6.com/show/Gahx_fVJ5bFGzG3eD1cLDw...html";
+		Resolver resolver = new Ku6Resolver();
 		test(resolver, uri);
 	}
 
-	 @Test
+	@Test
 	public void testCntv() {
-		String uri = "http://tv.cntv.cn/vodplay/56fb13e1e624474584a95be530234841/860010-1105010100";
+		String uri = "http://tv.cntv.cn/video/C39683/7ea80f4b17d7400ba216827e599fdc7f";
 		Resolver resolver = new CntvResolver();
 		test(resolver, uri);
 	}
 
 	// @Test
-	public void testKu6() {
-		String uri = "http://v.ku6.com/show/Gahx_fVJ5bFGzG3eD1cLDw...html";
-		Resolver resolver = new Ku6Resolver();
+	public void testiqiyi() {
+		String uri = "http://www.iqiyi.com/dongman/20120416/77770ccdf98f2322.html";
+		Resolver resolver = new IqiyiResolver();
+		test(resolver, uri);
+	}
+
+	@Test
+	public void testYyt() {
+		String uri = "http://www.yinyuetai.com/video/731011";
+		Resolver resolver = new YinyuetaiResolver();
 		test(resolver, uri);
 	}
 
@@ -89,28 +96,28 @@ public class VolumnTest {
 
 	}
 
-	 @Test
+	@Test
 	public void testTencent() {
 		String uri = "http://v.qq.com/cover/q/qk8vyb5drwnn174.html";
 		Resolver resolver = new TencentResolver();
 		test(resolver, uri);
 	}
 
-//	 @Test
+	// @Test
 	public void testPps() {
 		String uri = "http://v.pps.tv/play_36ASVO.html#from_www";
 		Resolver resolver = new PPSResolver();
 		test(resolver, uri);
 	}
 
-	 @Test
+	@Test
 	public void testLeshi() {
 		String uri = "http://www.letv.com/ptv/vplay/2074193.html";
 		Resolver resolver = new LeshResolver();
 		test(resolver, uri);
 	}
 
-	 @Test
+	@Test
 	public void test56() {
 		String uri = "http://www.56.com/u69/v_ODg5MTIzNTQ.html";
 		Resolver resolver = new WulResolver();
@@ -118,35 +125,28 @@ public class VolumnTest {
 
 	}
 
-	 @Test
+	@Test
 	public void testIFeng() {
 		String uri = "http://v.ifeng.com/mil/arms/201308/09e7f40c-c591-46e8-8df0-3f926043e7e9.shtml";
 		Resolver resolver = new FengResolver();
 		test(resolver, uri);
 	}
 
-	 @Test
+	@Test
 	public void testyouku() {
 		String uri = "http://v.youku.com/v_show/id_XNTQ2OTc0OTAw.html";
 		Resolver resolver = new YoukuResolver();
 		test(resolver, uri);
 	}
 
-//	 @Test
+	// @Test
 	public void testtudou() {
 		String uri = "http://www.tudou.com/listplay/8Jr659zJxA4/Dyhg3Ucl1mQ.html";
 		Resolver resolver = new TudouResolver();
 		test(resolver, uri);
 	}
 
-//	 @Test
-	public void testiqiyi() {
-		String uri = "http://www.iqiyi.com/dongman/20120416/77770ccdf98f2322.html";
-		Resolver resolver = new IqiyiResolver();
-		test(resolver, uri);
-	}
-
-	 @Test
+	@Test
 	public void testsohu() {// TODO
 		String uri = "http://tv.sohu.com/20120726/n349111647.shtml";
 		Resolver resolver = new SohuResolver();

@@ -1,10 +1,7 @@
 package org.cateyes.core.resolver.iqiyi;
 
-import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import javax.xml.xpath.XPath;
@@ -15,7 +12,6 @@ import javax.xml.xpath.XPathFactory;
 
 import net.sf.json.JSONObject;
 
-import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.ResponseHandler;
@@ -30,9 +26,11 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
+
 /**
  * 
  * application/octet-stream must set suffix
+ * 
  * @author sankooc
  */
 public class IqiyiResolver extends AbstractResolver implements Resolver {
@@ -52,18 +50,8 @@ public class IqiyiResolver extends AbstractResolver implements Resolver {
 		}
 	}
 
-//	public String[] getResource(String uri) throws Exception {
-//		String videoId = connector.doGet(uri, new ResponseHandler<String>() {
-//			public String handleResponse(HttpResponse response) throws ClientProtocolException, IOException {
-//				InputStream stream = response.getEntity().getContent();
-//				return getVideoId(stream);
-//			}
-//		});
-//		logger.debug("the {} videoId is {}", uri, videoId);
-//		return getRealURI(videoId);
-//	}
-
-	private static final String xmlformat = "http://cache.video.qiyi.com/v/%s";
+//	private static final String xmlformat = "http://cache.video.qiyi.com/v/%s";
+	private static final String xmlformat = "http://cache.video.qiyi.com/vd/%s";
 
 	private final static int mask = 0x96283bc0;
 
@@ -103,41 +91,14 @@ public class IqiyiResolver extends AbstractResolver implements Resolver {
 
 	final static Logger logger = LoggerFactory.getLogger(IqiyiResolver.class);
 	final static Pattern pattern = Pattern.compile("data-player-videoid=\"([\\w]+)\"");
-
-//	protected String getVideoId(InputStream stream) {
-//		BufferedReader reader = new BufferedReader(new InputStreamReader(stream));
-//		while (true) {
-//			try {
-//				String line = reader.readLine();
-//				if (null == line) {
-//					break;
-//				}
-//				Matcher matcher = pattern.matcher(line);
-//				if (matcher.find()) {
-//					return matcher.group(1);
-//				}
-//			} catch (IOException e) {
-//				logger.error(e.getMessage());
-//				break;
-//			}
-//		}
-//		return null;
-//	}
+	final static Pattern pattern2 = Pattern.compile("data-player-tvid=\"([\\w]+)\"");
 
 	public Volumn createVolumn(String uri) throws Exception {
-//		String videoId = connector.doGet(uri, new ResponseHandler<String>() {
-//			public String handleResponse(HttpResponse arg0) throws ClientProtocolException, IOException {
-//				HttpEntity entity = arg0.getEntity();
-//				InputStream stream = entity.getContent();
-//				return getVideoId(stream);
-//			}
-//		});
 		String videoId = connector.getPageRegix(uri, pattern);
-		logger.info("video id is {}", videoId);
-		if (null == videoId) {
-			return null;
-		}
-		return createVolumnFromVid(videoId);
+		String tvId = connector.getPageRegix(uri, pattern2);
+		String vid =  tvId + "/"+videoId + "/";
+		logger.info("video id is {} tvid {}", videoId, tvId);
+		return createVolumnFromVid(vid);
 	}
 
 	@Override
@@ -148,6 +109,20 @@ public class IqiyiResolver extends AbstractResolver implements Resolver {
 	public Volumn createVolumnFromVid(String vid) throws Exception {
 		String desc = String.format(xmlformat, vid);
 		logger.info(desc);
+//		JSONObject objdata  = connector.getPageAsJson(desc);
+//		JSONArray array = objdata.getJSONArray("tkl");
+//		array = array.getJSONObject(0).getJSONArray("vs");
+//		objdata = array.getJSONObject(0);
+//		String mv = objdata.getString("mu");
+//		JSONArray fss = objdata.getJSONArray("fs");
+//		JSONObject fs = fss.getJSONObject(0);
+//		String url = fs.getString("l");
+//		String fformat= "http://data.video.qiyi.com/%s/videos%s";
+//		String newUrl = String.format(fformat, suffix(),url);
+		
+		
+		
+		
 		Document doc = connector.getPageAsDoc(desc);
 		String title = (String) expression2.evaluate(doc, XPathConstants.STRING);
 		logger.info("video title {}", title);
