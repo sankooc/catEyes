@@ -36,7 +36,7 @@ public class VolumnImpl implements Volumn {
 	static Logger logger = LoggerFactory.getLogger(VolumnImpl.class);
 	Provider provider;
 	transient ApacheConnector connector = ApacheConnector.getInstance();
-	
+
 	public final static String MULTIFIX = "%s-%02d";
 
 	public Provider getProvider() {
@@ -51,6 +51,10 @@ public class VolumnImpl implements Volumn {
 		this.title = title;
 		this.orginal = orginal;
 		this.provider = provider;
+	}
+
+	public void addUrl(String url) {
+		addUrl(url, -1);
 	}
 
 	public void addUrl(String url, long size) {
@@ -98,30 +102,34 @@ public class VolumnImpl implements Volumn {
 			service.execute(new Runnable() {
 				public void run() {
 					try {
-						Thread.sleep(500);//tudou need delay
+						Thread.sleep(500);// tudou need delay
 						VideoInfo info = connector.getVideoInfo(uri);
 						if (null == info) {
-							connector.download(uri, size, new File(dir, fileName + "." + suffix), null);
+							connector.download(uri, size, new File(dir,
+									fileName + "." + suffix), null);
 						} else {
 							String contentType = info.getType();
 							String suf = ".";
-							if(null != contentType){
+							if (null != contentType) {
 								if (contentType.contains("video/x-flv")) {
 									suf += "flv";
-								} else if (contentType.contains("video/f4v")){
+								} else if (contentType.contains("video/f4v")) {
 									suf += "flv";
 								} else if (contentType.contains("video/mp4")) {
 									suf += "mp4";
-								} else if (contentType.contains("application/octet-stream")) {
+								} else if (contentType
+										.contains("application/octet-stream")) {
 									suf += suffix;
 								} else {
 									suf += suffix;
 								}
-							}else{
+							} else {
 								suf += suffix;
 							}
-							MResource resource = ConsoleOuputer.getInstance().createConsoler(fileName);
-							connector.download(uri, info.getSize(), new File(dir, fileName + suf), resource);
+							MResource resource = ConsoleOuputer.getInstance()
+									.createConsoler(fileName);
+							connector.download(uri, info.getSize(), new File(
+									dir, fileName + suf), resource);
 						}
 					} catch (Exception e) {
 						logger.error(e.getMessage(), e);

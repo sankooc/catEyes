@@ -22,6 +22,11 @@ import java.util.regex.Pattern;
 import org.cateyes.core.conn.ApacheConnector;
 import org.cateyes.core.conn.ConnectorProvider;
 
+/**
+ * 尽量使用易被模型取代的编程方案 
+ * 使用xpath,正则表达式,jsonpath(https://code.google.com/p/json-path/)等 避免在代码中出现过多的逻辑
+ * @author sankooc
+ */
 public abstract class AbstractResolver implements Resolver {
 
 	abstract protected String[] getRegexStrings();

@@ -29,15 +29,21 @@ import org.cateyes.core.volumn.VolumnImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.jayway.jsonpath.JsonPath;
+
 /**
  * @author sankooc
  */
 public class Ku6Resolver extends AbstractResolver implements Resolver {
 
-	static final Pattern pattern = Pattern.compile("/([^/]+).html");
+	protected static final Pattern pattern = Pattern.compile("/([^/]+).html");
 
-	static final String format = "http://v.ku6.com/fetchVideo4Player/%s.html";
-	static Logger logger = LoggerFactory.getLogger(Ku6Resolver.class);
+	protected static final String format = "http://v.ku6.com/fetchVideo4Player/%s.html";
+	protected static final Logger logger = LoggerFactory.getLogger(Ku6Resolver.class);
+	
+	protected static final JsonPath jpath_title = JsonPath.compile("$.data.t");
+	protected static final JsonPath jpath_url = JsonPath.compile("$.data.f");
+	protected static final JsonPath jpath_size = JsonPath.compile("$.data.videosize");
 
 	/*
 	 * (non-Javadoc)
@@ -64,11 +70,11 @@ public class Ku6Resolver extends AbstractResolver implements Resolver {
 	public Volumn createVolumnFromVid(String vid) throws Exception {
 		String desc = String.format(format, vid);
 		JSONObject data = connector.getPageAsJson(desc);
-		JSONObject obj = data.getJSONObject("data");
-		String url = obj.getString("f");
-		String title = obj.getString("t");
+		String url = jpath_url.read(data);
+		String title = jpath_title.read(data);
+		String size =  jpath_size.read(data);
+		
 		Volumn volumn = new VolumnImpl(title,vid,Provider.KU6);
-		String size = obj.getString("videosize");
 		volumn.addUrl(url, Long.parseLong(size));
 		return volumn;
 	}

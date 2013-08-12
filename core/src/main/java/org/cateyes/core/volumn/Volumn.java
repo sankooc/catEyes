@@ -15,6 +15,8 @@ public interface Volumn {
 	void write(File dir) throws Exception;
 
 	void addUrl(String url, long size);
+	
+	void addUrl(String url);
 
 	String getTitle();
 	

@@ -40,7 +40,8 @@ public class VolumnTest {
 					Assert.assertTrue(resolver.isPrefer(url));
 					Volumn volumn = resolver.createVolumn(url);
 					Assert.assertNotNull(volumn);
-					System.out.println("-------" + volumn.getProvider() + " testing-------");
+					System.out.println("-------" + volumn.getProvider()
+							+ " testing-------");
 					Assert.assertNotNull(volumn.getTitle());
 					System.out.println("title is :" + volumn.getTitle());
 					Map<String, Long> set = volumn.getUrlSet();
@@ -48,7 +49,8 @@ public class VolumnTest {
 					for (String uri : set.keySet()) {
 						VideoInfo info = connector.getVideoInfo(uri);
 						System.out.println("uri:" + uri);
-						System.out.println("video fragment size:" + info.getSize() + " type:" + info.getType());
+						System.out.println("video fragment size:"
+								+ info.getSize() + " type:" + info.getType());
 					}
 					return;
 				}
@@ -58,6 +60,27 @@ public class VolumnTest {
 			e.printStackTrace();
 			Assert.fail(e.getMessage());
 		}
+	}
+
+	// @Test
+	public void testPps() {
+		String uri = "http://v.pps.tv/play_36ASVO.html#from_www";
+		Resolver resolver = new PPSResolver();
+		test(resolver, uri);
+	}
+
+	@Test
+	public void test56() {
+		String uri = "http://www.56.com/u69/v_ODg5MTIzNTQ.html";
+		Resolver resolver = new WulResolver();
+		test(resolver, uri);
+	}
+	
+	@Test
+	public void testLeshi() {
+		String uri = "http://www.letv.com/ptv/vplay/2074193.html";
+		Resolver resolver = new LeshResolver();
+		test(resolver, uri);
 	}
 
 	@Test
@@ -101,28 +124,6 @@ public class VolumnTest {
 		String uri = "http://v.qq.com/cover/q/qk8vyb5drwnn174.html";
 		Resolver resolver = new TencentResolver();
 		test(resolver, uri);
-	}
-
-	// @Test
-	public void testPps() {
-		String uri = "http://v.pps.tv/play_36ASVO.html#from_www";
-		Resolver resolver = new PPSResolver();
-		test(resolver, uri);
-	}
-
-	@Test
-	public void testLeshi() {
-		String uri = "http://www.letv.com/ptv/vplay/2074193.html";
-		Resolver resolver = new LeshResolver();
-		test(resolver, uri);
-	}
-
-	@Test
-	public void test56() {
-		String uri = "http://www.56.com/u69/v_ODg5MTIzNTQ.html";
-		Resolver resolver = new WulResolver();
-		test(resolver, uri);
-
 	}
 
 	@Test

@@ -27,6 +27,8 @@ import org.cateyes.core.resolver.Resolver;
 import org.cateyes.core.volumn.Volumn;
 import org.cateyes.core.volumn.VolumnImpl;
 
+import com.jayway.jsonpath.JsonPath;
+
 /**
  * @author sankooc
  */
@@ -37,7 +39,7 @@ public class GTResolver extends AbstractResolver implements Resolver {
 	Pattern pattern_title = Pattern
 			.compile("/([^/]+)$");
 	String format = "http://www.gametrailers.com/feeds/video_download/%s";
-	
+	protected static final JsonPath japth_url = JsonPath.compile("$.url");
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -67,7 +69,7 @@ public class GTResolver extends AbstractResolver implements Resolver {
 		Volumn volumn = new VolumnImpl(title,vid,Provider.GT);
 		String desc = String.format(format, vid);
 		JSONObject obj = connector.getPageAsJson(desc);
-		String url = obj.getString("url");
+		String url = japth_url.read(obj);
 		volumn.addUrl(url, -1);
 		return volumn;
 	}

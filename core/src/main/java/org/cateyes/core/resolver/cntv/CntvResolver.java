@@ -16,7 +16,6 @@
  */
 package org.cateyes.core.resolver.cntv;
 
-import java.awt.RenderingHints.Key;
 import java.util.Iterator;
 import java.util.regex.Pattern;
 
@@ -29,6 +28,8 @@ import org.cateyes.core.resolver.Resolver;
 import org.cateyes.core.volumn.Volumn;
 import org.cateyes.core.volumn.VolumnImpl;
 
+import com.jayway.jsonpath.JsonPath;
+
 /**
  * @author sankooc
  */
@@ -38,6 +39,10 @@ public class CntvResolver extends AbstractResolver implements Resolver {
 			.compile("\"videoCenterId\",\"([^\"]+)\"");
 	public final static String format = "http://vdn.apps.cntv.cn/api/getHttpVideoInfo.do?pid=%s";
 
+	protected static final JsonPath jpath_title = JsonPath.compile("$.title");
+	protected static final JsonPath jpath_url = JsonPath.compile("$.video[1].chapter.");
+	
+	
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -59,7 +64,8 @@ public class CntvResolver extends AbstractResolver implements Resolver {
 	public Volumn createVolumnFromVid(String vid) throws Exception {
 		String desc = String.format(format, vid);
 		JSONObject data = connector.getPageAsJson(desc);
-		String title = data.getString("title");
+		String title = jpath_title.read(data);
+		
 		VolumnImpl volumn = new VolumnImpl(title, vid, Provider.CNTV);
 		JSONObject video = data.getJSONObject("video");
 		JSONArray chapters = select(video);

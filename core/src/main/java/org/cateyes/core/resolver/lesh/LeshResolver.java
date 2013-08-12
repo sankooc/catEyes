@@ -1,6 +1,7 @@
 package org.cateyes.core.resolver.lesh;
 
 import java.io.ByteArrayInputStream;
+import java.util.List;
 import java.util.regex.Pattern;
 
 import javax.xml.parsers.DocumentBuilder;
@@ -21,6 +22,8 @@ import org.cateyes.core.volumn.Volumn;
 import org.cateyes.core.volumn.VolumnImpl;
 import org.w3c.dom.Document;
 import org.xml.sax.InputSource;
+
+import com.jayway.jsonpath.JsonPath;
 /**
  * @author sankooc
  */
@@ -28,9 +31,12 @@ public class LeshResolver extends AbstractResolver implements Resolver {
 
 	Pattern pattern = Pattern.compile("  vid:(\\d+),");
 	String format = "http://app.letv.com/v.php?id=%s";
-
-	static XPathExpression expression_json;
-	static XPathExpression expression_title;
+	
+	protected static final JsonPath japth_url1 = JsonPath.compile("$.bean.video[*].url");
+	protected static final JsonPath japth_url2 = JsonPath.compile("$.location");
+	
+	protected static XPathExpression expression_json;
+	protected static XPathExpression expression_title;
 	static {
 		XPathFactory xfactory = javax.xml.xpath.XPathFactory.newInstance();
 		XPath xpath = xfactory.newXPath();
@@ -64,14 +70,20 @@ public class LeshResolver extends AbstractResolver implements Resolver {
 		String title = expression_title.evaluate(doc, XPathConstants.STRING).toString();
 		Volumn volumn = new VolumnImpl(title, vid, Provider.LESH);
 		String jsonContent = expression_json.evaluate(doc, XPathConstants.STRING).toString();
-		JSONObject json = JSONObject.fromObject(jsonContent);
-		JSONArray jsonarry = json.getJSONObject("bean").getJSONArray("video");
-		for (int i = 0; i < jsonarry.size(); i++) {
-			JSONObject obj = jsonarry.getJSONObject(i);
-			String url = obj.getString("url");
-			obj = connector.getPageAsJson(url);
-			volumn.addUrl(obj.getString("location"), -1);
+//		JSONObject json = JSONObject.fromObject(jsonContent);
+		List<String> urls1 = japth_url1.read(jsonContent);
+		for(String u1 : urls1){
+			JSONObject obj = connector.getPageAsJson(u1);
+			String url = japth_url2.read(obj);
+			volumn.addUrl(url, -1);
 		}
+//		JSONArray jsonarry = json.getJSONObject("bean").getJSONArray("video");
+//		for (int i = 0; i < jsonarry.size(); i++) {
+//			JSONObject obj = jsonarry.getJSONObject(i);
+//			String url = obj.getString("url");
+//			obj = connector.getPageAsJson(url);
+//			volumn.addUrl(obj.getString("location"), -1);
+//		}
 		return volumn;
 	}
 

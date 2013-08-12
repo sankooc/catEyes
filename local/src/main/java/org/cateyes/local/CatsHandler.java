@@ -31,11 +31,15 @@ import org.jboss.netty.handler.codec.http.HttpResponse;
 public class CatsHandler extends SimpleChannelUpstreamHandler {
 
 	static byte[] inx;
+	static String format;
 	static {
 		InputStream stream = CatsHandler.class.getClassLoader()
 				.getResourceAsStream("index.html");
+		InputStream stream2 = CatsHandler.class.getClassLoader()
+				.getResourceAsStream("content.html");
 		try {
 			inx = IOUtils.toByteArray(stream);
+			format = IOUtils.toString(stream2);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -62,23 +66,38 @@ public class CatsHandler extends SimpleChannelUpstreamHandler {
 		writeResponse(e, request);
 	}
 
+	static String trFormat = "<tr><td><a href=\"%s\">%s</a></td></tr>";
+
 	private void writeResponse(MessageEvent e, HttpRequest request, String url) {
-		HttpResponse response = new DefaultHttpResponse(HTTP_1_1, OK);
-		response.setContent(ChannelBuffers.copiedBuffer(inx));
 		try {
-			Volumn volum = VolumnFactory.createVolumn(url);
-			JSONObject object = JSONObject.fromObject(volum);
-			String content = object.toString();
-			response.setContent(ChannelBuffers.copiedBuffer(content,Charset.forName("UTF-8")));
-			response.setHeader(CONTENT_TYPE, "text/json;charset=utf-8");
-			response.setHeader(CONTENT_LENGTH, response.getContent()
-					.readableBytes());
+			Volumn volumn = VolumnFactory.createVolumn(url);
+			if (null != volumn) {
+				StringBuilder builder = new StringBuilder();
+				int inx = 1;
+				for (String source : volumn.getUrlSet().keySet()) {
+					builder.append(String.format(trFormat, source, "fragment-"
+							+ inx++));
+				}
+				String content = String.format(format, volumn.getProvider()
+						.name().toLowerCase(), volumn.getTitle(),builder.toString());
+				HttpResponse response = new DefaultHttpResponse(HTTP_1_1, OK);
+				try {
+					response.setContent(ChannelBuffers.copiedBuffer(content,
+							Charset.forName("UTF-8")));
+					response.setHeader(CONTENT_TYPE, "text/html;charset=utf-8");
+					response.setHeader(CONTENT_LENGTH, response.getContent()
+							.readableBytes());
+				} catch (Exception e1) {
+					e1.printStackTrace();
+				}
+				ChannelFuture future = e.getChannel().write(response);
+				future.addListener(ChannelFutureListener.CLOSE);
+				return;
+			}
 		} catch (Exception e1) {
 			e1.printStackTrace();
 		}
-		ChannelFuture future = e.getChannel().write(response);
-		future.addListener(ChannelFutureListener.CLOSE);
-
+		writeResponse(e, request);
 	}
 
 	private void writeResponse(MessageEvent e, HttpRequest request) {
