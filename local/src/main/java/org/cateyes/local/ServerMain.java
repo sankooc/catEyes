@@ -15,16 +15,12 @@ public class ServerMain {
     }
 
     public void run() {
-        // Configure the server.
         ServerBootstrap bootstrap = new ServerBootstrap(
                 new NioServerSocketChannelFactory(
                         Executors.newCachedThreadPool(),
                         Executors.newCachedThreadPool()));
-
-        // Set up the event pipeline factory.
         bootstrap.setPipelineFactory(new ServerPipelineFactory());
-
-        // Bind and start to accept incoming connections.
+        System.out.println("binding port : "+port);
         bootstrap.bind(new InetSocketAddress(port));
     }
 

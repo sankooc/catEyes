@@ -6,13 +6,10 @@ import static org.jboss.netty.handler.codec.http.HttpVersion.*;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URL;
 import java.net.URLDecoder;
 import java.nio.charset.Charset;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import net.sf.json.JSONObject;
 
 import org.apache.commons.io.IOUtils;
 import org.cateyes.core.volumn.Volumn;
@@ -33,10 +30,8 @@ public class CatsHandler extends SimpleChannelUpstreamHandler {
 	static byte[] inx;
 	static String format;
 	static {
-		InputStream stream = CatsHandler.class.getClassLoader()
-				.getResourceAsStream("index.html");
-		InputStream stream2 = CatsHandler.class.getClassLoader()
-				.getResourceAsStream("content.html");
+		InputStream stream = CatsHandler.class.getClassLoader().getResourceAsStream("index.html");
+		InputStream stream2 = CatsHandler.class.getClassLoader().getResourceAsStream("content.html");
 		try {
 			inx = IOUtils.toByteArray(stream);
 			format = IOUtils.toString(stream2);
@@ -46,12 +41,15 @@ public class CatsHandler extends SimpleChannelUpstreamHandler {
 	}
 
 	@Override
-	public void messageReceived(ChannelHandlerContext ctx, MessageEvent e)
-			throws Exception {
+	public void messageReceived(ChannelHandlerContext ctx, MessageEvent e) throws Exception {
 		HttpRequest request = (HttpRequest) e.getMessage();
 		String[] tokens = request.getUri().split("\\?");
 		if (tokens.length > 1) {
 			String path = tokens[0];
+			if (!"/cateyes".equals(path)) {
+				writeResponse(e, request);
+				return;
+			}
 			String que = tokens[1];
 			que = URLDecoder.decode(que);
 			Pattern pattern = Pattern.compile("target=([^&]+)");
@@ -75,18 +73,14 @@ public class CatsHandler extends SimpleChannelUpstreamHandler {
 				StringBuilder builder = new StringBuilder();
 				int inx = 1;
 				for (String source : volumn.getUrlSet().keySet()) {
-					builder.append(String.format(trFormat, source, "fragment-"
-							+ inx++));
+					builder.append(String.format(trFormat, source, "fragment-" + inx++));
 				}
-				String content = String.format(format, volumn.getProvider()
-						.name().toLowerCase(), volumn.getTitle(),builder.toString());
+				String content = String.format(format, volumn.getProvider().name().toLowerCase(), volumn.getTitle(), builder.toString());
 				HttpResponse response = new DefaultHttpResponse(HTTP_1_1, OK);
 				try {
-					response.setContent(ChannelBuffers.copiedBuffer(content,
-							Charset.forName("UTF-8")));
+					response.setContent(ChannelBuffers.copiedBuffer(content, Charset.forName("UTF-8")));
 					response.setHeader(CONTENT_TYPE, "text/html;charset=utf-8");
-					response.setHeader(CONTENT_LENGTH, response.getContent()
-							.readableBytes());
+					response.setHeader(CONTENT_LENGTH, response.getContent().readableBytes());
 				} catch (Exception e1) {
 					e1.printStackTrace();
 				}
@@ -104,16 +98,14 @@ public class CatsHandler extends SimpleChannelUpstreamHandler {
 		HttpResponse response = new DefaultHttpResponse(HTTP_1_1, OK);
 		response.setContent(ChannelBuffers.copiedBuffer(inx));
 		response.setHeader(CONTENT_TYPE, "text/html;charset=utf-8");
-		response.setHeader(CONTENT_LENGTH, response.getContent()
-				.readableBytes());
+		response.setHeader(CONTENT_LENGTH, response.getContent().readableBytes());
 		ChannelFuture future = e.getChannel().write(response);
 		future.addListener(ChannelFutureListener.CLOSE);
 
 	}
 
 	@Override
-	public void exceptionCaught(ChannelHandlerContext ctx, ExceptionEvent e)
-			throws Exception {
+	public void exceptionCaught(ChannelHandlerContext ctx, ExceptionEvent e) throws Exception {
 		e.getCause().printStackTrace();
 		e.getChannel().close();
 	}

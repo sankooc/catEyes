@@ -1,6 +1,23 @@
 <!DOCTYPE html>
 <html>
 <head>
+<style type="text/css">
+input#target {
+	float: center;
+	width: 400px;
+	height:23px
+}
+
+input#btn {
+-webkit-appearance: none;
+	width:95px;
+	height:28px
+}
+div#tag{
+top:150px
+}
+
+</style>
 <meta charset="utf-8" />
 <script type="text/javascript">
 	function doAction() {
@@ -10,11 +27,11 @@
 </script>
 <title>Cateyes</title>
 </head>
-<body>
-	<div align="center" >
+<body >
+	<div align="middle" id="tag">
 		<form name="input" action="/cateyes" method="get">
 		<input type="text" width="1000" id="target" name="target"/>
-		<input type="submit" value="click to get" />
+		<input type="submit" value="click to get" id="btn"/>
 		</form>
 	</div>
 </body>
