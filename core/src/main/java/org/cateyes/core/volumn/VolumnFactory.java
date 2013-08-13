@@ -3,6 +3,7 @@ package org.cateyes.core.volumn;
 import java.util.Collection;
 import java.util.LinkedList;
 
+import org.cateyes.core.IHeader;
 import org.cateyes.core.resolver.Resolver;
 import org.cateyes.core.resolver.acfun.AcfunResolver;
 import org.cateyes.core.resolver.cntv.CntvResolver;
@@ -71,38 +72,14 @@ public class VolumnFactory {
 		}
 		return null;
 	}
-
-	// public static Volumn createVolumn(URI uri){
-	// //TODO 解析uri
-	// return null;
-	// }
-	// public static Volumn createVolumn(String uri,File file){
-	// String yid = match(youkuPattern,uri);
-	// Volumn volumn = null;
-	// if(null != yid){
-	// // JSONObject data = YoukuResolver.getData(yid);
-	// // String title = data.getString("title");
-	// // String[] uris = YoukuResolver.getRealUri(data, VideoType.FLV);
-	// // if (ArrayUtils.isEmpty(uris)) {
-	// // logger.error("cannot download {}", yid);
-	// // return null;
-	// // }
-	// // volumn = new VolumnImp(yid,file,YoukuResolver.getConnector());
-	// // volumn.setTitle(title);
-	// // volumn.setUris(uris);
-	//
-	// }
-	// return volumn;
-	// }
-	//
-	// public static String match(Collection<Pattern> patterns,String uri){
-	// for(Pattern pattern : patterns){
-	// Matcher matcher = pattern.matcher(uri);
-	// if(matcher.find()){
-	// return matcher.group(1);
-	// }
-	// }
-	// return null;
-	// }
-
+	
+	public static Volumn createVolumn(String uri,IHeader headers) throws Exception {
+		for (Resolver resovler : rList) {
+			if (resovler.isPrefer(uri)) {
+				return resovler.createVolumn(uri,headers);
+			}
+		}
+		return null;
+	}
+	
 }

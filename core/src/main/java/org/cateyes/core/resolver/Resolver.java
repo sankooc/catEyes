@@ -16,10 +16,13 @@
  */
 package org.cateyes.core.resolver;
 
+import org.cateyes.core.IHeader;
 import org.cateyes.core.volumn.Volumn;
 
 public interface Resolver {
 
+	Volumn createVolumn(String uri,IHeader headers) throws Exception;
+	
 	Volumn createVolumn(String uri) throws Exception;
 	
 	Volumn createVolumnFromVid(String vid) throws Exception;

@@ -7,7 +7,6 @@ import java.util.Map;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
-
 import org.cateyes.core.VideoConstants.Provider;
 import org.cateyes.core.conn.ApacheConnector;
 import org.cateyes.core.conn.ConsoleOuputer;
@@ -35,6 +34,7 @@ public class VolumnImpl implements Volumn {
 
 	static Logger logger = LoggerFactory.getLogger(VolumnImpl.class);
 	Provider provider;
+	Map<String, String> params;
 	transient ApacheConnector connector = ApacheConnector.getInstance();
 
 	public final static String MULTIFIX = "%s-%02d";
@@ -170,6 +170,10 @@ public class VolumnImpl implements Volumn {
 
 	public Map<String, Long> getUrlSet() {
 		return urlSet;
+	}
+
+	public Map<String, String> getParams() {
+		return params;
 	}
 
 }

@@ -19,8 +19,10 @@ package org.cateyes.core.resolver;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.cateyes.core.IHeader;
 import org.cateyes.core.conn.ApacheConnector;
 import org.cateyes.core.conn.ConnectorProvider;
+import org.cateyes.core.volumn.Volumn;
 
 /**
  * 尽量使用易被模型取代的编程方案 
@@ -51,6 +53,10 @@ public abstract class AbstractResolver implements Resolver {
 		for (int i = 0; i < regx.length; i++) {
 			patterns[i] = Pattern.compile(regx[i]);
 		}
+	}
+
+	public Volumn createVolumn(String uri, IHeader headers) throws Exception {
+		return createVolumn(uri);
 	}
 
 	public boolean isPrefer(String uri) {

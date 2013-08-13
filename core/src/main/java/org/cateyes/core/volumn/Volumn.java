@@ -3,12 +3,13 @@ package org.cateyes.core.volumn;
 import java.io.File;
 import java.util.Map;
 
+import org.cateyes.core.IHeader;
 import org.cateyes.core.VideoConstants.Provider;
 
 /**
  * @author sankooc
  */
-public interface Volumn {
+public interface Volumn extends IHeader {
 
 	 Provider getProvider();
 

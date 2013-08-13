@@ -2,21 +2,33 @@
 <html>
 <head>
 <style type="text/css">
+body{
+	background:url("bk.jpg");
+	word-break:break-all;
+	word-wrap:break-word;
+	font-size:13px;
+	margin:0;
+	padding:0;
+	color:#222222;
+	overflow:auto;
+	height:100%;
+}
 input#target {
 	float: center;
 	width: 400px;
-	height:23px
+	height: 23px
 }
 
 input#btn {
--webkit-appearance: none;
-	width:95px;
-	height:28px
-}
-div#tag{
-top:150px
+	-webkit-appearance: none;
+	width: 95px;
+	height: 28px
 }
 
+div#tag {
+	top: 180px;
+	position: relative;
+}
 </style>
 <meta charset="utf-8" />
 <script type="text/javascript">
@@ -27,11 +39,11 @@ top:150px
 </script>
 <title>Cateyes</title>
 </head>
-<body >
-	<div align="middle" id="tag">
-		<form name="input" action="/cateyes" method="get">
-		<input type="text" width="1000" id="target" name="target"/>
-		<input type="submit" value="click to get" id="btn"/>
+<body>
+	<div align="center" id="tag">
+		<form name="input" action="/cateyes" method="get" >
+			<input type="text"  id="target" name="target" /> <input
+				type="submit" value="click to get" id="btn" />
 		</form>
 	</div>
 </body>

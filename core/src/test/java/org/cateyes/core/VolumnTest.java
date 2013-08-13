@@ -62,7 +62,7 @@ public class VolumnTest {
 		}
 	}
 
-	// @Test
+	 @Test
 	public void testPps() {
 		String uri = "http://v.pps.tv/play_36ASVO.html#from_www";
 		Resolver resolver = new PPSResolver();
@@ -140,9 +140,9 @@ public class VolumnTest {
 		test(resolver, uri);
 	}
 
-	// @Test
+	 @Test
 	public void testtudou() {
-		String uri = "http://www.tudou.com/listplay/8Jr659zJxA4/Dyhg3Ucl1mQ.html";
+		String uri = "http://www.tudou.com/programs/view/iSmn3SWNvKI/?fr=rec2";
 		Resolver resolver = new TudouResolver();
 		test(resolver, uri);
 	}
