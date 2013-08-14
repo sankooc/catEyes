@@ -24,7 +24,7 @@ Use and distribution of licensed under the Apache license. See the [LICENSE](htt
 * yinyuetai available
 * cntv available
 * ku6 available
-* gametrailers available
+* gametrailers unavailable
 
 
 

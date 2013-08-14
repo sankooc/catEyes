@@ -12,7 +12,6 @@ import javax.xml.xpath.XPathExpression;
 import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
 
-import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 
 import org.cateyes.core.VideoConstants.Provider;
@@ -70,20 +69,12 @@ public class LeshResolver extends AbstractResolver implements Resolver {
 		String title = expression_title.evaluate(doc, XPathConstants.STRING).toString();
 		Volumn volumn = new VolumnImpl(title, vid, Provider.LESH);
 		String jsonContent = expression_json.evaluate(doc, XPathConstants.STRING).toString();
-//		JSONObject json = JSONObject.fromObject(jsonContent);
 		List<String> urls1 = japth_url1.read(jsonContent);
 		for(String u1 : urls1){
 			JSONObject obj = connector.getPageAsJson(u1);
 			String url = japth_url2.read(obj);
-			volumn.addUrl(url, -1);
+			volumn.addFragment(0, url, -1);
 		}
-//		JSONArray jsonarry = json.getJSONObject("bean").getJSONArray("video");
-//		for (int i = 0; i < jsonarry.size(); i++) {
-//			JSONObject obj = jsonarry.getJSONObject(i);
-//			String url = obj.getString("url");
-//			obj = connector.getPageAsJson(url);
-//			volumn.addUrl(obj.getString("location"), -1);
-//		}
 		return volumn;
 	}
 

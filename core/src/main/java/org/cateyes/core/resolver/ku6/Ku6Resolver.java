@@ -75,7 +75,7 @@ public class Ku6Resolver extends AbstractResolver implements Resolver {
 		String size =  jpath_size.read(data);
 		
 		Volumn volumn = new VolumnImpl(title,vid,Provider.KU6);
-		volumn.addUrl(url, Long.parseLong(size));
+		volumn.addFragment(0, url, Long.parseLong(size));
 		return volumn;
 	}
 

@@ -108,7 +108,7 @@ public class PPTVResolver extends AbstractResolver implements Resolver {
 			String no = node.getAttributes().getNamedItem("no").getNodeValue();
 			String url  = String.format(urlFormat,no,rid+".mp4",key);
 //			long size = Long.par//incorrect//TODO fix it
-			volumn.addUrl(url, -1);
+			volumn.addFragment(0, url, -1);
 		}
 
 		return volumn;

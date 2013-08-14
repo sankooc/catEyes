@@ -70,7 +70,7 @@ public class TencentResolver extends AbstractResolver implements Resolver {
 				.toString();
 		long size = Long.parseLong(expression_size.evaluate(doc,
 				XPathConstants.STRING).toString());
-		volumn.addUrl(url, size);
+		volumn.addFragment(0, url, size);
 		return volumn;
 	}
 

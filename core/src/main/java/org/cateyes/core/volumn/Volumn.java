@@ -1,7 +1,7 @@
 package org.cateyes.core.volumn;
 
 import java.io.File;
-import java.util.Map;
+import java.util.Collection;
 
 import org.cateyes.core.IHeader;
 import org.cateyes.core.VideoConstants.Provider;
@@ -11,18 +11,24 @@ import org.cateyes.core.VideoConstants.Provider;
  */
 public interface Volumn extends IHeader {
 
-	 Provider getProvider();
+	Provider getProvider();
 
-	void write(File dir) throws Exception;
-
-	void addUrl(String url, long size);
+	void addFragment(int quality, String suffix, String url);
 	
-	void addUrl(String url);
+	void addFragment(int quality, String suffix, String url, long size);
+	
+	void addFragment(int quality, String url, long size);
+	
+	void writeLowQuality(File dir) throws Exception;
 
+	void write(File dir,int quality) throws Exception;
+	
+	void writeHighQuality(File dir) throws Exception;
+
+	int getQualityCount();
+	
+	Collection<String> getFragmentURL(int quality);
+	
 	String getTitle();
-	
-	Map<String, Long> getUrlSet();
-	
-	void setSuffix(String suffix);
 
 }

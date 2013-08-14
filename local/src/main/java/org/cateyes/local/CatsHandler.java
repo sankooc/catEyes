@@ -72,8 +72,8 @@ public class CatsHandler extends SimpleChannelUpstreamHandler {
 			if (null != volumn) {
 				StringBuilder builder = new StringBuilder();
 				int inx = 1;
-				for (String source : volumn.getUrlSet().keySet()) {
-					builder.append(String.format(trFormat, source, "fragment-" + inx++));
+				for (String source : volumn.getFragmentURL(0)) {
+					builder.append(String.format(trFormat, source, volumn.getTitle()+"-" + inx++));
 				}
 				String content = String.format(format, volumn.getProvider().name().toLowerCase(), volumn.getTitle(), builder.toString());
 				HttpResponse response = new DefaultHttpResponse(HTTP_1_1, OK);

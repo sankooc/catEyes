@@ -57,7 +57,7 @@ public class PPSResolver extends AbstractResolver implements Resolver {
 		if (matcher.find()) {
 			String title = matcher.group(1);
 			Volumn volumn = new VolumnImpl(title, vid, Provider.PPS);
-			volumn.addUrl(uri, -1);
+			volumn.addFragment(0, uri, -1);
 			return volumn;
 		} else {
 			logger.error("no title be found");

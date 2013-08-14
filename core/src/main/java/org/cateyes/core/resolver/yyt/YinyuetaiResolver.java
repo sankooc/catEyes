@@ -17,8 +17,8 @@ public class YinyuetaiResolver extends AbstractResolver implements Resolver {
 	static String format = "http://www.yinyuetai.com/video/%s";
 
 	public Volumn createVolumn(String uri) throws Exception {
-		Matcher matcher =  pattern_vid.matcher(uri);
-		return matcher.find() ? createVolumnFromVid(matcher.group(1)) :  null;
+		Matcher matcher = pattern_vid.matcher(uri);
+		return matcher.find() ? createVolumnFromVid(matcher.group(1)) : null;
 	}
 
 	public Volumn createVolumnFromVid(String vid) throws Exception {
@@ -26,10 +26,11 @@ public class YinyuetaiResolver extends AbstractResolver implements Resolver {
 		String title = connector.getPageRegix(desc, pattern_titile);
 		VolumnImpl volumn = new VolumnImpl(title, vid, Provider.YYT);
 		String url = connector.getPageRegix(desc, pattern_url);
-		volumn.addUrl(url, -1);
+		String suffix = "flv";
 		if (url.contains(".mp4")) {
-			volumn.setSuffix("mp4");
+			suffix = "mp4";
 		}
+		volumn.addFragment(0, suffix, url);
 		return volumn;
 	}
 

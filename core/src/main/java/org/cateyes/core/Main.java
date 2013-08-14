@@ -24,7 +24,7 @@ public class Main {
 			}
 			try {
 				Volumn volum = VolumnFactory.createVolumn(uri);
-				volum.write(target);
+				volum.writeLowQuality(target);
 			} catch (Exception e) {
 				e.printStackTrace();
 			}

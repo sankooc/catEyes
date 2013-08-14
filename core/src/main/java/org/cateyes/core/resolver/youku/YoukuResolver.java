@@ -1,5 +1,6 @@
 package org.cateyes.core.resolver.youku;
 
+import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
@@ -15,6 +16,9 @@ import org.cateyes.core.volumn.Volumn;
 import org.cateyes.core.volumn.VolumnImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.jayway.jsonpath.JsonPath;
+
 /**
  * @author sankooc
  */
@@ -35,43 +39,60 @@ public class YoukuResolver extends AbstractResolver implements Resolver {
 	private static final String REAL_FORMAT = "http://f.youku.com/player/getFlvPath/sid/%s_%s/st/%s/fileid/%s%s%s?K=%s&ts=%s";
 	private static String TOKEN = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ/\\:._-1234567890";
 	private static Random counter = new Random();
-	private static String TYPE = "flv";
+	// private static String TYPE = "flv";
 
+	protected static final JsonPath jpath_title = JsonPath
+			.compile("$.data[0].title");
+	protected static final JsonPath jpath_seed = JsonPath
+			.compile("$.data[0].seed");
+	protected static final JsonPath jpath_type = JsonPath
+			.compile("$.data[0].streamtypes");
+	
 	public Volumn createVolumnFromVid(String vid) throws Exception {
 		String desc = String.format(YOUKU_LIST, vid);
 		JSONObject metadata = connector.getPageAsJson(desc);
 
-		JSONObject data = metadata.getJSONArray("data").getJSONObject(0);
-
-		String title = data.getString("title");
+		String title = jpath_title.read(metadata);
 		VolumnImpl volumn = new VolumnImpl(title, vid, Provider.YOUKU);
-		addUrlAndSize(data, volumn);
+
+		Integer seed = jpath_seed.read(metadata);
+
+		Collection<String> types = jpath_type.read(metadata);
+		if (types.contains("flv")) {
+			addFlv(volumn, metadata, seed, "flv", 0);
+			logger.info("add flv fragment");
+		}
+		if (types.contains("mp4")) {
+			addFlv(volumn, metadata, seed, "mp4", 1);
+			logger.info("add mp4 fragment");
+		}
+//		if(types.contains("hd2")){
+//			addFlv(volumn, metadata, seed, "hd2", 2);
+//		}
 		return volumn;
 
 	}
 
-	public void addUrlAndSize(JSONObject data, Volumn volumn) {
-		int seed = getSeed(data);
+	public void addFlv(Volumn volumn, JSONObject metadata, int seed,
+			String type, int quality) {
 		char[] maxStr = getMixString(seed);
-		JSONObject sf = data.getJSONObject("streamfileids");
-		// JSONObject sizes = data.getJSONObject("streamsizes");
-		String token = (String) sf.get(TYPE);
+		JsonPath jpath_seg_flv = JsonPath.compile("$.data[0].streamfileids."
+				+ type);
+		String token = jpath_seg_flv.read(metadata);
 		String[] vid = token.split("\\*");
 		String vv = getVid(maxStr, vid);
-		final JSONObject segs = data.getJSONObject("segs");
-		JSONArray flvSegs = segs.getJSONArray(TYPE);
+		JsonPath jpath_seg = JsonPath.compile("$.data[0].segs." + type);
+		JSONArray flvSegs = jpath_seg.read(metadata);
 		for (int i = 0; i < flvSegs.size(); i++) {
 			JSONObject fragment = flvSegs.getJSONObject(i);
-			String numSt = fragment.getString("no");
-			String sizeStr = fragment.getString("size");
-			int in = Integer.parseInt(numSt);
-			long size = Long.parseLong(sizeStr);
+			int in = fragment.getInt("no");
+			long size = fragment.getLong("size");
 			String no = String.format("%02x", in);
 			String urlString = String.format(REAL_FORMAT, getSerialId(), no,
-					TYPE, vv.substring(0, 8), no.toUpperCase(),
+					type, vv.substring(0, 8), no.toUpperCase(),
 					vv.substring(10), fragment.get("k"),
 					fragment.get("seconds"));
-			volumn.addUrl(urlString, size);
+			volumn.addFragment(quality, type, urlString, size);
 		}
 	}
 

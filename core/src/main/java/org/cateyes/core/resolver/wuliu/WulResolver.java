@@ -42,15 +42,15 @@ public class WulResolver extends AbstractResolver implements Resolver {
 
 		String title = jpath_title.read(data);
 		Volumn volumn = new VolumnImpl(title, vid, Provider.WULIU);
-
-		String type = types[jpath_type.read(data)];
+		Integer inx = jpath_type.read(data);
+		String type = types[inx];
 		
 		JsonPath japth_fs = JsonPath.compile("$.info.rfiles[?(@.type == '"
 				+ type + "')].url");
 
 		List<String> array = japth_fs.read(data);
 		for (String url : array) {
-			volumn.addUrl(url);
+			volumn.addFragment(0, "flv", url);
 		}
 		return volumn;
 	}

@@ -140,7 +140,7 @@ public class IqiyiResolver extends AbstractResolver implements Resolver {
 			newURL += suffix();
 			byte[] data = connector.doGet(newURL);
 			JSONObject obj = JSONObject.fromObject(new String(data));
-			volumn.addUrl(obj.getString("l"), size);
+			volumn.addFragment(0, obj.getString("l"),size);
 		}
 		return volumn;
 	}

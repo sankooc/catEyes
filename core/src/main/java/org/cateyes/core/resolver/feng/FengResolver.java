@@ -79,10 +79,11 @@ public class FengResolver extends AbstractResolver implements Resolver {
 		String uri = expression_url.evaluate(doc, XPathConstants.STRING)
 				.toString();
 		Volumn volumn = new VolumnImpl(title, vid, Provider.FENG);
+		String suffix ="flv";
 		if (uri.endsWith(".mp4")) {
-			volumn.setSuffix("mp4");
+			suffix = "mp4";
 		}
-		volumn.addUrl(uri, -1);
+		volumn.addFragment(0, suffix, uri);
 		return volumn;
 	}
 

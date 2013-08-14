@@ -66,7 +66,7 @@ public class SohuResolver extends AbstractResolver implements Resolver {
 		String rot = data.getString("prot");
 		data = data.getJSONObject("data");
 		String title = data.getString("tvName");
-		JSONArray clipsSize = data.getJSONArray("clipsBytes");
+//		JSONArray clipsSize = data.getJSONArray("clipsBytes");
 		JSONArray clipsURLS = data.getJSONArray("clipsURL");
 		JSONArray suffixs = data.getJSONArray("su");
 		VolumnImpl volumn = new VolumnImpl(title, vid, Provider.SOHO);
@@ -81,9 +81,8 @@ public class SohuResolver extends AbstractResolver implements Resolver {
 			String url = String.format(urlFormat2,
 					tokens[0].substring(0, tokens[0].length() - 1),
 					suffixs.getString(i), tokens[3]);
-			int size = clipsSize.getInt(i);
-			volumn.addUrl(url, size - 13);// 为什么 少13字节
-			volumn.setSuffix(suffix);
+			volumn.addFragment(0, suffix, url);
+//			int size = clipsSize.getInt(i);
 		}
 		return volumn;
 	}

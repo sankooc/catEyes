@@ -40,46 +40,55 @@ public class VolumnFactory {
 
 	static {
 		rList = new LinkedList<Resolver>();
-		
+
 		rList.add(new TudouResolver());
 		rList.add(new IqiyiResolver());
 		rList.add(new SohuResolver());
 		rList.add(new YoukuResolver());
 		rList.add(new FengResolver());
-		
+
 		rList.add(new LeshResolver());
 		rList.add(new WulResolver());
 		rList.add(new YoutubeResolver());
 		rList.add(new AcfunResolver());
 		rList.add(new CntvResolver());
-		
+
 		rList.add(new PPSResolver());
 		rList.add(new PPTVResolver());
 		rList.add(new SinaResolver());
 		rList.add(new TencentResolver());
 		rList.add(new XLkkResolver());
-		
+
 		rList.add(new YinyuetaiResolver());
 		rList.add(new Ku6Resolver());
 		rList.add(new GTResolver());
 	}
 
+	public static Resolver getResolver(String uri) {
+		for (Resolver resovler : rList) {
+			if (resovler.isPrefer(uri)) {
+				return resovler;
+			}
+		}
+		return null;
+	}
+
 	public static Volumn createVolumn(String uri) throws Exception {
+		Resolver resolver = getResolver(uri);
+		if (null != resolver) {
+			return resolver.createVolumn(uri);
+		}
+		return null;
+	}
+
+	public static Volumn createVolumn(String uri, IHeader headers)
+			throws Exception {
 		for (Resolver resovler : rList) {
 			if (resovler.isPrefer(uri)) {
-				return resovler.createVolumn(uri);
+				return resovler.createVolumn(uri, headers);
 			}
 		}
 		return null;
 	}
-	
-	public static Volumn createVolumn(String uri,IHeader headers) throws Exception {
-		for (Resolver resovler : rList) {
-			if (resovler.isPrefer(uri)) {
-				return resovler.createVolumn(uri,headers);
-			}
-		}
-		return null;
-	}
-	
+
 }

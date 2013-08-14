@@ -1,9 +1,12 @@
 package org.cateyes.core.volumn;
 
 import java.io.File;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.SortedSet;
+import java.util.TreeSet;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -20,17 +23,45 @@ import org.slf4j.LoggerFactory;
  */
 public class VolumnImpl implements Volumn {
 
+	class VolumnFragment implements Comparable<VolumnFragment> {
+
+		public VolumnFragment(int quality, String suffix) {
+			super();
+			this.quality = quality;
+			this.suffix = suffix;
+		}
+
+		int quality;
+		String suffix="flv";
+
+		String[] getTitleName() {
+			if (resources.size() == 0) {
+				return null;
+			} else if (resources.size() == 1) {
+				return new String[] { title };
+			} else {
+				String[] names = new String[resources.size()];
+				for (int i = 0; i < resources.size(); i++) {
+					names[i] = String.format(MULTIFIX, title, i + 1);
+				}
+				return names;
+			}
+		}
+
+		Map<String, Long> resources = new LinkedHashMap<String, Long>();
+
+		public int compareTo(VolumnFragment o) {
+			return o.quality - quality;
+		}
+	}
+
 	// video title
 	String title;
 
 	// video unique id
 	String orginal;
 
-	// video fragments
-	Map<String, Long> urlSet = new LinkedHashMap<String, Long>();
-
-	// video suffix
-	String suffix = "flv";
+	SortedSet<VolumnFragment> fragments = new TreeSet<VolumnFragment>();
 
 	static Logger logger = LoggerFactory.getLogger(VolumnImpl.class);
 	Provider provider;
@@ -53,52 +84,64 @@ public class VolumnImpl implements Volumn {
 		this.provider = provider;
 	}
 
-	public void addUrl(String url) {
-		addUrl(url, -1);
+	VolumnFragment getFragment(int quality) {
+		for (VolumnFragment fragment : fragments) {
+			if (fragment.quality == quality) {
+				return fragment;
+			}
+		}
+		return null;
 	}
 
-	public void addUrl(String url, long size) {
-		urlSet.put(url, size);
+	VolumnFragment getFragment(int quality, String suffix) {
+		VolumnFragment fragment = getFragment(quality);
+		if (null == fragment) {
+			fragment = new VolumnFragment(quality, suffix);
+			fragments.add(fragment);
+		}
+		return fragment;
 	}
 
-	public void write(File dir) throws Exception {
+	public void addFragment(int quality, String suffix, String url) {
+		addFragment(quality, "flv", url, -1);
+	}
+	
+	public void addFragment(int quality, String suffix, String url, long size) {
+		VolumnFragment fragment = getFragment(quality, suffix);
+		fragment.resources.put(url, size);
+	}
+
+	public void addFragment(int quality, String url, long size) {
+		addFragment(quality, "flv", url, size);
+	}
+
+	public void addFragment(int quality, String url) {
+		addFragment(quality, url, -1);
+	}
+	public void writeLowQuality(File dir) throws Exception {
+		download(dir, fragments.first());
+	}
+
+	static Executor service = Executors.newFixedThreadPool(10);
+
+	protected synchronized void download(final File dir, VolumnFragment fragment) throws Exception {
 		if (dir.isFile()) {
 			throw new Exception("file is not a directory");
 		}
 		if (!dir.exists()) {
 			dir.mkdirs();
 		}
-		if (urlSet.isEmpty()) {
+		if (fragment.resources.isEmpty()) {
 			throw new Exception("no source address");
 		}
-
-		if (urlSet.size() == 1) {
-			String fileName = title;
-			download(dir, new String[] { fileName });
-		} else {
-			File root = new File(dir, title);
-			if (!root.exists()) {
-				root.mkdirs();
-			}
-			String[] names = new String[urlSet.size()];
-			for (int i = 0; i < urlSet.size(); i++) {
-				String fileName = String.format(MULTIFIX, title, i + 1);
-				names[i] = fileName;
-			}
-			download(root, names);
-		}
-
-	}
-
-	static Executor service = Executors.newFixedThreadPool(10);
-
-	protected synchronized void download(final File dir, String[] names) {
-		final AtomicInteger counter = new AtomicInteger(names.length);
-		Iterator<String> ite = urlSet.keySet().iterator();
+		final AtomicInteger counter = new AtomicInteger(fragment.resources.size());
+		Iterator<String> ite = fragment.resources.keySet().iterator();
+		final String suffix = fragment.suffix;
+		String[] names = fragment.getTitleName();
 		for (int i = 0; ite.hasNext(); i++) {
-			final String uri = ite.next();
-			final long size = urlSet.get(uri);
 			final String fileName = names[i];
+			final String uri = ite.next();
+			final long size = fragment.resources.get(uri);
 			service.execute(new Runnable() {
 				public void run() {
 					try {
@@ -160,20 +203,33 @@ public class VolumnImpl implements Volumn {
 		this.title = title;
 	}
 
-	public String getSuffix() {
-		return suffix;
-	}
-
-	public void setSuffix(String suffix) {
-		this.suffix = suffix;
-	}
-
-	public Map<String, Long> getUrlSet() {
-		return urlSet;
-	}
+//	public Map<String, Long> getUrlSet() {
+//		return urlSet;
+//	}
 
 	public Map<String, String> getParams() {
 		return params;
+	}
+
+	public void write(File dir, int quality) throws Exception {
+		VolumnFragment fragment = getFragment(quality);
+		if(null == fragment){
+			throw new Exception("no such this quality");
+		}
+		download(dir, fragment);
+	}
+
+	public int getQualityCount() {
+		return fragments.size();
+	}
+
+	public Collection<String> getFragmentURL(int quality){
+		VolumnFragment vf =getFragment(quality);
+		return vf.resources.keySet();
+	}
+	
+	public void writeHighQuality(File dir) throws Exception {
+		download(dir, fragments.last());
 	}
 
 }

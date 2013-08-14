@@ -70,7 +70,7 @@ public class GTResolver extends AbstractResolver implements Resolver {
 		String desc = String.format(format, vid);
 		JSONObject obj = connector.getPageAsJson(desc);
 		String url = japth_url.read(obj);
-		volumn.addUrl(url, -1);
+		volumn.addFragment(0, url, -1);
 		return volumn;
 	}
 
