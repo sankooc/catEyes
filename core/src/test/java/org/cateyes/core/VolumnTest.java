@@ -62,7 +62,7 @@ public class VolumnTest {
 		}
 	}
 
-	@Test
+//	@Test
 	public void testtudou() {
 		String uri = "http://www.tudou.com/albumplay/igpSz5FAzZk.html";
 		test(uri);

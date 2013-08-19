@@ -46,10 +46,6 @@ public class FlvMetadata {
 		}
 	}
 
-	// void check(String key){
-	//
-	// }
-
 	public void update(EcmaArray<String, ?> arr) throws Exception {
 		for (String key : arr.keySet()) {
 			if ("keyframes".equals(key)) {
@@ -183,26 +179,6 @@ public class FlvMetadata {
 	}
 
 	public void update(FlvInputStream stream) throws IOException {
-//		EcmaArray<String, ?> ecma = stream.readMetadata();
-
-		// while(true){
-		// stream.readTag();
-		// }
-
-		// Double duration = null;
-		// int fregCout = 0;
-		// for (String key : ecma.keySet()) {
-		// // if ("duration".equals(key)) {
-		// // duration = (Double) ecma.get(key);
-		// // }
-		// if (key.equals("keyframes")) {
-		// Map<String, ?> metaMap = (Map<String, ?>) ecma.get(key);
-		// Collection<?> list1 = (Collection<?>) metaMap.get("times");
-		// // Collection<?> list2 = (Collection<?>)
-		// // metaMap.get("filepositions");
-		// // System.out.println(list1.size());
-		// }
-		// }
 	}
 
 	public void write(File file) {

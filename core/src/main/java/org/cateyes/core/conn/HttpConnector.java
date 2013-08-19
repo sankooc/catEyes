@@ -1,12 +1,5 @@
 package org.cateyes.core.conn;
 
-import java.io.File;
-import java.io.OutputStream;
-
-import javax.xml.xpath.XPathExpression;
-
-import org.apache.http.client.ResponseHandler;
-
 public interface HttpConnector {
 //	void download(final String uri, OutputStream out, long size, Adaptor adaptor) throws Exception;
 //	void download(final String uri, File file, Adaptor adaptor) throws Exception;

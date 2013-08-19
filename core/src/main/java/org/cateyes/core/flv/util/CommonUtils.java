@@ -72,9 +72,11 @@ public class CommonUtils {
 		FMetadata metatdata = new FMetadata(ecma);
 		List<Double> list = metatdata.getTimes();
 		List<Double> list2 = metatdata.getPosition();
+		System.out.println(list.size());
+		System.out.println(list2.size());
 		for (Double d : list) {
-			int ct = (int) (d * 300);
-			System.out.print(ct / 20 + ",");
+			int ct = (int) (d * 300)/20;
+			System.out.print(ct + ",");
 		}
 		System.out.println();
 		for (Double d : list2) {
@@ -102,10 +104,6 @@ public class CommonUtils {
 			case VIDEO:
 				acount += 1;
 				v = tag.getTime();
-//				long akb = v % 200;
-//				if (akb != 66 && akb != 133 && akb != 0) {
-//					System.err.println(akb + "-->" + v);
-//				}
 				vtag = tag;
 				break;
 			}

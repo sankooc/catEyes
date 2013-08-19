@@ -12,8 +12,8 @@ public class FlvMergeDemo {
 //	@Test
 	public void merge() throws Exception{
 		File[] files = new File[2];
-		files[0] = new File("d:/test/test-00.flv");
-		files[1] = new File("d:/test/test-01.flv");
+		files[0] = new File("d:/test/test-01.flv");
+		files[1] = new File("d:/test/test-02.flv");
 //		files[2] = new File("d:/test/test-02.flv");
 //		files[3] = new File("d:/test/test-03.flv");
 //		files[4] = new File("d:/test/test.flv");
@@ -23,7 +23,7 @@ public class FlvMergeDemo {
 	
 	@Test
 	public void resolv() throws FileNotFoundException, IOException{
-		File file =  new File("target/youku/test2.flv");
+		File file =  new File("target/youku/test-01.flv");
 		CommonUtils.test(file);
 		
 	}

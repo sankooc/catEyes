@@ -26,11 +26,67 @@ public class FMetadata {
 	public static int META_INCREASE = 18;
 
 	final EcmaArray<String, Object> metadata;
-
+	
+	double taglength;
+	
+	double tags;
+	
+	void decreaseH1(){
+		int count = getPosition().size();
+		double offset1 = count*18+9+289;
+		List<Double> plist = getPosition();
+		double offset2 = plist.get(0) -4;
+		List<Double> tmp = new LinkedList<Double>();
+		for(double p : plist){
+			tmp.add(p-offset2);
+		}
+		plist.clear();
+		plist.addAll(tmp);
+	}
+	
+	void decreaseH2(){
+		List<Double> plist = getPosition();
+		plist.remove(0);
+		double f = plist.get(0);
+		double offset = f-4;
+		List<Double> tmp = new LinkedList<Double>();
+		for(double p : plist){
+			tmp.add(p-offset);
+		}
+		plist.clear();
+		plist.addAll(tmp);
+	}
+	
+	
+	
 	public FMetadata(EcmaArray<String, Object> arr) {
 		assert null != arr;
 		metadata = arr;
 		System.out.println("read duration:" + (Double) arr.get("duration"));
+		decreaseH1();
+	}
+	
+	public void append(FMetadata meta,double time,double pos){
+		List<Double> list =getTimes();
+		
+		List<Double> tlist = meta.getTimes();
+		for(double t : tlist){
+			list.add(t+time);
+		}
+		list =getPosition();
+		List<Double> plist = meta.getPosition();
+		
+		for(double p : plist){
+			list.add(p+pos);
+		}
+	}
+	
+	public double getTaglength() {
+		return taglength;
+	}
+
+	public void setTaglength(double taglength) {
+		this.taglength = taglength;
 	}
 
 	public Double getDoubleValue(String key) {
@@ -72,7 +128,7 @@ public class FMetadata {
 		Map<String, Object> cMap = (Map<String, Object>) arr.get("keyframes");
 		return getList(FlvConstants.time, cMap);
 	}
-
+	
 	public void update(EcmaArray<String, ?> arr) {
 		for (String key : arr.keySet()) {
 			if ("keyframes".equals(key)) {
@@ -84,14 +140,26 @@ public class FMetadata {
 			}
 			assert arr.get(key).equals(metadata.get(key));
 		}
-		// Map<String, Object> cMap = (Map<String, Object>)
-		// arr.get("keyframes");
-
-		// Double inc = (Double) arr.get("duration");
-		// Double value = (Double) metadata.get("duration");
 
 	}
 
+	public byte[] toBytes2() throws IOException {
+		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		DataOutputStream os = new DataOutputStream(baos);
+		os.write(new byte[] {0, 0, 0, 0, 18, 0, 0, 0, 0, 0, 0, 0,
+				0, 0, 0 });
+		AMFOutputStream aos = new AMFOutputStream(os);
+		aos.write("onMetaData");
+		aos.write(metadata);
+		baos.flush();
+		byte[] datas = baos.toByteArray();
+		int length = datas.length - 0x18;
+		datas[0x0e] = (byte) (length >>> 16);
+		datas[0x0f] = (byte) ((length >>> 8) & 0xff);
+		datas[0x10] = (byte) (length & 0xff);
+		return datas;
+	}
+	
 	public byte[] toBytes() throws IOException {
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		DataOutputStream os = new DataOutputStream(baos);

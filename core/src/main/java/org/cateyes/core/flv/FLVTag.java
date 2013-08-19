@@ -11,14 +11,15 @@ public class FLVTag {
 	private byte[] data;
 //	private FLVTag preTag;
 	private long time;
-	
+	private long position;
 //	public static FLVTag read(DataInputStream stream){
 //		
 //	}
 	
-	public FLVTag(int type,long time,byte[] data) {
+	public FLVTag(int type,long time,byte[] data,long position) {
 		this.time = time;
 		this.data = data;
+		this.position = position;
 		switch (type) {
 		case 0x09:
 			this.type = TagType.VIDEO;

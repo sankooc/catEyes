@@ -119,7 +119,7 @@ public class VolumnImpl implements Volumn {
 		addFragment(quality, url, -1);
 	}
 	public void writeLowQuality(File dir) throws Exception {
-		download(dir, fragments.first());
+		download(dir, fragments.last());
 	}
 
 	static Executor service = Executors.newFixedThreadPool(10);
@@ -229,7 +229,7 @@ public class VolumnImpl implements Volumn {
 	}
 	
 	public void writeHighQuality(File dir) throws Exception {
-		download(dir, fragments.last());
+		download(dir, fragments.first());
 	}
 
 }

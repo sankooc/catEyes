@@ -39,7 +39,7 @@ public class Demo {
 	}
 	
 	
-//	@Test
+	@Test
 	public void youkuTest() throws Exception{
 		try {
 			Volumn volum = VolumnFactory.createVolumn("http://v.youku.com/v_show/id_XNTQ2OTc0OTAw.html");
@@ -101,7 +101,7 @@ public class Demo {
 	}
 	
 	
-	@Test
+//	@Test
 	public void testYyt() {
 		String uri = "http://www.yinyuetai.com/video/731011";
 		download(uri,"target/yyt");

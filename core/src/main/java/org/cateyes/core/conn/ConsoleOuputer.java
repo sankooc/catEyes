@@ -32,19 +32,18 @@ public class ConsoleOuputer {
 		String gb = "";
 		content = content >> 10;
 		if (content > 0) {
-			kb = (content & 0x02ffl) + "kb ";
+			kb = (content & 0x02ffl) + "k ";
 			content = content >> 10;
 			if (content > 0) {
-				mb = (content & 0x02ffl) + "mb ";
+				mb = (content & 0x02ffl) + "m ";
 				content = content >> 10;
 				if (content > 0) {
-					gb = (content & 0x02ffl) + "gb ";
+					gb = (content & 0x02ffl) + "g ";
 					content = content >> 10;
 				}
 			}
 		}
 		return gb + mb + kb + bt;
-		// return String.format("%sMB %sKB %sB", m, k, b);
 	}
 
 	class ConsolerTask implements MResource, Runnable {
@@ -53,11 +52,12 @@ public class ConsoleOuputer {
 			this.task = task;
 		}
 
-		void show(String task, long content, int time) {
+		void show(String task,long current, long content, int time) {
 			content = content * 1000 / time;
 			String md = getStr(content);
-			logger.info("task:[{}] total:[{}] current:[{}] speed [{}] ", task,
-					totalSize, content, md + "/s");
+			int percent = (int) (totalSize*100/current);
+			logger.info("task:[{}] total:[{}] percent:[{}] speed [{}] ", task,
+					getStr(totalSize),percent, md + "/s");
 		}
 
 		public void run() {
@@ -69,7 +69,7 @@ public class ConsoleOuputer {
 					e.printStackTrace();
 				}
 				s = content - s;
-				show(task, s, duration);
+				show(task,content, s, duration);
 			}
 		}
 
