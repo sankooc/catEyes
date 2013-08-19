@@ -115,7 +115,7 @@ public class FlvInputStream extends DataInputStream {
 	public FMetadata readMetadata2() throws IOException{
 		EcmaArray<String, Object> mta =  readMetadata();
 		FMetadata metadata = new FMetadata(mta);
-		metadata.setTaglength(avi);
+		metadata.setTotleSize(avi);
 		return metadata;
 	}
 	

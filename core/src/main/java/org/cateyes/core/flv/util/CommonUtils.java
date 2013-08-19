@@ -57,13 +57,6 @@ public class CommonUtils {
 		}
 	}
 
-	public static void mergeFlv(File[] files, OutputStream out) {
-		for (File f : files) {
-
-		}
-
-	}
-
 	public static void test(File file) throws FileNotFoundException,
 			IOException {
 		assert file.exists();
@@ -152,6 +145,22 @@ public class CommonUtils {
 		System.out.println(counter + ":" + times.size());
 	}
 
+	public static void mergeFlv2(File[] files, File file) throws Exception{
+		FMetadata metadata = null;
+		for(File f : files){
+			FlvInputStream fis =new FlvInputStream(f);
+			if(null == metadata){
+				metadata = fis.readMetadata2();
+				metadata.decreaseH1();
+			}else{
+				metadata.append(fis.readMetadata2());
+			}
+		}
+		
+		
+	}
+	
+	
 	public static void mergeFlv(File[] files, File file) throws Exception {
 		long pos = 0;
 		FMetadata metatdata = null;

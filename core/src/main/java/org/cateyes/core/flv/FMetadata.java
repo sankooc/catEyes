@@ -27,15 +27,16 @@ public class FMetadata {
 
 	final EcmaArray<String, Object> metadata;
 	
-	double taglength;
+	double filesize;
 	
-	double tags;
+	double tagsize;
 	
-	void decreaseH1(){
-		int count = getPosition().size();
-		double offset1 = count*18+9+289;
+	public void decreaseH1(){
+//		int count = getPosition().size();
+//		double offset1 = count*18+9+289;
 		List<Double> plist = getPosition();
 		double offset2 = plist.get(0) -4;
+		tagsize =filesize- offset2;
 		List<Double> tmp = new LinkedList<Double>();
 		for(double p : plist){
 			tmp.add(p-offset2);
@@ -44,11 +45,13 @@ public class FMetadata {
 		plist.addAll(tmp);
 	}
 	
-	void decreaseH2(){
+	public void decreaseH2(){
 		List<Double> plist = getPosition();
 		plist.remove(0);
+		getTimes().remove(0);
 		double f = plist.get(0);
 		double offset = f-4;
+		tagsize =filesize- offset;
 		List<Double> tmp = new LinkedList<Double>();
 		for(double p : plist){
 			tmp.add(p-offset);
@@ -66,27 +69,37 @@ public class FMetadata {
 		decreaseH1();
 	}
 	
-	public void append(FMetadata meta,double time,double pos){
+	public void append(FMetadata meta){
+		
+		meta.decreaseH2();
+		
+		double duration = (Double) metadata.get("duration");
+		
+		
 		List<Double> list =getTimes();
 		
 		List<Double> tlist = meta.getTimes();
 		for(double t : tlist){
-			list.add(t+time);
+			list.add(t+duration);
 		}
+		
+		
+		
 		list =getPosition();
 		List<Double> plist = meta.getPosition();
-		
 		for(double p : plist){
-			list.add(p+pos);
+			list.add(p+tagsize);
 		}
+		tagsize += meta.tagsize;
 	}
 	
-	public double getTaglength() {
-		return taglength;
+
+	public long getTotleSize() {
+		return totleSize;
 	}
 
-	public void setTaglength(double taglength) {
-		this.taglength = taglength;
+	public void setTotleSize(long totleSize) {
+		this.totleSize = totleSize;
 	}
 
 	public Double getDoubleValue(String key) {
@@ -144,6 +157,19 @@ public class FMetadata {
 	}
 
 	public byte[] toBytes2() throws IOException {
+		int count = getTimes().size();
+		double offset = count*18+9+289;
+		List<Double> plist = getPosition();
+		List<Double> tmp = new LinkedList<Double>();
+		for(double p : plist){
+			tmp.add(p+offset);
+		}
+		plist.clear();
+		plist.addAll(tmp);
+		
+		
+		
+		
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		DataOutputStream os = new DataOutputStream(baos);
 		os.write(new byte[] {0, 0, 0, 0, 18, 0, 0, 0, 0, 0, 0, 0,
