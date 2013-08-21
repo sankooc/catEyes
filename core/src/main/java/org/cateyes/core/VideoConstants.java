@@ -1,9 +1,9 @@
 package org.cateyes.core;
 
 public interface VideoConstants {
-	@Deprecated
+	
 	public enum VideoType {
-		MP4, FLV, HD2
+		MP4, FLV
 	}
 
 	public enum Provider {

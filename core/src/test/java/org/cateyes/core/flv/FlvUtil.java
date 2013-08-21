@@ -1,10 +1,8 @@
 /**
  * 
  */
-package org.cateyes.core.flv.util;
+package org.cateyes.core.flv;
 
-import java.io.ByteArrayOutputStream;
-import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -16,10 +14,7 @@ import java.io.OutputStream;
 import java.io.RandomAccessFile;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
-import java.util.Queue;
-import java.util.RandomAccess;
 
 import org.cateyes.core.VideoConstants.VideoType;
 import org.cateyes.core.conn.MResource;
@@ -27,14 +22,14 @@ import org.cateyes.core.flv.EcmaArray;
 import org.cateyes.core.flv.FLVTag;
 import org.cateyes.core.flv.FMetadata;
 import org.cateyes.core.flv.FlvInputStream;
-import org.cateyes.core.flv.FlvMetadata;
 
 /**
  * @author sankooc
  * 
  */
-public class CommonUtils {
-	static int cacheByte = 1024;
+public class FlvUtil {
+	private static int cacheByte = 1024;
+	
 	public final static String FIX = "%s-%02d.%s";
 
 	public static void mergeMedia(File parent, String title, int size,
@@ -57,6 +52,11 @@ public class CommonUtils {
 		}
 	}
 
+	public static void getInfo(File file) throws Exception{
+		FlvInputStream fis = new FlvInputStream(new FileInputStream(file));
+		EcmaArray<String, Object> ecma = fis.readMetadata();
+	}
+	
 	public static void test(File file) throws FileNotFoundException,
 			IOException {
 		assert file.exists();

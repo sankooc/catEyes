@@ -12,8 +12,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import org.cateyes.core.flv.util.AMFUtils;
-import org.cateyes.core.flv.util.DataStreamUtils;
+import org.cateyes.core.flv.utils.AMFUtils;
+import org.cateyes.core.flv.utils.DataStreamUtils;
 /**
  * @author sankooc
  */

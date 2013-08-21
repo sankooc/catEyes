@@ -6,3 +6,9 @@
 
 
 keyframes 每个字段占用18字节
+
+
+每个flv 的片段中 keyframe 索引 都是videotag
+
+开始的前两个tag是 video 和audeo的 tag头信心
+但是文件的最后没有 相应的结束tag！

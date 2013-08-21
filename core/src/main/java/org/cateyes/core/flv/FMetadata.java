@@ -15,7 +15,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Queue;
 
-import org.cateyes.core.flv.util.DataStreamUtils;
+import org.cateyes.core.flv.utils.DataStreamUtils;
 
 /**
  * @author sankooc
@@ -31,18 +31,29 @@ public class FMetadata {
 	
 	double tagsize;
 	
-	public void decreaseH1(){
+	public void decrease(double offset){
+		List<Double> plist = getPosition();
+		List<Double> tmp = new LinkedList<Double>();
+		for(double p : plist){
+			tmp.add(p-offset);
+		}
+		plist.clear();
+		plist.addAll(tmp);
+	}
+	
+	public double decreaseH1(){
 //		int count = getPosition().size();
 //		double offset1 = count*18+9+289;
 		List<Double> plist = getPosition();
 		double offset2 = plist.get(0) -4;
-		tagsize =filesize- offset2;
-		List<Double> tmp = new LinkedList<Double>();
-		for(double p : plist){
-			tmp.add(p-offset2);
-		}
-		plist.clear();
-		plist.addAll(tmp);
+//		tagsize =filesize- offset2;
+//		List<Double> tmp = new LinkedList<Double>();
+//		for(double p : plist){
+//			tmp.add(p-offset2);
+//		}
+//		plist.clear();
+//		plist.addAll(tmp);
+		return offset2;
 	}
 	
 	public void decreaseH2(){
@@ -63,10 +74,11 @@ public class FMetadata {
 	
 	
 	public FMetadata(EcmaArray<String, Object> arr) {
-		assert null != arr;
 		metadata = arr;
-		System.out.println("read duration:" + (Double) arr.get("duration"));
-		decreaseH1();
+	}
+	
+	public double getduration(){
+		return (Double) metadata.get("duration");
 	}
 	
 	public void append(FMetadata meta){

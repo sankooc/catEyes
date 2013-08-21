@@ -48,4 +48,13 @@ public class FLVTag {
 	public void setTime(long time) {
 		this.time = time;
 	}
+
+	public long getPosition() {
+		return position;
+	}
+
+	public void setPosition(long position) {
+		this.position = position;
+	}
+	
 }
