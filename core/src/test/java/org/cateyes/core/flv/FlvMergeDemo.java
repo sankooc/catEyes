@@ -26,11 +26,4 @@ public class FlvMergeDemo {
 		FlvUtil.test(file);
 		
 	}
-	
-//	@Test
-	public void compute(){
-		double ret = 362.46666666666664+390.4667573696145+363.06721088435376+343.7946485260771;
-		System.out.println(ret);
-		//1459.789
-	}
 }
