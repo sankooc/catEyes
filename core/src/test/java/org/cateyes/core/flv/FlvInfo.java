@@ -1,8 +1,6 @@
 package org.cateyes.core.flv;
 
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.LinkedList;
 
@@ -11,6 +9,7 @@ public class FlvInfo {
 	final FLVTag vedeohead;
 	final FLVTag audeohead;
 	long tagsize;
+	double duration;
 	private LinkedList<FlvInputStream> list = new LinkedList<FlvInputStream>();
 	public FlvInfo(File file) throws IOException{
 		FlvInputStream fis = new FlvInputStream(file);
@@ -19,8 +18,8 @@ public class FlvInfo {
 		audeohead = fis.readTag();
 		long offset = fis.getCursor();
 		
-		metadata.decrease(offset);//fix remove 0
-		
+		metadata.resetPos(offset);//fix remove 0
+		this.duration = metadata.getduration();
 		tagsize = file.length()- offset;
 		list.push(fis);
 	}
@@ -33,19 +32,32 @@ public class FlvInfo {
 		long offset = fis.getCursor() ;
 		long tagsize = file.length()- offset;
 		offset -=  tagsize;
-		metadata.decrease(offset);
+		metadata.resetPos(offset);
+		metadata.resetTimes(this.duration);
+		
+		this.duration += metadata.getduration();
+		this.tagsize += tagsize;
 		this.metadata.append(metadata);
 	}
 	
-	public void write(File target) throws FileNotFoundException{
+	public void write(File target) throws IOException{
 		target.getParentFile().mkdirs();
-		FileOutputStream stream = new FileOutputStream(target);
-		//TODO
-		// writemetadata
-		// set offset
-		// write tag from flvinpustream
-		//close stream
 		
+		FlvOutputStream fos = new FlvOutputStream(target);
+		
+		metadata.resetPos(-tagsize);
+		
+		fos.writeMetadata(metadata);
+		
+		fos.writeTag(vedeohead);
+		fos.writeTag(audeohead);
+		
+		for(FlvInputStream fis : list){
+			FLVTag tag = fis.readTag();
+			fos.writeTag(tag);
+		}
+		fos.flush();
+		fos.close();
 	}
 	
 }

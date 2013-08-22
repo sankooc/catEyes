@@ -12,3 +12,6 @@ keyframes 每个字段占用18字节
 
 开始的前两个tag是 video 和audeo的 tag头信心
 但是文件的最后没有 相应的结束tag！
+
+每个片段中的 audio 和 video 的 头信息是相同的
+

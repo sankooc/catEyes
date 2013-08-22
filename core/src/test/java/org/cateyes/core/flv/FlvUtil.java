@@ -12,6 +12,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.RandomAccessFile;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -29,11 +31,10 @@ import org.cateyes.core.flv.FlvInputStream;
  */
 public class FlvUtil {
 	private static int cacheByte = 1024;
-	
+
 	public final static String FIX = "%s-%02d.%s";
 
-	public static void mergeMedia(File parent, String title, int size,
-			VideoType type) throws Exception {
+	public static void mergeMedia(File parent, String title, int size, VideoType type) throws Exception {
 		if (size < 2) {
 			return;
 		}
@@ -41,8 +42,7 @@ public class FlvUtil {
 		case FLV:
 			File[] files = new File[size];
 			for (int i = 0; i < size; i++) {
-				File file = new File(parent,
-						String.format(FIX, title, i, "flv"));
+				File file = new File(parent, String.format(FIX, title, i, "flv"));
 				if (!file.exists()) {
 					throw new RuntimeException("fragment " + i + " missing");
 				}
@@ -52,13 +52,69 @@ public class FlvUtil {
 		}
 	}
 
-	public static void getInfo(File file) throws Exception{
+	public static void getInfo(File file) throws Exception {
 		FlvInputStream fis = new FlvInputStream(new FileInputStream(file));
 		EcmaArray<String, Object> ecma = fis.readMetadata();
 	}
+
 	
-	public static void test(File file) throws FileNotFoundException,
-			IOException {
+	static char[] tokens = new char[] { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F' };
+
+	public static String toHexString(byte[] contents) {
+		if (contents == null) {
+			return null;
+		}
+		StringBuilder builder = new StringBuilder();
+		for (int j = 0; j < contents.length; j++) {
+			int val = 0xff & contents[j];
+			builder.append(tokens[val >>> 4]);
+			builder.append(tokens[val & 0x0f]);
+		}
+		return builder.toString();
+	}
+	
+	public static String getMessageDigest(File file) throws NoSuchAlgorithmException, IOException{
+		MessageDigest digest = MessageDigest.getInstance("MD5");
+		
+		byte[] tmp =new byte[2048];
+		
+		FileInputStream fis = new FileInputStream(file);
+		int inx;
+		while(true){
+			inx = fis.read(tmp);
+			if(inx < 0){
+				fis.close();
+				break;
+			}
+			digest.update(tmp, 0, inx);
+		}
+		byte[] data = digest.digest();
+		return toHexString(data);
+	}
+	
+	public static void buildByInfo(File[] files,File target) throws Exception{
+		FlvInfo info =null;
+		for (int i = 0; i < files.length; i++) {
+			if(info == null){
+				info = new FlvInfo(files[i]);
+			}else{
+				info.append(files[i]);
+			}
+		}
+		info.write(target);
+	}
+	
+	public static void infotest(File[] files) throws IOException {
+		FlvInfo[] infos = new FlvInfo[files.length];
+		for (int i = 0; i < files.length; i++) {
+			infos[i] = new FlvInfo(files[i]);
+		}
+		
+		System.out.println();
+
+	}
+
+	public static void test(File file) throws FileNotFoundException, IOException {
 		assert file.exists();
 		FlvInputStream fis = new FlvInputStream(new FileInputStream(file));
 		EcmaArray<String, Object> ecma = fis.readMetadata();
@@ -68,7 +124,7 @@ public class FlvUtil {
 		System.out.println(list.size());
 		System.out.println(list2.size());
 		for (Double d : list) {
-			int ct = (int) (d * 300)/20;
+			int ct = (int) (d * 300) / 20;
 			System.out.print(ct + ",");
 		}
 		System.out.println();
@@ -88,13 +144,13 @@ public class FlvUtil {
 				break;
 			}
 			switch (tag.getType()) {
-			case AUDIO:
+			case 8:
 				vcount += 1;
 				a = tag.getTime();
-				System.out.print(a+",");
+				System.out.print(a + ",");
 				atag = tag;
 				break;
-			case VIDEO:
+			case 9:
 				acount += 1;
 				v = tag.getTime();
 				vtag = tag;
@@ -115,8 +171,7 @@ public class FlvUtil {
 		// metatdata.copy(queue, new DataOutputStream(out));
 	}
 
-	public static void resolve(File file) throws FileNotFoundException,
-			IOException {
+	public static void resolve(File file) throws FileNotFoundException, IOException {
 		assert file.exists();
 		FlvInputStream fis = new FlvInputStream(new FileInputStream(file));
 		EcmaArray<String, Object> ecma = fis.readMetadata();
@@ -145,22 +200,19 @@ public class FlvUtil {
 		System.out.println(counter + ":" + times.size());
 	}
 
-	public static void mergeFlv2(File[] files, File file) throws Exception{
+	public static void mergeFlv2(File[] files, File file) throws Exception {
 		FMetadata metadata = null;
-		for(File f : files){
-			FlvInputStream fis =new FlvInputStream(f);
-			if(null == metadata){
+		for (File f : files) {
+			FlvInputStream fis = new FlvInputStream(f);
+			if (null == metadata) {
 				metadata = fis.readMetadata2();
-				metadata.decreaseH1();
-			}else{
+			} else {
 				metadata.append(fis.readMetadata2());
 			}
 		}
-		
-		
+
 	}
-	
-	
+
 	public static void mergeFlv(File[] files, File file) throws Exception {
 		long pos = 0;
 		FMetadata metatdata = null;
@@ -189,8 +241,7 @@ public class FlvUtil {
 		}
 	}
 
-	public static void copyStream(InputStream in, OutputStream out,
-			MResource control) throws IOException {
+	public static void copyStream(InputStream in, OutputStream out, MResource control) throws IOException {
 		byte[] tmp = new byte[cacheByte];
 		while (true) {
 			try {
