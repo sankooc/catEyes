@@ -42,6 +42,11 @@ public class FMetadata {
 		times.addAll(tmp);
 	}
 
+	
+	public void removeHeader(){
+		 getPosition().remove(0);
+		 getTimes().remove(0);
+	}
 	public void resetPos(double offset) {
 		List<Double> plist = getPosition();
 		List<Double> tmp = new LinkedList<Double>();
@@ -163,22 +168,30 @@ public class FMetadata {
 				sum(key, arr);
 				continue;
 			}
-			assert arr.get(key).equals(metadata.get(key));
+//			arr.get(key).equals(metadata.get(key));
 		}
 
 	}
 
+	public FLVTag toTag() throws IOException {
+		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		DataOutputStream os = new DataOutputStream(baos);
+//		os.write(new byte[] { 0, 0, 0, 0, 18, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 });
+		AMFOutputStream aos = new AMFOutputStream(os);
+		aos.write("onMetaData");
+		aos.write(metadata);
+		baos.flush();
+		byte[] datas = baos.toByteArray();
+		
+		
+//		int length = datas.length - 0x18;
+//		datas[0x0e] = (byte) (length >>> 16);
+//		datas[0x0f] = (byte) ((length >>> 8) & 0xff);
+//		datas[0x10] = (byte) (length & 0xff);
+		return new FLVTag(0,18,0,datas,0);
+	}
+	
 	public byte[] toBytes2() throws IOException {
-//		int count = getTimes().size();
-//		double offset = count * 18 + 9 + 289;
-//		List<Double> plist = getPosition();
-//		List<Double> tmp = new LinkedList<Double>();
-//		for (double p : plist) {
-//			tmp.add(p + offset);
-//		}
-//		plist.clear();
-//		plist.addAll(tmp);
-
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		DataOutputStream os = new DataOutputStream(baos);
 		os.write(new byte[] { 0, 0, 0, 0, 18, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 });
@@ -251,7 +264,7 @@ public class FMetadata {
 				stream = queue.poll();
 				continue;
 			}
-			assert (type >>> 1) == 4;
+//			assert (type >>> 1) == 4;
 			out.write(type);
 			int dataSize = DataStreamUtils.copyAndReadUInt24(stream, out);
 			presize = dataSize + FlvInputStream.TAG_INCREASE;
@@ -288,7 +301,7 @@ public class FMetadata {
 		if (-1 == type) {
 			return false;
 		}
-		assert (type >>> 1) == 4;
+//		assert (type >>> 1) == 4;
 		out.write(type);
 		int dataSize = DataStreamUtils.copyAndReadUInt24(fis, out);
 		presize = dataSize + FlvInputStream.TAG_INCREASE;
@@ -315,7 +328,7 @@ public class FMetadata {
 			if (-1 == type) {
 				break;
 			}
-			assert type / 2 == 4;
+//			assert type / 2 == 4;
 			out.write(type);
 			int dataSize = DataStreamUtils.copyAndReadUInt24(fis, out);
 			presize = dataSize + FlvInputStream.TAG_INCREASE;

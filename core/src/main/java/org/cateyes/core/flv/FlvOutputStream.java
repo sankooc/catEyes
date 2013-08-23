@@ -1,20 +1,18 @@
 package org.cateyes.core.flv;
 
+import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.OutputStream;
-import java.util.Collection;
-import java.util.List;
-
-import org.cateyes.core.flv.FLVTag.TagType;
 import org.cateyes.core.flv.utils.DataStreamUtils;
 
 public class FlvOutputStream extends DataOutputStream {
 
 	File file;
 	long counter;
+	boolean log;
+
 	public FlvOutputStream(File target) throws IOException {
 		super(new FileOutputStream(target));
 		this.file = target;
@@ -24,68 +22,68 @@ public class FlvOutputStream extends DataOutputStream {
 		write(1);
 		write(5);
 		writeInt(9);
-		counter  = 9;
+		counter = 9;
 	}
-	
-	public void writeMetadata(FMetadata metadata) throws IOException{
-		write(metadata.toBytes2());// metadata
-	}
-	
-	long pretime;
-	long presize;
-	
-	public void writeTag(FLVTag tag){
-		
-//			int pr = readInt();
-//			if (-1 == presize) {
-//				presize = pr;
-//			}
-//			writeInt((int) presize);
-//
-//			TagType type = tag.getType();
-//			
-//			if (-1 == type) {
-//				break;
-//			}
-//			assert type / 2 == 4;
-//			out.write(type);
-//			int dataSize = DataStreamUtils.copyAndReadUInt24(this, out);
-//			presize = dataSize + 18;
-//
-//			long time = DataStreamUtils.readTime(this) + pt;
-//			DataStreamUtils.writeTime(this, time);
-//
-//			DataStreamUtils.copyAndReadUInt24(, this);
-//
-//			byte[] data = new byte[dataSize];
-//			read(data);
-//			out.write(data);
-		//TODO
-	}
-	
-	public void rebuild(Collection<FlvInputStream> flvs) throws IOException{
-		double startTime = 0;
-		FMetadata metatdata = null;
-		for(FlvInputStream fis : flvs){
-			EcmaArray<String, Object> ecma = fis.readMetadata();
-			FMetadata mta =  new FMetadata(ecma);
-			double duration = mta.getDoubleValue("duration");//time
-			if (null == metatdata) {
-				metatdata = mta;
-			} else {
-				metatdata.update(ecma);
+	long presize = 0;
+
+	// ms
+	public void writeTags(DataInputStream stream, long pretime)
+			throws Exception {
+		while (true) {
+			if (stream.available() < 4) {
+				break;
 			}
-			//loop
-			startTime +=duration;
+			stream.readInt();
+
+			writeInt((int) presize);
+
+			int type = stream.read();
+			if (-1 == type) {
+				break;
+			}
+			if (type / 2 != 4) {
+				throw new Exception("wrong tag type");
+			}
+			write(type); // type 1
+
+			int dataSize = DataStreamUtils.copyAndReadUInt24(stream, this); // size
+																			// 3
+			presize = dataSize + 11; // 1+3+4+3
+
+			long time = DataStreamUtils.readTime(stream) + pretime;
+			DataStreamUtils.writeTime(this, time); // time 4
+
+			DataStreamUtils.copyAndReadUInt24(stream, this);// stream id 3
+
+			byte[] data = new byte[dataSize];
+			stream.read(data);
+			write(data);
 		}
+
 	}
+
+	public final void writeUI24(int v) throws IOException {
+		write((v >>> 16) & 0xFF);
+		write((v >>> 8) & 0xFF);
+		write((v >>> 0) & 0xFF);
+	}
+
+	public void writeTime(long time) throws IOException {
+		writeUI24((int) time);
+		write((int) ((time >>> 24) & 0xff));
+	}
+
+	public void writeTag(FLVTag tag) throws IOException {
+		writeInt((int) presize);// presize
+		write(tag.getType());
+		int datasize = tag.getData().length;
+		writeUI24(datasize);
+		presize = datasize + 11;
+		writeTime(tag.getTime());
+		writeUI24(0);
+		write(tag.getData());
+	}
+
 	public static final int initMeta = 289;
-	void addMetadata(FMetadata metatdata) throws IOException{
-		List<Double> tlist = metatdata.getTimes();
-		List<Double> plist = metatdata.getPosition();
-		int totalsize = tlist.size()*18+initMeta;
-		byte[] data = metatdata.toBytes2();
-	}
-	
-	
+
 }

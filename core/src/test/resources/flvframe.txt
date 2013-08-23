@@ -10,7 +10,14 @@ keyframes 每个字段占用18字节
 
 每个flv 的片段中 keyframe 索引 都是videotag
 
+metadata中的duration 单位是秒
+
+keyfram 中时间单位是秒
+
+tag中的时间单位是微秒
+
 开始的前两个tag是 video 和audeo的 tag头信心
+
 但是文件的最后没有 相应的结束tag！
 
 每个片段中的 audio 和 video 的 头信息是相同的

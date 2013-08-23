@@ -9,27 +9,34 @@ public class FLVTag {
 	}
 	private int type;
 	private byte[] data;
-//	private FLVTag preTag;
 	private long time;
 	private long position;
-	
-	public FLVTag(int type,long time,byte[] data,long position) {
+	long presize;
+	public FLVTag(long presize ,int type,long time,byte[] data,long position) {
+		this.presize = presize;
 		this.time = time;
 		this.data = data;
 		this.position = position;
 		this.type = type;
-//		switch (type) {
-//		case 0x09:
-//			this.type = TagType.VIDEO;
-//			break;
-//		case 0x08:
-//			this.type = TagType.AUDIO;
-//			break;
-//		case 0x12:
-//			this.type = TagType.SCRIPTDATA;
-//			break;
-//		}
 	}
+	
+//	public FLVTag(int type,long time,byte[] data,long position) {
+//		this.time = time;
+//		this.data = data;
+//		this.position = position;
+//		this.type = type;
+////		switch (type) {
+////		case 0x09:
+////			this.type = TagType.VIDEO;
+////			break;
+////		case 0x08:
+////			this.type = TagType.AUDIO;
+////			break;
+////		case 0x12:
+////			this.type = TagType.SCRIPTDATA;
+////			break;
+////		}
+//	}
 
 	public int getType() {
 		return type;
@@ -53,6 +60,14 @@ public class FLVTag {
 
 	public void setPosition(long position) {
 		this.position = position;
+	}
+
+	public byte[] getData() {
+		return data;
+	}
+
+	public void setData(byte[] data) {
+		this.data = data;
 	}
 	
 }

@@ -32,30 +32,25 @@ import org.cateyes.core.flv.FlvInputStream;
 public class FlvUtil {
 	private static int cacheByte = 1024;
 
-	public final static String FIX = "%s-%02d.%s";
-
-	public static void mergeMedia(File parent, String title, int size, VideoType type) throws Exception {
-		if (size < 2) {
-			return;
-		}
-		switch (type) {
-		case FLV:
-			File[] files = new File[size];
-			for (int i = 0; i < size; i++) {
-				File file = new File(parent, String.format(FIX, title, i, "flv"));
-				if (!file.exists()) {
-					throw new RuntimeException("fragment " + i + " missing");
-				}
-			}
-			File file = new File(parent, String.format("%s.%s", title, "flv"));
-			mergeFlv(files, file);
-		}
-	}
-
-	public static void getInfo(File file) throws Exception {
-		FlvInputStream fis = new FlvInputStream(new FileInputStream(file));
-		EcmaArray<String, Object> ecma = fis.readMetadata();
-	}
+//	public final static String FIX = "%s-%02d.%s";
+//
+//	public static void mergeMedia(File parent, String title, int size, VideoType type) throws Exception {
+//		if (size < 2) {
+//			return;
+//		}
+//		switch (type) {
+//		case FLV:
+//			File[] files = new File[size];
+//			for (int i = 0; i < size; i++) {
+//				File file = new File(parent, String.format(FIX, title, i, "flv"));
+//				if (!file.exists()) {
+//					throw new RuntimeException("fragment " + i + " missing");
+//				}
+//			}
+//			File file = new File(parent, String.format("%s.%s", title, "flv"));
+//			mergeFlv(files, file);
+//		}
+//	}
 
 	
 	static char[] tokens = new char[] { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F' };
@@ -109,9 +104,7 @@ public class FlvUtil {
 		for (int i = 0; i < files.length; i++) {
 			infos[i] = new FlvInfo(files[i]);
 		}
-		
 		System.out.println();
-
 	}
 
 	public static void test(File file) throws FileNotFoundException, IOException {
@@ -121,11 +114,13 @@ public class FlvUtil {
 		FMetadata metatdata = new FMetadata(ecma);
 		List<Double> list = metatdata.getTimes();
 		List<Double> list2 = metatdata.getPosition();
-		System.out.println(list.size());
+		double duration = metatdata.getduration();
+		System.out.println(duration);
 		System.out.println(list2.size());
 		for (Double d : list) {
-			int ct = (int) (d * 300) / 20;
-			System.out.print(ct + ",");
+			System.out.print(d + ",");
+//			int ct = (int) (d * 300) / 20;
+//			System.out.print(ct + ",");
 		}
 		System.out.println();
 		for (Double d : list2) {
@@ -164,11 +159,6 @@ public class FlvUtil {
 		System.out.println("video tag count" + vcount * 46);
 		System.out.println("audio tag count" + acount * 66);
 		System.out.println(v);
-		// System.out.println(a);
-		// Queue<FlvInputStream> queue = new LinkedList<FlvInputStream>();
-		// queue.add(fis);
-		// OutputStream out = new ByteArrayOutputStream();
-		// metatdata.copy(queue, new DataOutputStream(out));
 	}
 
 	public static void resolve(File file) throws FileNotFoundException, IOException {
@@ -198,19 +188,6 @@ public class FlvUtil {
 
 		}
 		System.out.println(counter + ":" + times.size());
-	}
-
-	public static void mergeFlv2(File[] files, File file) throws Exception {
-		FMetadata metadata = null;
-		for (File f : files) {
-			FlvInputStream fis = new FlvInputStream(f);
-			if (null == metadata) {
-				metadata = fis.readMetadata2();
-			} else {
-				metadata.append(fis.readMetadata2());
-			}
-		}
-
 	}
 
 	public static void mergeFlv(File[] files, File file) throws Exception {

@@ -62,7 +62,6 @@ public class FlvInputStream extends DataInputStream {
 			if (-1 == type) {
 				break;
 			}
-			assert type / 2 == 4;
 			out.write(type);
 			int dataSize = DataStreamUtils.copyAndReadUInt24(this, out);
 			presize = dataSize + TAG_INCREASE;
@@ -82,13 +81,13 @@ public class FlvInputStream extends DataInputStream {
 
 	public static final int TAG_INCREASE = 11;
 
-	public long getCursor(){
+	public long getCursor() {
 		return curser;
 	}
-	
+
 	public FLVTag readTag() throws IOException {
 		int leave = available();
-		if(leave < 4){
+		if (leave < 4) {
 			return null;
 		}
 		long presize = DataStreamUtils.readUInt32(this);
@@ -99,23 +98,24 @@ public class FlvInputStream extends DataInputStream {
 		if (type == -1) {
 			return null;
 		}
-		assert type / 2 == 4;
 		int dataSize = DataStreamUtils.readUInt24(this);
 		long time = DataStreamUtils.readTime(this);
 		curser += 7;
 		// System.out.println("time:" + time);
-		DataStreamUtils.readUInt24(this);
+		DataStreamUtils.readUInt24(this);// always 0
 		curser += 3;
 		byte[] data = new byte[dataSize];
 		read(data);
 		curser += dataSize;
-		return new FLVTag(type, time, data, pos);
+		return new FLVTag(presize, type, time, data, pos);
 	}
 
 	@SuppressWarnings("unchecked")
 	public EcmaArray<String, Object> readMetadata() throws IOException {
 		DataStreamUtils.readUInt32(this);
-		assert 0x12 == read();
+		if (0x12 != read()) {
+			throw new IOException("wrong type");
+		}
 		int dataSize = DataStreamUtils.readUInt24(this); // body length
 		DataStreamUtils.readUInt32(this); // timestamp
 		DataStreamUtils.readUInt24(this); // streamid
@@ -125,7 +125,6 @@ public class FlvInputStream extends DataInputStream {
 		curser += dataSize;
 		AMFInputStream ais = new AMFInputStream(new ByteArrayInputStream(data));
 		Object obj = ais.getNextObject();
-		assert "onMetaData".equals(obj);
 		return (EcmaArray<String, Object>) ais.getNextObject();
 	}
 

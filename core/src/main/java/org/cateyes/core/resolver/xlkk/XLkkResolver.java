@@ -4,6 +4,10 @@ import org.cateyes.core.resolver.AbstractResolver;
 import org.cateyes.core.resolver.Resolver;
 import org.cateyes.core.volumn.Volumn;
 
+/**
+ * 迅雷看看 
+ * @author sankooc
+ */
 public class XLkkResolver extends AbstractResolver implements Resolver {
 
 	public Volumn createVolumn(String uri) throws Exception {
