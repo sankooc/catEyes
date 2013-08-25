@@ -1,10 +1,12 @@
-package org.cateyes.core.flv;
+package org.cateyes.core.media.io;
 
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.List;
 import java.util.Map;
+
+import org.cateyes.core.flv.EcmaArray;
 /**
  * @author sankooc
  */

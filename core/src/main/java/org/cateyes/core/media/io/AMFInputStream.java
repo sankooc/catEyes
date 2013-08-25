@@ -1,4 +1,4 @@
-package org.cateyes.core.flv;
+package org.cateyes.core.media.io;
 
 import java.io.DataInputStream;
 import java.io.IOException;
@@ -8,7 +8,8 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 
-import org.cateyes.core.flv.utils.DataStreamUtils;
+import org.cateyes.core.flv.EcmaArray;
+import org.cateyes.core.media.utils.DataStreamUtils;
 /**
  * @author sankooc
  */

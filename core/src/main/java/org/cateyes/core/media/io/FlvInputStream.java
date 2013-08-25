@@ -1,4 +1,4 @@
-package org.cateyes.core.flv;
+package org.cateyes.core.media.io;
 
 import java.io.ByteArrayInputStream;
 import java.io.DataInputStream;
@@ -8,7 +8,11 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
-import org.cateyes.core.flv.utils.DataStreamUtils;
+import org.cateyes.core.flv.EcmaArray;
+import org.cateyes.core.flv.FLVTag;
+import org.cateyes.core.flv.FMetadata;
+import org.cateyes.core.flv.FlvConstants;
+import org.cateyes.core.media.utils.DataStreamUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -16,14 +20,13 @@ import org.slf4j.LoggerFactory;
  * @author sankooc
  */
 public class FlvInputStream extends DataInputStream {
-	// int offSet;
+	
 	static Logger logger = LoggerFactory.getLogger(FlvInputStream.class);
-	long avi;
+	
 	int curser = 0;
 
 	public FlvInputStream(File file) throws IOException {
 		super(new FileInputStream(file));
-		avi = file.length();
 		if (read() == 'F' && read() == 'L' && read() == 'V') {
 			readUnsignedByte();
 			readUnsignedByte();
@@ -64,13 +67,11 @@ public class FlvInputStream extends DataInputStream {
 			}
 			out.write(type);
 			int dataSize = DataStreamUtils.copyAndReadUInt24(this, out);
-			presize = dataSize + TAG_INCREASE;
+			presize = dataSize + FlvConstants.TAG_INCREASE;
 
 			long time = DataStreamUtils.readTime(this) + pt;
 			DataStreamUtils.writeTime(out, time);
-
 			DataStreamUtils.copyAndReadUInt24(this, out);
-
 			byte[] data = new byte[dataSize];
 			read(data);
 			out.write(data);
@@ -78,8 +79,6 @@ public class FlvInputStream extends DataInputStream {
 		out.flush();
 		return presize;
 	}
-
-	public static final int TAG_INCREASE = 11;
 
 	public long getCursor() {
 		return curser;
@@ -111,7 +110,7 @@ public class FlvInputStream extends DataInputStream {
 	}
 
 	@SuppressWarnings("unchecked")
-	public EcmaArray<String, Object> readMetadata() throws IOException {
+	public EcmaArray<String, Object> readEmca() throws IOException {
 		DataStreamUtils.readUInt32(this);
 		if (0x12 != read()) {
 			throw new IOException("wrong type");
@@ -124,14 +123,13 @@ public class FlvInputStream extends DataInputStream {
 		read(data);
 		curser += dataSize;
 		AMFInputStream ais = new AMFInputStream(new ByteArrayInputStream(data));
-		Object obj = ais.getNextObject();
+		ais.getNextObject();
 		return (EcmaArray<String, Object>) ais.getNextObject();
 	}
 
-	public FMetadata readMetadata2() throws IOException {
-		EcmaArray<String, Object> mta = readMetadata();
+	public FMetadata readMetadata() throws IOException {
+		EcmaArray<String, Object> mta = readEmca();
 		FMetadata metadata = new FMetadata(mta);
-		metadata.setTotleSize(avi);
 		return metadata;
 	}
 

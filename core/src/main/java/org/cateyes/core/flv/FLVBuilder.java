@@ -1,137 +1,91 @@
-/**
- * 
- */
 package org.cateyes.core.flv;
 
+import java.io.Closeable;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.RandomAccessFile;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
-/**
- * @author sankooc
- * 
- */
-public class FLVBuilder {
-	final LinkedList<File> sources = new LinkedList<File>();
+import org.apache.commons.io.IOUtils;
+import org.cateyes.core.media.io.FlvInputStream;
+import org.cateyes.core.media.io.FlvOutputStream;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-	public void addURI(File url) {
-		sources.add(url);
+public class FlvBuilder implements Closeable {
+	static Logger logger = LoggerFactory.getLogger(FlvBuilder.class);
+	final FMetadata metadata;
+	final FLVTag vedeohead;
+	final FLVTag audeohead;
+	long tagsize;
+	double duration;// m
+	private Map<FlvInputStream, Double> list = new LinkedHashMap<FlvInputStream, Double>();
+
+	public FlvBuilder(File file) throws IOException {
+		FlvInputStream fis = new FlvInputStream(file);
+		list.put(fis, duration);
+		this.metadata = fis.readMetadata();
+		long offset = fis.getCursor();
+		vedeohead = fis.readTag();
+		audeohead = fis.readTag();
+		metadata.resetPos(offset);// fix remove 0
+		this.duration = metadata.getduration();
+		tagsize = file.length() - offset;
 	}
 
-	FLVParser parser = new FLVParser();
+	public void append(File file) throws Exception {
+		FlvInputStream fis = new FlvInputStream(file);
+		list.put(fis, duration);
+		FMetadata metadata = fis.readMetadata();
+		fis.readTag();
+		fis.readTag();
+		metadata.removeHeader();
+		long offset = fis.getCursor();
+		long _tagsize = file.length() - offset;
+		offset -= tagsize;
+		metadata.resetPos(offset);
+		metadata.resetTimes(this.duration);
 
-	public void resolve(File target) throws Exception {
-		FlvMetadata metadata = new FlvMetadata(null);
-		double time = 0;
-		double pos = 0;
-		if (!target.exists()) {
-			target.getParentFile().mkdirs();
+		this.duration += metadata.getduration();
+		this.tagsize += _tagsize;
+		this.metadata.append(metadata);
+	}
+
+	public void write(File target) {
+		
+		FlvOutputStream fos = null;
+		try {
+			fos = new FlvOutputStream(target);
+			double offset1 = metadata.getFrameCount() * 18 + 9 + 289;
+			metadata.resetPos(-offset1);// bug
+			offset1 -= (FlvConstants.FLV_HEADLENGH + FlvConstants.TAG_SPLIT + FlvConstants.TAG_INCREASE);
+
+			metadata.setDuration(duration);
+
+			FLVTag metatag = metadata.toTag();
+			fos.writeTag(metatag);
+			fos.writeTag(vedeohead);
+			fos.writeTag(audeohead);
+
+			for (FlvInputStream fis : list.keySet()) {
+				double time = list.get(fis) * 1000;// m
+				fos.writeTags(fis, (long) time);
+			}
+			fos.flush();
+		} catch (Exception e) {
+			logger.error(e.getMessage(), e);
+		} finally {
+			IOUtils.closeQuietly(fos);
 		}
-		FileOutputStream fos = new FileOutputStream(target);
-		for (File file : sources) {
-			InputStream is = null;
-			FlvMetadata data = null;
+	}
+
+	public void close() {
+		for (FlvInputStream fis : list.keySet()) {
 			try {
-				is = new FileInputStream(file);
-				data = parser.parseMetaData(is);
-				parser.copyTags(is, fos,(long)time);
-				List<Double> list = data.getPosFrame();
-				System.out.println(list.size());
-				for (double value : list) {
-					metadata.getPosFrame().add(value + pos);
-				}
-				metadata.getPosFrame().remove(0);
-				metadata.getPosFrame().remove(0);
-				list = data.getTimeFrame();
-				for (double value : list) {
-					metadata.getTimeFrame().add(value + time);
-				}
-				metadata.getTimeFrame().remove(0);
-				metadata.getTimeFrame().remove(0);
-				time += data.getDuration();
-				metadata.setDuration(time);
-				pos += file.length();
-				//f1 + N * 0X12 + LENGTH
-			} catch (Exception e) {
-				e.printStackTrace();
-			} finally {
-				try {
-					is.close();
-				} catch (Exception e) {
-				}
+				fis.close();
+			} catch (IOException e) {
 			}
 		}
-		fos.flush();
-		fos.close();
-		InputStream metadataStream = FLVParser.createMetaData(metadata);
-		offset(target,metadataStream);
-	}
-
-	public void offset(File file, InputStream is) throws IOException {
-		int capacity = is.available();
-		byte[] buffer = new byte[capacity];
-		long old = file.length();
-		RandomAccessFile raf = new RandomAccessFile(file, "rw");
-		long mod = (old - 1) / capacity;
-		for (int i = 0; i < mod; i++) {
-			old -= capacity;
-			raf.seek(old);
-			raf.read(buffer);
-			raf.write(buffer);
-		}
-		raf.seek(0);
-		raf.read(buffer,0,(int) old);
-		raf.seek(capacity);
-		raf.write(buffer,0,(int) old);
-		is.read(buffer);
-		raf.seek(0);
-		raf.write(buffer);
-	}
-
-	byte[] streamId = new byte[] { 0, 0, 0 };
-
-	public static void writeTime(OutputStream os, int period)
-			throws IOException {
-		os.write((period >>> 16) & 0xff);
-		os.write((period >>> 8) & 0xff);
-		os.write((period) & 0xff);
-		os.write((period >>> 24) & 0xff);
-	}
-
-	public static int readTimeUIB(RandomAccessFile file) throws IOException {
-		int value = 0;
-		value = (file.read() << 16) + (file.read() << 8) + file.read();
-		int high = file.read();
-		if (0 != high) {
-			value += (high << 24);
-		}
-		return value;
-	}
-
-	public static void copy(RandomAccessFile file, OutputStream os, int length)
-			throws IOException {
-		byte[] tmp = new byte[length];
-		int inx = file.read(tmp);
-		os.write(tmp);
-	}
-
-	public static int read24UIB(RandomAccessFile file, OutputStream os)
-			throws IOException {
-		int value = 0;
-		int tmp;
-		os.write(tmp = file.read());
-		value += (tmp << 16);
-		os.write(tmp = file.read());
-		value += (tmp << 8);
-		os.write(tmp = file.read());
-		value += tmp;
-		return value;
 	}
 
 }

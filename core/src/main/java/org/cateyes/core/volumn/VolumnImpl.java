@@ -1,9 +1,11 @@
 package org.cateyes.core.volumn;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.Map;
 import java.util.SortedSet;
 import java.util.TreeSet;
@@ -15,6 +17,8 @@ import org.cateyes.core.conn.ApacheConnector;
 import org.cateyes.core.conn.ConsoleOuputer;
 import org.cateyes.core.conn.ApacheConnector.VideoInfo;
 import org.cateyes.core.conn.MResource;
+import org.cateyes.core.media.MediaMerger;
+import org.cateyes.core.media.utils.MediaFileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -42,7 +46,7 @@ public class VolumnImpl implements Volumn {
 			} else {
 				String[] names = new String[resources.size()];
 				for (int i = 0; i < resources.size(); i++) {
-					names[i] = String.format(MULTIFIX, title, i + 1);
+					names[i] = String.format(MULTIFIX, title,title, i + 1);
 				}
 				return names;
 			}
@@ -67,8 +71,8 @@ public class VolumnImpl implements Volumn {
 	Provider provider;
 	Map<String, String> params;
 	transient ApacheConnector connector = ApacheConnector.getInstance();
-
-	public final static String MULTIFIX = "%s-%02d";
+	MediaMerger merger = new MediaMerger();
+	public final static String MULTIFIX = "%s/%s-%02d";
 
 	public Provider getProvider() {
 		return provider;
@@ -138,6 +142,7 @@ public class VolumnImpl implements Volumn {
 		Iterator<String> ite = fragment.resources.keySet().iterator();
 		final String suffix = fragment.suffix;
 		String[] names = fragment.getTitleName();
+		final Collection<File> files = new LinkedList<File>();
 		for (int i = 0; ite.hasNext(); i++) {
 			final String fileName = names[i];
 			final String uri = ite.next();
@@ -148,31 +153,18 @@ public class VolumnImpl implements Volumn {
 						Thread.sleep(500);// tudou need delay
 						VideoInfo info = connector.getVideoInfo(uri);
 						if (null == info) {
-							connector.download(uri, size, new File(dir,
-									fileName + "." + suffix), null);
+							File file = new File(dir,fileName + "." + suffix);
+							connector.download(uri, size,file , null);
+							files.add(file);
 						} else {
 							String contentType = info.getType();
 							String suf = ".";
-							if (null != contentType) {
-								if (contentType.contains("video/x-flv")) {
-									suf += "flv";
-								} else if (contentType.contains("video/f4v")) {
-									suf += "flv";
-								} else if (contentType.contains("video/mp4")) {
-									suf += "mp4";
-								} else if (contentType
-										.contains("application/octet-stream")) {
-									suf += suffix;
-								} else {
-									suf += suffix;
-								}
-							} else {
-								suf += suffix;
-							}
+							suf += MediaFileUtils.getSuffixByContentType(contentType, suffix);
+							File file = new File(dir, fileName + suf);
 							MResource resource = ConsoleOuputer.getInstance()
 									.createConsoler(fileName);
-							connector.download(uri, info.getSize(), new File(
-									dir, fileName + suf), resource);
+							connector.download(uri, info.getSize(), file, resource);
+							files.add(file);
 						}
 					} catch (Exception e) {
 						logger.error(e.getMessage(), e);
@@ -192,7 +184,9 @@ public class VolumnImpl implements Volumn {
 		} catch (InterruptedException e) {
 			logger.error(e.getMessage());
 		}
-
+		if(files.size() >1 && files.size() == fragment.resources.size()){
+			merger.merge(files, dir,getTitle());
+		}
 	}
 
 	public String getTitle() {

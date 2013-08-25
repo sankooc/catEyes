@@ -1,11 +1,13 @@
-package org.cateyes.core.flv;
+package org.cateyes.core.media.io;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import org.cateyes.core.flv.utils.DataStreamUtils;
+
+import org.cateyes.core.flv.FLVTag;
+import org.cateyes.core.media.utils.DataStreamUtils;
 
 public class FlvOutputStream extends DataOutputStream {
 

@@ -1,4 +1,4 @@
-package org.cateyes.core.flv.utils;
+package org.cateyes.core.media.utils;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
