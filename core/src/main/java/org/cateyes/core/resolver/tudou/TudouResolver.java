@@ -13,10 +13,12 @@ import javax.xml.xpath.XPathExpression;
 import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
 
+import org.apache.commons.codec.binary.StringUtils;
 import org.cateyes.core.IHeader;
 import org.cateyes.core.VideoConstants.Provider;
 import org.cateyes.core.resolver.AbstractResolver;
 import org.cateyes.core.resolver.Resolver;
+import org.cateyes.core.resolver.youku.YoukuResolver;
 import org.cateyes.core.volumn.Volumn;
 import org.cateyes.core.volumn.VolumnImpl;
 import org.slf4j.Logger;
@@ -47,16 +49,23 @@ public class TudouResolver extends AbstractResolver implements Resolver {
 		}
 	}
 	static Pattern pattern = Pattern.compile("iid:[ ]?([\\d]+)");
+	
+	static Pattern pattern2 = Pattern.compile("vcode:[ ]?\'([\\w]+)\'");
 
 	static Logger logger = LoggerFactory.getLogger(TudouResolver.class);
 
 	public Volumn createVolumn(String uri) throws Exception {
 		String iid = connector.getPageRegix(uri, pattern);
 		logger.info("tudou iid {}", iid);
+		Volumn volumn = null;
 		if (null != iid) {
-			return createVolumnFromVid(iid);
+			volumn =  createVolumnFromVid(iid);
 		}
-		return null;
+		if(null == volumn){
+			String vid =  connector.getPageRegix(uri, pattern2);
+			volumn = YoukuResolver.createVolumnFromVid(vid);
+		}
+		return volumn;
 	}
 
 	public Volumn createVolumnFromVid(String vid) throws Exception {
@@ -65,6 +74,9 @@ public class TudouResolver extends AbstractResolver implements Resolver {
 		Document doc = connector.getPageAsDoc(desc);
 		String title = (String) expression_title.evaluate(doc,
 				XPathConstants.STRING);
+		if(org.apache.commons.lang.StringUtils.isEmpty(title)){
+			return null;
+		}
 		logger.info("title is {}", title);
 		VolumnImpl volumn = new VolumnImpl(title, vid, Provider.TUDOU);
 

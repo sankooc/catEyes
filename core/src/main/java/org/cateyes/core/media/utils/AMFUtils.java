@@ -10,7 +10,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.cateyes.core.flv.FlvMetadata;
 /**
  * @author sankooc
  */
@@ -36,10 +35,11 @@ public class AMFUtils {
 		} else if (obj instanceof List) {
 			os.write(10);
 			writeAMFSTRICTList((List) obj, os);
-		} else if (obj instanceof FlvMetadata) {
-			os.write(8);
-			writeEmcaArray((FlvMetadata) obj, os);
 		}
+//		else if (obj instanceof FlvMetadata) {
+//			os.write(8);
+//			writeEmcaArray((FlvMetadata) obj, os);
+//		}
 	}
 
 	protected static void writeAMFSTRICTList(List<?> obj, DataOutputStream os)
@@ -89,24 +89,24 @@ public class AMFUtils {
 		}
 	}
 
-	protected static void writeEmcaArray(FlvMetadata data, DataOutputStream os)
-			throws IOException {
-		os.writeInt(11);
-		Field[] fs = FlvMetadata.class.getDeclaredFields();
-		if (null != fs && fs.length > 0) {
-			for (Field f : fs) {
-				writeAMFString(f.getName(), os);
-				f.setAccessible(true);
-				try {
-					writeData(f.get(data), os);
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-			}
-		}
-
-		os.write(new byte[] { 0, 0, 9 });
-	}
+//	protected static void writeEmcaArray(FlvMetadata data, DataOutputStream os)
+//			throws IOException {
+//		os.writeInt(11);
+//		Field[] fs = FlvMetadata.class.getDeclaredFields();
+//		if (null != fs && fs.length > 0) {
+//			for (Field f : fs) {
+//				writeAMFString(f.getName(), os);
+//				f.setAccessible(true);
+//				try {
+//					writeData(f.get(data), os);
+//				} catch (Exception e) {
+//					e.printStackTrace();
+//				}
+//			}
+//		}
+//
+//		os.write(new byte[] { 0, 0, 9 });
+//	}
 
 	protected static void writeAMFString(String obj, DataOutputStream os)
 			throws IOException {

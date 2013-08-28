@@ -56,7 +56,7 @@ public class ConsoleOuputer {
 			content = content * 1000 / time;
 			String md = getStr(content);
 			int percent = (int) (current*100/totalSize);
-			logger.info("task:[{}] total:[{}] percent:[{}] speed [{}] ", task,
+			logger.info("task:[{}] total:[{}] percent:[{}%] speed [{}] ", task,
 					getStr(totalSize),percent, md + "/s");
 		}
 

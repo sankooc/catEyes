@@ -7,4 +7,7 @@
   </parent>
   <artifactId>assembly</artifactId>
   <packaging>pom</packaging>
+  <modules>
+  	<module>eyes-core</module>
+  </modules>
 </project>

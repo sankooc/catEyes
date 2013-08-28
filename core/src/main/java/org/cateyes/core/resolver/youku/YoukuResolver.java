@@ -10,6 +10,7 @@ import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 
 import org.cateyes.core.VideoConstants.Provider;
+import org.cateyes.core.conn.ConnectorProvider;
 import org.cateyes.core.resolver.AbstractResolver;
 import org.cateyes.core.resolver.Resolver;
 import org.cateyes.core.volumn.Volumn;
@@ -48,9 +49,9 @@ public class YoukuResolver extends AbstractResolver implements Resolver {
 	protected static final JsonPath jpath_type = JsonPath
 			.compile("$.data[0].streamtypes");
 	
-	public Volumn createVolumnFromVid(String vid) throws Exception {
+	public static Volumn createVolumnFromVid(String vid) throws Exception {
 		String desc = String.format(YOUKU_LIST, vid);
-		JSONObject metadata = connector.getPageAsJson(desc);
+		JSONObject metadata = ConnectorProvider.getCommonConnector().getPageAsJson(desc);
 
 		String title = jpath_title.read(metadata);
 		VolumnImpl volumn = new VolumnImpl(title, vid, Provider.YOUKU);
@@ -73,7 +74,7 @@ public class YoukuResolver extends AbstractResolver implements Resolver {
 
 	}
 
-	public void addFlv(Volumn volumn, JSONObject metadata, int seed,
+	public static void addFlv(Volumn volumn, JSONObject metadata, int seed,
 			String type, int quality) {
 		char[] maxStr = getMixString(seed);
 		JsonPath jpath_seg_flv = JsonPath.compile("$.data[0].streamfileids."
@@ -96,17 +97,17 @@ public class YoukuResolver extends AbstractResolver implements Resolver {
 		}
 	}
 
-	protected int getSeed(JSONObject obj) {
+	protected static int getSeed(JSONObject obj) {
 		Integer value = (Integer) obj.get("seed");
 		return value;
 	}
 
-	protected String getSerialId() {
+	protected static String getSerialId() {
 		return "" + System.currentTimeMillis() + (1000 + counter.nextInt(999))
 				+ (1000 + counter.nextInt(9000));
 	}
 
-	protected String getVid(final char[] maxStr, String[] idx) {
+	protected static String getVid(final char[] maxStr, String[] idx) {
 		if (null == idx || idx.length == 0) {
 			return null;
 		}
@@ -122,7 +123,7 @@ public class YoukuResolver extends AbstractResolver implements Resolver {
 		return new String(chs);
 	}
 
-	protected char[] getMixString(int seed) {
+	protected static char[] getMixString(int seed) {
 		List<Character> queue = new LinkedList<Character>();
 		for (char ch : TOKEN.toCharArray()) {
 			queue.add(ch);

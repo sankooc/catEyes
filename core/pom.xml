@@ -5,13 +5,17 @@
 		<artifactId>cateyes</artifactId>
 		<groupId>cateyes</groupId>
 		<version>0.0.1-SNAPSHOT</version>
-		<relativePath>..</relativePath>
 	</parent>
 	<properties>
+		<jpath.vesion>0.8.1</jpath.vesion>
+		<hc.version>4.2.4</hc.version>
+		<cio-version>2.4</cio-version>
+		<mp4parser.version>1.0-RC-15</mp4parser.version>
+		<logback.version>1.0.9</logback.version>
+		<slf.version>1.7.5</slf.version>
 		<mainclass>org.cateyes.core.Main</mainclass>
 	</properties>
-	<groupId>core</groupId>
-	<artifactId>eye.core</artifactId>
+	<artifactId>core</artifactId>
 	<dependencies>
 		<dependency>
 			<groupId>net.sf.json-lib</groupId>
@@ -22,17 +26,17 @@
 		<dependency>
 			<groupId>com.jayway.jsonpath</groupId>
 			<artifactId>json-path</artifactId>
-			<version>0.8.1</version>
+			<version>${jpath.vesion}</version>
 		</dependency>
 		<dependency>
 			<groupId>ch.qos.logback</groupId>
 			<artifactId>logback-classic</artifactId>
-			<version>1.0.9</version>
+			<version>${logback.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>ch.qos.logback</groupId>
 			<artifactId>logback-core</artifactId>
-			<version>1.0.9</version>
+			<version>${logback.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>junit</groupId>
@@ -43,12 +47,12 @@
 		<dependency>
 			<groupId>commons-io</groupId>
 			<artifactId>commons-io</artifactId>
-			<version>2.4</version>
+			<version>${cio-version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.httpcomponents</groupId>
 			<artifactId>httpcore</artifactId>
-			<version>4.2.4</version>
+			<version>${hc.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.jsoup</groupId>
@@ -58,19 +62,18 @@
 		<dependency>
 			<groupId>org.apache.httpcomponents</groupId>
 			<artifactId>httpclient</artifactId>
-			<version>4.2.4</version>
+			<version>${hc.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>com.googlecode.mp4parser</groupId>
+			<artifactId>isoparser</artifactId>
+			<version>${mp4parser.version}</version>
 		</dependency>
 
 		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-api</artifactId>
-			<version>1.7.5</version>
-		</dependency>
-		<dependency>
-			<groupId>io.netty</groupId>
-			<artifactId>netty</artifactId>
-			<version>3.6.6.Final</version>
-			<scope>test</scope>
+			<version>${slf.version}</version>
 		</dependency>
 	</dependencies>
 
@@ -85,7 +88,7 @@
 				</includes>
 			</resource>
 		</resources>
-		<plugins>
+		<!-- plugins>
 			<plugin>
 				<artifactId>maven-assembly-plugin</artifactId>
 				<configuration>
@@ -101,7 +104,7 @@
 					</descriptors>
 				</configuration>
 			</plugin>
-		</plugins>
+		</plugins-->
 	</build>
 
 </project>

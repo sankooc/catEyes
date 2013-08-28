@@ -1,7 +1,6 @@
 package org.cateyes.core;
 
 import java.util.Collection;
-import java.util.Map;
 
 import junit.framework.Assert;
 
@@ -9,21 +8,6 @@ import org.cateyes.core.conn.ApacheConnector;
 import org.cateyes.core.conn.ConnectorProvider;
 import org.cateyes.core.conn.ApacheConnector.VideoInfo;
 import org.cateyes.core.resolver.Resolver;
-import org.cateyes.core.resolver.blibli.BlibliResolver;
-import org.cateyes.core.resolver.cntv.CntvResolver;
-import org.cateyes.core.resolver.feng.FengResolver;
-import org.cateyes.core.resolver.gametrailers.GTResolver;
-import org.cateyes.core.resolver.iqiyi.IqiyiResolver;
-import org.cateyes.core.resolver.ku6.Ku6Resolver;
-import org.cateyes.core.resolver.lesh.LeshResolver;
-import org.cateyes.core.resolver.pps.PPSResolver;
-import org.cateyes.core.resolver.sina.SinaResolver;
-import org.cateyes.core.resolver.sohu.SohuResolver;
-import org.cateyes.core.resolver.tencent.TencentResolver;
-import org.cateyes.core.resolver.tudou.TudouResolver;
-import org.cateyes.core.resolver.wuliu.WulResolver;
-import org.cateyes.core.resolver.youku.YoukuResolver;
-import org.cateyes.core.resolver.yyt.YinyuetaiResolver;
 import org.cateyes.core.volumn.Volumn;
 import org.cateyes.core.volumn.VolumnFactory;
 import org.junit.Test;
@@ -39,7 +23,7 @@ public class VolumnTest {
 			Assert.assertNotNull(resolver);
 			Volumn volumn = resolver.createVolumn(url);
 			Assert.assertNotNull(volumn);
-			System.out.println("-------" + volumn.getProvider()
+			System.out.println("-------" + resolver.getClass().getSimpleName()
 					+ " testing-------");
 			Assert.assertNotNull(volumn.getTitle());
 			System.out.println("title is :" + volumn.getTitle());
@@ -62,14 +46,14 @@ public class VolumnTest {
 		}
 	}
 
-//	@Test
+	@Test
 	public void testtudou() {
-		String uri = "http://www.tudou.com/albumplay/igpSz5FAzZk.html";
+		String uri = "http://www.tudou.com/albumplay/4X8TTOvk_rw/uuC7X1JuEgQ.html";
 		test(uri);
 	}
 	
 	@Test
-	public void testsohu() {// TODO
+	public void testsohu() {
 		String uri = "http://tv.sohu.com/20120726/n349111647.shtml";
 		test(uri);
 	}
@@ -148,7 +132,6 @@ public class VolumnTest {
 	}
 
 	public void testSina() {
-		// String uri = "http://video.weibo.com/v/weishipin/t_zQac7Z4.htm";
 		String uri = "http://video.sina.com.cn/v/b/111599121-1348174564.html";
 		test(uri);
 	}

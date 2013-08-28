@@ -4,12 +4,14 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.io.RandomAccessFile;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.List;
 
 import org.apache.commons.lang.StringUtils;
+import org.cateyes.core.conn.MResource;
 import org.cateyes.core.flv.FMetadata;
 
 import com.jayway.jsonpath.internal.IOUtils;
@@ -113,5 +115,24 @@ public class MediaFileUtils {
 		}
 		byte[] data = digest.digest();
 		return toHexString(data);
+	}
+	
+	private static int cacheByte = 1024;
+	
+	public static void copyStream(InputStream in, OutputStream out, MResource control) throws IOException {
+		byte[] tmp = new byte[cacheByte];
+		while (true) {
+			try {
+				int num = in.read(tmp);
+				if (num < 1) {
+					break;
+				}
+				out.write(tmp, 0, num);
+				control.addContent(num);
+			} catch (IOException e) {
+				break;
+			}
+		}
+		out.flush();
 	}
 }

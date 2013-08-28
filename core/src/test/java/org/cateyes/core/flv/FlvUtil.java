@@ -53,9 +53,9 @@ public class FlvUtil {
 //	}
 	
 	public static void infotest(File[] files) throws IOException {
-		FlvBuilder[] infos = new FlvBuilder[files.length];
+		FLVBuilder[] infos = new FLVBuilder[files.length];
 		for (int i = 0; i < files.length; i++) {
-			infos[i] = new FlvBuilder(files[i]);
+			infos[i] = new FLVBuilder(files[i]);
 		}
 		System.out.println();
 	}

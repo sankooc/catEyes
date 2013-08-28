@@ -12,8 +12,8 @@ import org.cateyes.core.media.io.FlvOutputStream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class FlvBuilder implements Closeable {
-	static Logger logger = LoggerFactory.getLogger(FlvBuilder.class);
+public class FLVBuilder implements Closeable {
+	static Logger logger = LoggerFactory.getLogger(FLVBuilder.class);
 	final FMetadata metadata;
 	final FLVTag vedeohead;
 	final FLVTag audeohead;
@@ -21,7 +21,7 @@ public class FlvBuilder implements Closeable {
 	double duration;// m
 	private Map<FlvInputStream, Double> list = new LinkedHashMap<FlvInputStream, Double>();
 
-	public FlvBuilder(File file) throws IOException {
+	public FLVBuilder(File file) throws IOException {
 		FlvInputStream fis = new FlvInputStream(file);
 		list.put(fis, duration);
 		this.metadata = fis.readMetadata();

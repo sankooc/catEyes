@@ -39,7 +39,7 @@ import org.apache.http.params.CoreConnectionPNames;
 import org.apache.http.params.HttpParams;
 import org.apache.http.protocol.HttpContext;
 import org.apache.http.util.EntityUtils;
-import org.cateyes.core.flv.FlvUtil;
+import org.cateyes.core.media.utils.MediaFileUtils;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.slf4j.Logger;
@@ -403,7 +403,7 @@ public class ApacheConnector implements HttpConnector {
 			HttpEntity entity = response.getEntity();
 			logger.info("headlength {} ", entity.getContentLength());
 			if (null != entity) {
-				FlvUtil.copyStream(entity.getContent(), out, control);
+				MediaFileUtils.copyStream(entity.getContent(), out, control);
 			}
 		} catch (Exception e) {
 			logger.error(e.getMessage(), e);
