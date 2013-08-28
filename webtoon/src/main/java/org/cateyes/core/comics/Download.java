@@ -1,23 +1,13 @@
 package org.cateyes.core.comics;
 
 import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
-import java.io.Reader;
-import java.io.Writer;
 import java.lang.Character.UnicodeBlock;
-import java.net.URI;
-import java.net.URLDecoder;
-import java.net.URLEncoder;
 import java.nio.charset.Charset;
 import java.util.Iterator;
-import java.util.StringTokenizer;
 
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
