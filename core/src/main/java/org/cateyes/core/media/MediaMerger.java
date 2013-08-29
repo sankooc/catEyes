@@ -5,6 +5,7 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.nio.channels.Channels;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
@@ -53,6 +54,7 @@ public class MediaMerger {
 
 	public void merge(Collection<File> files, File folder, String title) {
 		File[] sources = files.toArray(new File[] {});
+		Arrays.sort(sources);
 		merge(sources, folder, title);
 	}
 

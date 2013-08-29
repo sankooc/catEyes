@@ -1,7 +1,6 @@
 package org.cateyes.core.volumn;
 
 import java.io.File;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -185,7 +184,9 @@ public class VolumnImpl implements Volumn {
 			logger.error(e.getMessage());
 		}
 		if(files.size() >1 && files.size() == fragment.resources.size()){
+			logger.info("start to merge files");
 			merger.merge(files, dir,getTitle());
+			logger.info("finish merge files");
 		}
 	}
 

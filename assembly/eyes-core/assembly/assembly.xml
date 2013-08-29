@@ -12,7 +12,7 @@
 			<outputDirectory>/bin</outputDirectory>
 		</file>
 		<file>
-			<source>../../core/src/main/assembly/downflv.sh</source>
+			<source>../../core/target/classes/downflv.sh</source>
 			<outputDirectory>/bin</outputDirectory>
 		</file>
 		<file>
