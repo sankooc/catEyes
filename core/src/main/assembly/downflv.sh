@@ -106,13 +106,6 @@ unlimitFD() {
 }
 
 locateHome() {
-    if [ "x$CEYE_HOME" != "x" ]; then
-        warn "Ignoring predefined value for CEYE_HOME"
-    fi
-
-    # In POSIX shells, CDPATH may cause cd to write to stdout
-    (unset CDPATH) >/dev/null 2>&1 && unset CDPATH
-
     CEYE_HOME=`cd $DIRNAME/..; pwd`
     if [ ! -d "$CEYE_HOME" ]; then
         die "CEYE_HOME is not valid: $CEYE_HOME"
@@ -203,12 +196,7 @@ setupDefaults() {
         fi
     done
     DEFAULT_JAVA_DEBUG_OPTS="-Xdebug -Xnoagent -Djava.compiler=NONE -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=5005"
-
-    ##
-    ## TODO: Move to conf/profiler/yourkit.{sh|cmd}
-    ##
-    # Uncomment to enable YourKit profiling
-    #DEFAULT_JAVA_DEBUG_OPTS="-Xrunyjpagent"
+    
 }
 
 init() {
@@ -216,7 +204,7 @@ init() {
     detectOS
 
     # Unlimit the number of file descriptors if possible
-    unlimitFD
+    #unlimitFD
 
     # Locate the Sshd home directory
     locateHome
@@ -234,7 +222,7 @@ init() {
     setupDefaults
 
     # Install debug options
-    setupDebugOptions
+    #setupDebugOptions
 
 }
 
@@ -244,7 +232,7 @@ run() {
         CLASSPATH=`cygpath --path --windows "$CLASSPATH"`
     fi
     cd $CEYE_HOME
-    exec $JAVA $JAVA_OPTS -Dsshd.home="$CEYE_HOME" $OPTS -classpath "$CLASSPATH" ${mainclass} "$@"
+    exec $JAVA $JAVA_OPTS $OPTS -classpath "$CLASSPATH" ${mainclass} "$@"
 }
 
 main() {

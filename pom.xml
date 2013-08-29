@@ -10,7 +10,7 @@
 	</properties>
 	<modules>
 		<module>core</module>
-		<module>eye.webtoon</module>
+		<module>webtoon</module>
 		<module>assembly</module>
 		<module>server</module>
 		<module>local</module>

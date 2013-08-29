@@ -15,7 +15,7 @@ import com.jayway.jsonpath.internal.IOUtils;
 
 public class Main {
 
-	static void downloadByStream(InputStream stream,File dir) {
+	static void downloadByStream(InputStream stream, File dir) {
 		BufferedReader reader = null;
 		try {
 			reader = new BufferedReader(new InputStreamReader(stream));
@@ -39,7 +39,9 @@ public class Main {
 		}
 	}
 
-	static void download(String uri,File file){
+	static void download(String uri, File file) {
+		System.out.println("url : " + uri);
+		System.out.println("folder:" + file.getPath());
 		try {
 			Volumn volum = VolumnFactory.createVolumn(uri);
 			volum.writeLowQuality(file);
@@ -47,32 +49,38 @@ public class Main {
 			e.printStackTrace();
 		}
 	}
-	
+
 	/**
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		if (null == args || args.length < 2) {
+		if (args.length == 0) {
 			useage();
-			File cf = new File("downlist.ini");
-			File dir = new File("../downloads");
+			return;
+		}
+		File root = new File(args[0]);
+		System.out.println("program root : " + root.getPath());
+		if (args.length == 1) {
+			useage();
+			File cf = new File(root, "downlist.ini");
+			File dir = new File(root, "downloads");
 			dir.mkdirs();
 			try {
-				downloadByStream(new FileInputStream(cf),dir);
+				downloadByStream(new FileInputStream(cf), dir);
 			} catch (FileNotFoundException e) {
 				e.printStackTrace();
 			}
-
-		} else {
-			String uri = args[0];
-			String folder = args[1];
+		} else if (args.length == 3) {
+			String uri = args[1];
+			String folder = args[2];
 			File target = new File(folder);
 			if (target.isFile()) {
 				System.err.println("target is a file");
 				useage();
 				return;
 			}
-			download(uri,target);
+			target.mkdirs();
+			download(uri, target);
 		}
 	}
 
