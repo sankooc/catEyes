@@ -6,7 +6,7 @@
 		<artifactId>cateyes</artifactId>
 		<version>0.0.1-SNAPSHOT</version>
 	</parent>
-	<artifactId>webtoon</artifactId>
+	<artifactId>comics</artifactId>
 	<dependencies>
 		<dependency>
 			<groupId>com.google.code.gson</groupId>
@@ -15,8 +15,8 @@
 		</dependency>
 
 		<dependency>
-			<groupId>core</groupId>
-			<artifactId>eye.core</artifactId>
+			<groupId>cateyes</groupId>
+			<artifactId>core</artifactId>
 			<version>0.0.1-SNAPSHOT</version>
 		</dependency>
 		<dependency>

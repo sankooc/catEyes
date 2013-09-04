@@ -234,7 +234,7 @@ public class ApacheConnector implements HttpConnector {
 					DocumentBuilder builder = factory.newDocumentBuilder();
 					return builder.parse(stream);
 				} catch (Exception e) {
-					logger.error(e.getMessage(),e);
+					logger.error(e.getMessage(), e);
 				} finally {
 					EntityUtils.consume(entity);
 				}
@@ -415,6 +415,10 @@ public class ApacheConnector implements HttpConnector {
 		long end = System.currentTimeMillis();
 
 		logger.info("spend time {}", (end - begin));
+	}
+
+	public void download(final String url, File file) throws Exception {
+		download(url, -1, file, null);
 	}
 
 	public void download(final HttpUriRequest request, OutputStream out) {

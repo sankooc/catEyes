@@ -78,6 +78,7 @@
 	</dependencies>
 
 	<build>
+		<sourceDirectory>UTF-8</sourceDirectory>
 		<resources>
 			<resource>
 				<directory>src/main/assembly</directory>
@@ -88,23 +89,10 @@
 				</includes>
 			</resource>
 		</resources>
-		<!-- plugins>
-			<plugin>
-				<artifactId>maven-assembly-plugin</artifactId>
-				<configuration>
-					<archive>
-						<manifest>
-							<mainClass>${mainclass}</mainClass>
-							<packageName>cateyes</packageName>
-							<addClasspath>true</addClasspath>
-						</manifest>
-					</archive>
-					<descriptors>
-						<descriptor>src/main/assembly/assembly.xml</descriptor>
-					</descriptors>
-				</configuration>
-			</plugin>
-		</plugins-->
+		<!-- plugins> <plugin> <artifactId>maven-assembly-plugin</artifactId> <configuration> 
+			<archive> <manifest> <mainClass>${mainclass}</mainClass> <packageName>cateyes</packageName> 
+			<addClasspath>true</addClasspath> </manifest> </archive> <descriptors> <descriptor>src/main/assembly/assembly.xml</descriptor> 
+			</descriptors> </configuration> </plugin> </plugins -->
 	</build>
 
 </project>

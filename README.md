@@ -1,6 +1,6 @@
 ## Overview
 
-Cat eyes is a stream media downloader include youku,tudou
+* [Overview](https://github.com/sankooc/catEyes/wiki)
 
 ## Quick Start
 
