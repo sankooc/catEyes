@@ -37,18 +37,24 @@ public class VolumnImpl implements Volumn {
 		int quality;
 		String suffix="flv";
 
-		String[] getTitleName() {
+		String[] getTitleName(String name) {
+			if(null == name){
+				name = title;
+			}
 			if (resources.size() == 0) {
 				return null;
 			} else if (resources.size() == 1) {
-				return new String[] { title };
+				return new String[] { name };
 			} else {
 				String[] names = new String[resources.size()];
 				for (int i = 0; i < resources.size(); i++) {
-					names[i] = String.format(MULTIFIX, title,title, i + 1);
+					names[i] = String.format(MULTIFIX, name,name, i + 1);
 				}
 				return names;
 			}
+		}
+		String[] getTitleName() {
+			return getTitleName(null);
 		}
 
 		Map<String, Long> resources = new LinkedHashMap<String, Long>();
@@ -125,9 +131,13 @@ public class VolumnImpl implements Volumn {
 		download(dir, fragments.last());
 	}
 
-	static Executor service = Executors.newFixedThreadPool(10);
+	public void writeLowQuality(File dir,String title) throws Exception {
+		download(dir, title,fragments.last());
+	}
+	
+	private static Executor service = Executors.newFixedThreadPool(10);
 
-	protected synchronized void download(final File dir, VolumnFragment fragment) throws Exception {
+	protected synchronized void download(final File dir,String title, VolumnFragment fragment) throws Exception {
 		if (dir.isFile()) {
 			throw new Exception("file is not a directory");
 		}
@@ -140,7 +150,7 @@ public class VolumnImpl implements Volumn {
 		final AtomicInteger counter = new AtomicInteger(fragment.resources.size());
 		Iterator<String> ite = fragment.resources.keySet().iterator();
 		final String suffix = fragment.suffix;
-		String[] names = fragment.getTitleName();
+		String[] names = fragment.getTitleName(title);
 		final Collection<File> files = new LinkedList<File>();
 		for (int i = 0; ite.hasNext(); i++) {
 			final String fileName = names[i];
@@ -189,6 +199,11 @@ public class VolumnImpl implements Volumn {
 			logger.info("finish merge files");
 		}
 	}
+	
+	
+	protected synchronized void download(final File dir, VolumnFragment fragment) throws Exception {
+		download(dir,null,fragment);
+	}
 
 	public String getTitle() {
 		return title;
@@ -198,22 +213,22 @@ public class VolumnImpl implements Volumn {
 		this.title = title;
 	}
 
-//	public Map<String, Long> getUrlSet() {
-//		return urlSet;
-//	}
-
 	public Map<String, String> getParams() {
 		return params;
 	}
 
 	public void write(File dir, int quality) throws Exception {
+		write(dir,null,quality);
+	}
+
+	public void write(File dir,String title, int quality) throws Exception {
 		VolumnFragment fragment = getFragment(quality);
 		if(null == fragment){
 			throw new Exception("no such this quality");
 		}
-		download(dir, fragment);
+		download(dir, title,fragment);
 	}
-
+	
 	public int getQualityCount() {
 		return fragments.size();
 	}
@@ -227,4 +242,8 @@ public class VolumnImpl implements Volumn {
 		download(dir, fragments.first());
 	}
 
+	public void writeHighQuality(File dir,String title) throws Exception {
+		download(dir,title, fragments.first());
+	}
+	
 }

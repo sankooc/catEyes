@@ -14,5 +14,6 @@
 		<module>assembly</module>
 		<module>server</module>
 		<module>local</module>
+		<module>dropapp</module>
 	</modules>
 </project>
