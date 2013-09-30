@@ -10,9 +10,9 @@
 	</properties>
 	<modules>
 		<module>core</module>
-		<module>webtoon</module>
 		<module>assembly</module>
 		<module>server</module>
 		<module>local</module>
+		<module>comics</module>
 	</modules>
 </project>
