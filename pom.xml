@@ -13,6 +13,10 @@
 		<module>assembly</module>
 		<module>server</module>
 		<module>local</module>
+<<<<<<< HEAD
 		<module>comics</module>
+=======
+		<module>dropapp</module>
+>>>>>>> f47afd85bf5d3ac84a04179cb1d70609a8f10b0d
 	</modules>
 </project>

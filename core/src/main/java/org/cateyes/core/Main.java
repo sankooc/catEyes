@@ -20,7 +20,7 @@ public class Main {
 		try {
 			reader = new BufferedReader(new InputStreamReader(stream));
 			while (true) {
-				String path = reader.readLine();
+				String path = reader.readLine().trim();
 				if (null == path) {
 					break;
 				}
@@ -44,7 +44,7 @@ public class Main {
 		System.out.println("folder:" + file.getPath());
 		try {
 			Volumn volum = VolumnFactory.createVolumn(uri);
-			volum.writeLowQuality(file);
+			volum.writeLowQuality(file,null);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

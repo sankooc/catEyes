@@ -19,11 +19,11 @@ public interface Volumn extends IHeader {
 	
 	void addFragment(int quality, String url, long size);
 	
-	void writeLowQuality(File dir) throws Exception;
+	void writeLowQuality(File dir,String title) throws Exception;
 
-	void write(File dir,int quality) throws Exception;
+	void write(File dir,String title, int quality) throws Exception;
 	
-	void writeHighQuality(File dir) throws Exception;
+	void writeHighQuality(File dir,String title) throws Exception;
 
 	int getQualityCount();
 	
