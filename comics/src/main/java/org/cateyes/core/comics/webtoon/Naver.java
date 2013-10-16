@@ -43,7 +43,6 @@ public class Naver {
 		logger.info("webtoon title {}", title);
 		String icon = detail.attr("src");
 		file.mkdirs();
-		// connector.download(icon, new File(file, "icon.jpg"));
 		return title;
 	}
 
