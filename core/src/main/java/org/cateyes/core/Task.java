@@ -2,10 +2,10 @@ package org.cateyes.core;
 
 import java.io.File;
 import java.util.LinkedHashMap;
-import java.util.LinkedList;
 import java.util.Map;
-import java.util.Queue;
-import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 import org.cateyes.core.media.MediaMerger;
 import org.cateyes.core.volumn.Volumn;
@@ -30,50 +30,33 @@ public class Task {
 	}
 
 	static boolean threadSwitch = true;
-	static Queue<VolumnInfo> infoQueue = new LinkedList<VolumnInfo>();
-	static Map<VolumnInfo, Exception> errMap = new LinkedHashMap<VolumnInfo, Exception>();
+
 	static Map<Volumn, VolumnInfo> volumnMap = new LinkedHashMap<Volumn, VolumnInfo>();
 	static Map<VolumnDownloadResult, VolumnInfo> results = new LinkedHashMap<VolumnDownloadResult, VolumnInfo>();
-	static Thread infoThread;
+
 	static Thread downThread;
 	static Thread mergeThread;
 	static Logger logger = LoggerFactory.getLogger(Task.class);
 
-	static final Runnable resolver = new Runnable() {
-		public void run() {
-			while (threadSwitch) {
-				if (infoQueue.isEmpty()) {
-					try {
-						Thread.sleep(1000);
-					} catch (Exception e) {
-					}
-				} else {
-					VolumnInfo info = infoQueue.poll();
-					try {
-						Volumn volum = VolumnFactory.createVolumn(info.url);
-						volumnMap.put(volum, info);
-					} catch (Exception e) {
-						errMap.put(info, e);
-					}
-				}
-			}
-		}
-	};
-	
 	static final Runnable merger = new Runnable() {
 		public void run() {
-			while (threadSwitch) {
+			while (threadSwitch || !results.isEmpty()) {
 				if (results.isEmpty()) {
 					try {
 						Thread.sleep(1500);
 					} catch (InterruptedException e) {
 					}
 				} else {
-					VolumnDownloadResult result =results.keySet().iterator().next();
-					results.remove(results);
-					if(result.isComplete()){
-						MediaMerger.merge(result.getSource(), result.getFolder(), result.getTitle());
-					}
+					final VolumnDownloadResult result = results.keySet().iterator().next();
+					results.remove(result);
+					mergeExecutor.execute(new Runnable() {
+						public void run() {
+							if (result.isComplete()) {
+								MediaMerger.merge(result.getSource(), result.getFolder(), result.getTitle());
+							}
+						}
+					});
+
 				}
 			}
 
@@ -82,57 +65,85 @@ public class Task {
 	};
 	static final Runnable downloader = new Runnable() {
 		public void run() {
-			while (threadSwitch) {
+			while (threadSwitch || !volumnMap.isEmpty()) {
 				if (volumnMap.isEmpty()) {
 					try {
 						Thread.sleep(1500);
 					} catch (InterruptedException e) {
 					}
 				} else {
-					Volumn volumn = volumnMap.keySet().iterator().next();
-					VolumnInfo info = volumnMap.remove(volumn);
-					try {
-						VolumnDownloadResult result = volumn.writeLowQuality(info.dir, info.title);
-						results.put(result, info);
-					} catch (Exception e) {
-						logger.error(e.getMessage(), e);
-					}
+					final Volumn volumn = volumnMap.keySet().iterator().next();
+					final VolumnInfo info = volumnMap.remove(volumn);
+					downExecutor.execute(new Runnable() {
+						public void run() {
+							try {
+								VolumnDownloadResult result = volumn.writeLowQuality(info.dir, info.title);
+								results.put(result, info);
+							} catch (Exception e) {
+								logger.error(e.getMessage(), e);
+							}
+						}
+					});
 				}
 			}
 		}
 	};
 
 	public static void addVolumn(String url, String title, File root) {
-		VolumnInfo info = new VolumnInfo(url, title, root);
-		infoQueue.add(info);
-		if (null == infoThread) {
-			infoThread = new Thread(resolver, "resolver");
-			infoThread.start();
-		}
+		final VolumnInfo info = new VolumnInfo(url, title, root);
+		infoExecutor.execute(new Runnable() {
+			public void run() {
+				try {
+					Volumn volunm = VolumnFactory.createVolumn(info.url);
+					volumnMap.put(volunm, info);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+		});
 		if (null == downThread) {
-			downThread = new Thread(resolver, "downloader");
+			downThread = new Thread(downloader, "downloader");
 			downThread.start();
 		}
 		if (null == mergeThread) {
-			mergeThread = new Thread(resolver, "merge");
+			mergeThread = new Thread(merger, "merge");
 			mergeThread.start();
+		}
+	}
+
+	static void await(ThreadPoolExecutor executor) {
+		try {
+			executor.shutdown();
+			while (!executor.isTerminated()) {
+				executor.awaitTermination(1, TimeUnit.SECONDS);
+			}
+		} catch (InterruptedException e) {
 		}
 	}
 
 	public static synchronized void waitToFinish() {
 		threadSwitch = false;
+		try {
+			await(infoExecutor);
+			if (null != downThread) {
+				downThread.join();
+			}
+			await(downExecutor);
+			if (null != mergeThread) {
+				mergeThread.join();
+			}
+			await(mergeExecutor);
+		} catch (InterruptedException e) {
+		}
 
 	}
 
-	public static Executor getResolverExecutor() {
-		return null;
+	public void main(String[] args) {
+		Task.addVolumn("", "LIad", new File("target/task"));
+		Task.waitToFinish();
 	}
 
-	public static Executor getDownloadExecutor() {
-		return null;
-	}
-
-	public static Executor getMergeExecutor() {
-		return null;
-	}
+	static ThreadPoolExecutor infoExecutor = (ThreadPoolExecutor) Executors.newFixedThreadPool(5);
+	static ThreadPoolExecutor downExecutor = (ThreadPoolExecutor) Executors.newFixedThreadPool(5);
+	static ThreadPoolExecutor mergeExecutor = (ThreadPoolExecutor) Executors.newFixedThreadPool(5);
 }

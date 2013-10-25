@@ -15,5 +15,7 @@
 		<module>local</module>
 		<module>comics</module>
 		<module>dropapp</module>
+		<module>script</module>
+		<module>dsl</module>
 	</modules>
 </project>

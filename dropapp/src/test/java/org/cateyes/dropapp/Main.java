@@ -1,6 +1,5 @@
 package org.cateyes.dropapp;
 
-import java.io.OutputStream;
 import java.util.Locale;
 
 import com.dropbox.core.DbxAppInfo;
