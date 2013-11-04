@@ -73,7 +73,7 @@ public class FengResolver extends AbstractResolver implements Resolver {
 		char ch2 = vid.charAt(length - 1);
 		String desc = String.format(format, ch1, new String(new char[] { ch1,
 				ch2 }), vid);
-		Document doc = connector.getPageAsDoc(desc);
+		Document doc = connector.getPageAsDocument(desc);
 		String title = expression_title.evaluate(doc, XPathConstants.STRING)
 				.toString();
 		String uri = expression_url.evaluate(doc, XPathConstants.STRING)

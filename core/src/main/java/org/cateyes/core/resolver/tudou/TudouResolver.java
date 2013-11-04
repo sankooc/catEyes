@@ -71,7 +71,7 @@ public class TudouResolver extends AbstractResolver implements Resolver {
 	public Volumn createVolumnFromVid(String vid) throws Exception {
 		String desc = String.format(xmlformat, vid);
 		logger.info(desc);
-		Document doc = connector.getPageAsDoc(desc);
+		Document doc = connector.getPageAsDocument(desc);
 		String title = (String) expression_title.evaluate(doc,
 				XPathConstants.STRING);
 		if(org.apache.commons.lang.StringUtils.isEmpty(title)){

@@ -45,37 +45,7 @@ public class FMetadata {
 		plist.clear();
 		plist.addAll(tmp);
 	}
-
-	// public double decreaseH1(){
-	// // int count = getPosition().size();
-	// // double offset1 = count*18+9+289;
-	// List<Double> plist = getPosition();
-	// double offset2 = plist.get(0) -4;
-	// // tagsize =filesize- offset2;
-	// // List<Double> tmp = new LinkedList<Double>();
-	// // for(double p : plist){
-	// // tmp.add(p-offset2);
-	// // }
-	// // plist.clear();
-	// // plist.addAll(tmp);
-	// return offset2;
-	// }
-
-	// public void decreaseH2(){
-	// List<Double> plist = getPosition();
-	// plist.remove(0);
-	// getTimes().remove(0);
-	// double f = plist.get(0);
-	// double offset = f-4;
-	// tagsize =filesize- offset;
-	// List<Double> tmp = new LinkedList<Double>();
-	// for(double p : plist){
-	// tmp.add(p-offset);
-	// }
-	// plist.clear();
-	// plist.addAll(tmp);
-	// }
-
+	
 	public FMetadata(EcmaArray<String, Object> arr) {
 		metadata = arr;
 	}

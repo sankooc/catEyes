@@ -20,24 +20,6 @@ public class FLVTag {
 		this.type = type;
 	}
 	
-//	public FLVTag(int type,long time,byte[] data,long position) {
-//		this.time = time;
-//		this.data = data;
-//		this.position = position;
-//		this.type = type;
-////		switch (type) {
-////		case 0x09:
-////			this.type = TagType.VIDEO;
-////			break;
-////		case 0x08:
-////			this.type = TagType.AUDIO;
-////			break;
-////		case 0x12:
-////			this.type = TagType.SCRIPTDATA;
-////			break;
-////		}
-//	}
-
 	public int getType() {
 		return type;
 	}

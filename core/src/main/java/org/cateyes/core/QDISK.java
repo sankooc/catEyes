@@ -6,7 +6,6 @@ public class QDISK {
 	
 	static ApacheConnector connector = ApacheConnector.getInstance();
 	
-	//http://www.1qdisk.com/vod/view.html?idx=8095
 	public static void download(String param){
 		
 	}

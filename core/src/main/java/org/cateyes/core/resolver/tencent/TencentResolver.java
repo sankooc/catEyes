@@ -65,7 +65,7 @@ public class TencentResolver extends AbstractResolver implements Resolver {
 		String title = threadlocal.get();
 		Volumn volumn = new VolumnImpl(title,vid,Provider.TENCENT);
 		String desc = String.format(descFormat, vid);
-		Document doc = connector.getPageAsDoc(desc);
+		Document doc = connector.getPageAsDocument(desc);
 		String url = expression_src.evaluate(doc, XPathConstants.STRING)
 				.toString();
 		long size = Long.parseLong(expression_size.evaluate(doc,

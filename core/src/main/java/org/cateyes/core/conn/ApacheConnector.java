@@ -9,6 +9,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.URI;
+import java.nio.charset.Charset;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.regex.Matcher;
@@ -31,7 +32,6 @@ import org.apache.http.client.HttpRequestRetryHandler;
 import org.apache.http.client.ResponseHandler;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpRequestBase;
-import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.impl.conn.PoolingClientConnectionManager;
 import org.apache.http.params.BasicHttpParams;
@@ -41,7 +41,6 @@ import org.apache.http.protocol.HttpContext;
 import org.apache.http.util.EntityUtils;
 import org.cateyes.core.media.utils.MediaFileUtils;
 import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xml.sax.InputSource;
@@ -210,7 +209,7 @@ public class ApacheConnector implements HttpConnector {
 		return null;
 	}
 
-	public org.w3c.dom.Document getPageAsDoc(String addr) throws Exception {
+	public org.w3c.dom.Document getPageAsDocument(String addr) throws Exception {
 		ResponseHandler<org.w3c.dom.Document> handler = new ResponseHandler<org.w3c.dom.Document>() {
 			public org.w3c.dom.Document handleResponse(HttpResponse response) throws ClientProtocolException, IOException {
 				HttpEntity entity = response.getEntity();
@@ -268,11 +267,11 @@ public class ApacheConnector implements HttpConnector {
 		return null;
 	}
 
-	public Document getPage(String addr) {
+	public org.jsoup.nodes.Document getHtmlPage(String addr) {
 		return getPage(URI.create(addr));
 	}
 
-	public Document getPage(URI uri) {
+	public org.jsoup.nodes.Document getPage(URI uri) {
 		HttpGet request = new HttpGet(uri);
 		HttpResponse response = null;
 		try {
@@ -284,7 +283,7 @@ public class ApacheConnector implements HttpConnector {
 		HttpEntity entity = response.getEntity();
 		try {
 			if (null != entity) {
-				Document document = Jsoup.parse(entity.getContent(), "UTF-8", uri.toString());
+				org.jsoup.nodes.Document document = Jsoup.parse(entity.getContent(), Charset.defaultCharset().name(), uri.toString());
 				return document;
 			}
 		} catch (Exception e) {
@@ -445,32 +444,33 @@ public class ApacheConnector implements HttpConnector {
 		download(url, -1, file, null);
 	}
 
-	public void download(final HttpUriRequest request, OutputStream out) {
-		HttpEntity entity;
-		try {
-			HttpResponse response = client.execute(request);
-			if (logger.isDebugEnabled()) {
-				logger.debug("response code {}", response.getStatusLine().getStatusCode());
-				Header[] headers = response.getAllHeaders();
-				if (null != headers && headers.length != 0) {
-					for (Header head : headers) {
-						logger.info("response headers key[{}] - value[{}]", head.getName(), head.getValue());
-					}
-				}
-			}
-			entity = response.getEntity();
-			logger.info("headlength {} ", entity.getContentLength());
-			if (null != entity) {
-				EntityUtils.consume(entity);
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
-		} finally {
-			request.abort();
-		}
-	}
+//	@Deprecated
+//	private void download(final HttpUriRequest request, OutputStream out) {
+//		HttpEntity entity;
+//		try {
+//			HttpResponse response = client.execute(request);
+//			if (logger.isDebugEnabled()) {
+//				logger.debug("response code {}", response.getStatusLine().getStatusCode());
+//				Header[] headers = response.getAllHeaders();
+//				if (null != headers && headers.length != 0) {
+//					for (Header head : headers) {
+//						logger.info("response headers key[{}] - value[{}]", head.getName(), head.getValue());
+//					}
+//				}
+//			}
+//			entity = response.getEntity();
+//			logger.info("headlength {} ", entity.getContentLength());
+//			if (null != entity) {
+//				EntityUtils.consume(entity);
+//			}
+//		} catch (Exception e) {
+//			e.printStackTrace();
+//		} finally {
+//			request.abort();
+//		}
+//	}
 
-	public <T> T doGet(final String uri, final ResponseHandler<T> hander) throws Exception {
+	private <T> T doGet(final String uri, final ResponseHandler<T> hander) throws Exception {
 		HttpRequestBase request = createRequest(uri);
 		return client.execute(request, hander);
 	}

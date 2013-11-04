@@ -16,7 +16,6 @@ import org.cateyes.core.conn.ApacheConnector;
 import org.cateyes.core.conn.ConsoleOuputer;
 import org.cateyes.core.conn.ApacheConnector.VideoInfo;
 import org.cateyes.core.conn.MResource;
-import org.cateyes.core.media.MediaMerger;
 import org.cateyes.core.media.utils.MediaFileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -76,9 +75,12 @@ public class VolumnImpl implements Volumn {
 	Provider provider;
 	Map<String, String> params;
 	transient ApacheConnector connector = ApacheConnector.getInstance();
-	MediaMerger merger = new MediaMerger();
+//	MediaMerger merger = new MediaMerger();
 	public final static String MULTIFIX = "%s/%s-%02d";
 
+//	private boolean complete;
+//	private boolean merged;
+	
 	public Provider getProvider() {
 		return provider;
 	}
@@ -127,17 +129,17 @@ public class VolumnImpl implements Volumn {
 	public void addFragment(int quality, String url) {
 		addFragment(quality, url, -1);
 	}
-	public void writeLowQuality(File dir) throws Exception {
-		download(dir, fragments.last());
+	public VolumnDownloadResult writeLowQuality(File dir) throws Exception {
+		return download(dir, fragments.last());
 	}
 
-	public void writeLowQuality(File dir,String title) throws Exception {
-		download(dir, title,fragments.last());
+	public VolumnDownloadResult writeLowQuality(File dir,String title) throws Exception {
+		return download(dir, title,fragments.last());
 	}
 	
 	private static Executor service = Executors.newFixedThreadPool(10);
 
-	protected synchronized void download(final File dir,String title, VolumnFragment fragment) throws Exception {
+	protected synchronized VolumnDownloadResult download(final File dir,String title, VolumnFragment fragment) throws Exception {
 		if (dir.isFile()) {
 			throw new Exception("file is not a directory");
 		}
@@ -192,16 +194,22 @@ public class VolumnImpl implements Volumn {
 		} catch (InterruptedException e) {
 			logger.error(e.getMessage());
 		}
-		if(files.size() >1 && files.size() == fragment.resources.size()){
-			logger.info("start to merge files");
-			merger.merge(files, dir,getTitle());
-			logger.info("finish merge files");
-		}
+		return new VolumnDownloadResult(fragment.resources.size() == files.size(),files,dir,getTitle());
 	}
 	
+//	Collection<File> ofiles;
+//	File targetDir;
+//	public synchronized File merge(){
+//		if(ofiles.size() >1 && complete){
+//			logger.info("start to merge files");
+//			return merger.merge(ofiles, targetDir,getTitle());
+//		}
+//		return null;
+//	}
 	
-	protected synchronized void download(final File dir, VolumnFragment fragment) throws Exception {
-		download(dir,null,fragment);
+	
+	protected synchronized VolumnDownloadResult download(final File dir, VolumnFragment fragment) throws Exception {
+		return download(dir,null,fragment);
 	}
 
 	public String getTitle() {
@@ -216,16 +224,16 @@ public class VolumnImpl implements Volumn {
 		return params;
 	}
 
-	public void write(File dir, int quality) throws Exception {
-		write(dir,null,quality);
+	public VolumnDownloadResult write(File dir, int quality) throws Exception {
+		return write(dir,null,quality);
 	}
 
-	public void write(File dir,String title, int quality) throws Exception {
+	public VolumnDownloadResult write(File dir,String title, int quality) throws Exception {
 		VolumnFragment fragment = getFragment(quality);
 		if(null == fragment){
 			throw new Exception("no such this quality");
 		}
-		download(dir, title,fragment);
+		return download(dir, title,fragment);
 	}
 	
 	public int getQualityCount() {
@@ -237,12 +245,12 @@ public class VolumnImpl implements Volumn {
 		return vf.resources.keySet();
 	}
 	
-	public void writeHighQuality(File dir) throws Exception {
-		download(dir, fragments.first());
+	public VolumnDownloadResult writeHighQuality(File dir) throws Exception {
+		return download(dir, fragments.first());
 	}
 
-	public void writeHighQuality(File dir,String title) throws Exception {
-		download(dir,title, fragments.first());
+	public VolumnDownloadResult writeHighQuality(File dir,String title) throws Exception {
+		return download(dir,title, fragments.first());
 	}
 	
 }

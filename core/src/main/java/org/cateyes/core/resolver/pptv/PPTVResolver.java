@@ -88,7 +88,7 @@ public class PPTVResolver extends AbstractResolver implements Resolver {
 			return null;
 		}
 		String desc = String.format(format, vid);
-		Document doc = connector.getPageAsDoc(desc);
+		Document doc = connector.getPageAsDocument(desc);
 		String title = expression_title.evaluate(doc, XPathConstants.STRING).toString();
 		Volumn volumn = new VolumnImpl(title, vid, Provider.PPTV);
 		int port = 8080;
