@@ -155,16 +155,15 @@ public class VolumnImpl implements Volumn {
 		for (int i = 0; ite.hasNext(); i++) {
 			final String fileName = names[i];
 			final String uri = ite.next();
-			final long size = fragment.resources.get(uri);
+//			final long size = 
+			fragment.resources.get(uri);
 			service.execute(new Runnable() {
 				public void run() {
 					try {
 						Thread.sleep(500);// tudou need delay
 						VideoInfo info = connector.getVideoInfo(uri);
 						if (null == info) {
-							File file = new File(dir,fileName + "." + suffix);
-							connector.download(uri, size,file , null);
-							files.add(file);
+							throw new RuntimeException("no resource");
 						} else {
 							String contentType = info.getType();
 							String suf = ".";

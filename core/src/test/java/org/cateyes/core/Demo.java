@@ -42,7 +42,7 @@ public class Demo {
 	@Test
 	public void youkuTest() throws Exception{
 		try {
-			Volumn volum = VolumnFactory.createVolumn("http://v.youku.com/v_show/id_XNTQ2OTc0OTAw.html");
+			Volumn volum = VolumnFactory.createVolumn("http://v.youku.com/v_show/id_XNjE1Mjk2MjM2.html");
 			volum.writeLowQuality(new File("target/youku"),null);
 		} catch (Exception e) {
 			e.printStackTrace();
