@@ -38,6 +38,7 @@ public class VolumnFactory {
 		return rList;
 	}
 
+	//TODO add resolver automatic
 	static {
 		rList = new LinkedList<Resolver>();
 

@@ -1,15 +1,13 @@
 package org.cateyes.core.comics.webtoon;
 
 import java.io.File;
-import java.io.IOException;
-import java.net.URI;
 import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import org.cateyes.core.comics.MangaProvider;
 import org.cateyes.core.conn.ApacheConnector;
+import org.cateyes.core.conn.HttpConnector;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.nodes.Node;
@@ -19,10 +17,8 @@ import org.slf4j.LoggerFactory;
 
 public class Naver {
 	static Logger logger = LoggerFactory.getLogger(Naver.class);
-	
-	
-	public void download(String id, File file, int start, int end)
-			throws IOException, InterruptedException {
+
+	public void download(String id, File file, int start, int end) throws Exception {
 		String title = detail(id, file);
 		int inx = start;
 		for (; inx <= end; inx++) {
@@ -34,9 +30,9 @@ public class Naver {
 		}
 	}
 
-	public String detail(String id, File file) throws IOException {
-		URI uri = URI.create(detail + id);
-		Document page = connector.getPage(uri);
+	public String detail(String id, File file) throws Exception {
+		// URI uri = URI.create(detail + id);
+		Document page = connector.getHtmlPage(detail + id);
 		Elements eles = page.getElementsByAttributeValue("class", "comicinfo");
 		Element detail = eles.get(0).child(0).child(0).child(0);
 		String title = detail.attr("title");
@@ -46,19 +42,17 @@ public class Naver {
 		return title;
 	}
 
-	final ApacheConnector connector = ApacheConnector.getInstance();
+	final HttpConnector connector = ApacheConnector.getInstance();
 	String detail = "http://comic.naver.com/webtoon/list.nhn?titleId=";
 	String prefix = "http://comic.naver.com/webtoon/detail.nhn";
-	ThreadPoolExecutor service = (ThreadPoolExecutor) Executors
-			.newCachedThreadPool();
+	ThreadPoolExecutor service = (ThreadPoolExecutor) Executors.newCachedThreadPool();
 
-	public void download(String id, int volumn, String path, final String prix)
-			throws InterruptedException {
+	public void download(String id, int volumn, String path, final String prix) throws InterruptedException {
 		try {
-			URI uri = URI.create(prefix + "?titleId=" + id + "&no=" + volumn);
-			Document page = connector.getPage(uri);
-			Elements list = page.getElementsByAttributeValue("class",
-					"view_area");
+			// URI uri = URI.create(prefix + "?titleId=" + id + "&no=" +
+			// volumn);
+			Document page = connector.getHtmlPage(prefix + "?titleId=" + id + "&no=" + volumn);
+			Elements list = page.getElementsByAttributeValue("class", "view_area");
 			Element ele = list.get(0);
 			List<Node> nodes = ele.child(0).childNodes();
 			final AtomicInteger i = new AtomicInteger(0);
@@ -69,9 +63,7 @@ public class Naver {
 					service.execute(new Runnable() {
 						public void run() {
 							try {
-								connector.download(node.attr("src"), new File(
-										root, prix + "-" + i.incrementAndGet()
-												+ ".jpg"));
+								connector.download(node.attr("src"), new File(root, prix + "-" + i.incrementAndGet() + ".jpg"));
 							} catch (Exception e) {
 								e.printStackTrace();
 							}

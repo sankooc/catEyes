@@ -12,9 +12,9 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.cateyes.core.VideoConstants.Provider;
-import org.cateyes.core.conn.ApacheConnector;
+import org.cateyes.core.conn.ConnectorProvider;
 import org.cateyes.core.conn.ConsoleOuputer;
-import org.cateyes.core.conn.ApacheConnector.VideoInfo;
+import org.cateyes.core.conn.HttpConnector;
 import org.cateyes.core.conn.MResource;
 import org.cateyes.core.media.utils.MediaFileUtils;
 import org.slf4j.Logger;
@@ -74,7 +74,7 @@ public class VolumnImpl implements Volumn {
 	static Logger logger = LoggerFactory.getLogger(VolumnImpl.class);
 	Provider provider;
 	Map<String, String> params;
-	transient ApacheConnector connector = ApacheConnector.getInstance();
+	transient HttpConnector connector = ConnectorProvider.getCommonConnector();
 //	MediaMerger merger = new MediaMerger();
 	public final static String MULTIFIX = "%s/%s-%02d";
 
@@ -163,7 +163,7 @@ public class VolumnImpl implements Volumn {
 				public void run() {
 					try {
 						Thread.sleep(500);// tudou need delay
-						VideoInfo info = connector.getVideoInfo(uri);
+						org.cateyes.core.conn.HttpConnector.ResponseInfo info = connector.getVideoInfo(uri);
 						if (null == info) {
 							throw new RuntimeException("no resource");
 						} else {

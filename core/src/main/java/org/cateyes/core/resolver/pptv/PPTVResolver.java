@@ -91,7 +91,7 @@ public class PPTVResolver extends AbstractResolver implements Resolver {
 		Document doc = connector.getPageAsDocument(desc);
 		String title = expression_title.evaluate(doc, XPathConstants.STRING).toString();
 		Volumn volumn = new VolumnImpl(title, vid, Provider.PPTV);
-		int port = 8080;
+//		int port = 8080;
 		MessageDigest degest = MessageDigest.getInstance("MD5");
 		String host = expression_host.evaluate(doc, XPathConstants.STRING).toString();
 		String st = expression_time.evaluate(doc, XPathConstants.STRING).toString();

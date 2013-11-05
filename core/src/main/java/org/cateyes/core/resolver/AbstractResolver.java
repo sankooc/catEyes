@@ -20,8 +20,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.cateyes.core.IHeader;
-import org.cateyes.core.conn.ApacheConnector;
 import org.cateyes.core.conn.ConnectorProvider;
+import org.cateyes.core.conn.HttpConnector;
 import org.cateyes.core.volumn.Volumn;
 
 /**
@@ -33,7 +33,7 @@ public abstract class AbstractResolver implements Resolver {
 
 	abstract protected String[] getRegexStrings();
 
-	protected ApacheConnector connector = ConnectorProvider.getCommonConnector();
+	protected HttpConnector connector = ConnectorProvider.getCommonConnector();
 	
 
 	protected ThreadLocal<String> threadlocal = new ThreadLocal<String>();

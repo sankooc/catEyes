@@ -65,9 +65,6 @@ public class Metadata {
 	    Marshaller m = context.createMarshaller();
 	    m.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);
 	    m.marshal(meta, System.out);
-//	    InputStream stream;
-//	    Unmarshaller um = context.createUnmarshaller();
-//	    um.unmarshal(new FileReader(new InputStreamReader(stream)));
 
 	}
 }

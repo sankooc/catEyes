@@ -2,22 +2,14 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>cateyes</groupId>
-	<artifactId>0.0.1-SNAPSHOT</artifactId>
-	<version>${version}</version>
+	<artifactId>cateyes</artifactId>
+	<version>0.0.1-SNAPSHOT</version>
 	<packaging>pom</packaging>
 	<properties>
-	<version>0.0.1-SNAPSHOT</version>
+		<version>0.0.1-SNAPSHOT</version>
 	</properties>
 	<modules>
 		<module>core</module>
 		<module>assembly</module>
-		<module>server</module>
-		<module>comics</module>
-		<module>dropapp</module>
-		<module>local</module>
-		<module>comics</module>
-		<module>dropapp</module>
-		<module>script</module>
-		<module>dsl</module>
 	</modules>
 </project>

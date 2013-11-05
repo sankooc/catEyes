@@ -7,6 +7,7 @@
 		<version>0.0.1-SNAPSHOT</version>
 	</parent>
 	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<jpath.vesion>0.8.1</jpath.vesion>
 		<hc.version>4.2.4</hc.version>
 		<cio-version>2.4</cio-version>
@@ -78,8 +79,6 @@
 	</dependencies>
 
 	<build>
-		<sourceDirectory>UTF-8</sourceDirectory>
-
 		<resources>
 			<resource>
 				<directory>src/main/assembly</directory>
@@ -94,6 +93,7 @@
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>exec-maven-plugin</artifactId>
+				<version>1.2.1</version>
 				<executions>
 					<execution>
 						<goals>
@@ -103,9 +103,6 @@
 				</executions>
 				<configuration>
 					<mainClass>${mainclass}</mainClass>
-					<commandlineArgs>
-					${project.basedir} http://v.youku.com/v_show/id_XNjE1Mjk2MjM2.html target/youku
-					</commandlineArgs>
 				</configuration>
 			</plugin>
 		</plugins>

@@ -51,6 +51,7 @@ public class PPSResolver extends AbstractResolver implements Resolver {
 
 	public Volumn createVolumnFromVid(String vid) throws Exception {
 		String desc = String.format(format, vid);
+		logger.debug(desc);
 		byte[] data = connector.doGet(desc);
 		String uri = new String(data);
 		Matcher matcher = pattern_title.matcher(uri);

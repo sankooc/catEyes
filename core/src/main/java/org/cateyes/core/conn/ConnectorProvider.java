@@ -3,7 +3,7 @@ package org.cateyes.core.conn;
 public class ConnectorProvider {
 	
 	
-	public static ApacheConnector getCommonConnector(){
+	public static HttpConnector getCommonConnector(){
 		return ApacheConnector.getInstance();
 	}
 	

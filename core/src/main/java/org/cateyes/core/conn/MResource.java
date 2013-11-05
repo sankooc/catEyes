@@ -9,5 +9,4 @@ public interface MResource {
 	void setLength(long size);
 	void setContent(long content);
 	void addContent(long increase);
-	
 }

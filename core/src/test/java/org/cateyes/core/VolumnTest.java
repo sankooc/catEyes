@@ -4,16 +4,16 @@ import java.util.Collection;
 
 import junit.framework.Assert;
 
-import org.cateyes.core.conn.ApacheConnector;
 import org.cateyes.core.conn.ConnectorProvider;
-import org.cateyes.core.conn.ApacheConnector.VideoInfo;
+import org.cateyes.core.conn.HttpConnector;
+import org.cateyes.core.conn.HttpConnector.ResponseInfo;
 import org.cateyes.core.resolver.Resolver;
 import org.cateyes.core.volumn.Volumn;
 import org.cateyes.core.volumn.VolumnFactory;
 import org.junit.Test;
 
 public class VolumnTest {
-	ApacheConnector connector = ConnectorProvider.getCommonConnector();
+	HttpConnector connector = ConnectorProvider.getCommonConnector();
 
 	static Collection<Resolver> resolvers = VolumnFactory.getResolvers();
 
@@ -33,7 +33,7 @@ public class VolumnTest {
 				Collection<String> urls = volumn.getFragmentURL(i);
 				Assert.assertFalse(urls.isEmpty());
 				for (String uri : urls) {
-					VideoInfo info = connector.getVideoInfo(uri);
+					ResponseInfo info = connector.getVideoInfo(uri);
 					System.out.println("uri:" + uri);
 					System.out.println("video fragment size:" + info.getSize()
 							+ " type:" + info.getType());
@@ -88,7 +88,7 @@ public class VolumnTest {
 		test(uri);
 	}
 
-	@Test
+//	@Test
 	public void testPps() {
 		String uri = "http://v.pps.tv/play_36ASVO.html#from_www";
 		test(uri);

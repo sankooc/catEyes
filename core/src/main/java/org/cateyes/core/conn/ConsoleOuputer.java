@@ -1,12 +1,14 @@
 package org.cateyes.core.conn;
 
+import java.util.Collection;
+import java.util.LinkedList;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class ConsoleOuputer {
+public class ConsoleOuputer implements Runnable {
 
 	private final static ConsoleOuputer INSTANCE = new ConsoleOuputer();
 
@@ -16,16 +18,36 @@ public class ConsoleOuputer {
 
 	private int duration = 3000;
 
-	private static Logger logger = LoggerFactory
-			.getLogger(ConsoleOuputer.class);
+	private static Logger logger = LoggerFactory.getLogger(ConsoleOuputer.class);
+
+	final Thread thread = new Thread(this);
 
 	ExecutorService service = Executors.newCachedThreadPool();
 
-	public MResource createConsoler(final String task) {
-		return new ConsolerTask(task);
+	// int count;
+
+	// void show(String task, long current, long content, int time, long
+	// totalSize) {
+	// content = content * 1000 / time;
+	// String md = getStr(content)+ "/s";
+	// int percent = (int) (current * 100 / totalSize);
+	// logger.info("task:[{}] total:[{}] percent:[{}%] speed [{}] \r", task,
+	// getStr(totalSize), percent, md + "/s");
+	// }
+
+	final Collection<ConsolerTask> taskList = new LinkedList<ConsolerTask>();
+
+	public synchronized MResource createConsoler(final String task) {
+
+		ConsolerTask dtask = new ConsolerTask(task);
+//		taskList.add(dtask);
+		if (!this.thread.isAlive()) {
+			thread.start();
+		}
+		return dtask;
 	}
 
-	public String getStr(long content) {
+	String getStr(long content) {
 		String bt = (content & 0x02ffl) + "b";
 		String kb = "";
 		String mb = "";
@@ -52,13 +74,9 @@ public class ConsoleOuputer {
 			this.task = task;
 		}
 
-		void show(String task,long current, long content, int time) {
-			content = content * 1000 / time;
-			String md = getStr(content);
-			int percent = (int) (current*100/totalSize);
-			logger.info("task:[{}] total:[{}] percent:[{}%] speed [{}] ", task,
-					getStr(totalSize),percent, md + "/s");
-		}
+		int percent;
+
+		String currentSpeed;
 
 		public void run() {
 			while (flag) {
@@ -69,14 +87,16 @@ public class ConsoleOuputer {
 					e.printStackTrace();
 				}
 				s = content - s;
-				show(task,content, s, duration);
+				long data = s * 1000 / duration;
+				currentSpeed = getStr(data) + "/s";
+				percent = (int) (content * 100 / totalSize);
 			}
 		}
 
 		private String task;
 		private boolean flag;
 		private long start;
-		private long initSize = 0;
+		// private long initSize = 0;
 		private long totalSize;
 		private long content;
 
@@ -88,6 +108,7 @@ public class ConsoleOuputer {
 			logger.info("start task:{}", task);
 			start = System.currentTimeMillis();
 			flag = true;
+			addTask(this);
 			service.execute(this);
 		}
 
@@ -97,8 +118,9 @@ public class ConsoleOuputer {
 
 		public void finish() {
 			flag = false;
-			long time = System.currentTimeMillis() - start;
-			logger.info("task:{} is finish cost time {}ms", task, time);
+//			long time = System.currentTimeMillis() - start;
+			removeTask(this);
+//			logger.info("task:{} is finish cost time {}ms", task, time);
 		}
 
 		public boolean isError() {
@@ -111,7 +133,7 @@ public class ConsoleOuputer {
 		}
 
 		public void setContent(long content) {
-			initSize = content;
+			// initSize = content;
 
 		}
 
@@ -119,5 +141,55 @@ public class ConsoleOuputer {
 			content += increase;
 		}
 
+		public long getTime() {
+			return System.currentTimeMillis() - start;
+		}
+
+	}
+
+	synchronized void addTask(ConsolerTask task) {
+		taskList.add(task);
+	}
+
+	synchronized void removeTask(ConsolerTask task) {
+		taskList.remove(task);
+	}
+
+	synchronized void show() {
+		int taskCount = taskList.size();
+		if (taskCount < 1) {
+			return;
+		}
+		StringBuilder builder = new StringBuilder();
+		for (ConsolerTask task : taskList) {
+			show(task, builder);
+			builder.append(" | ");
+		}
+//		if(null == System.console()){
+			System.out.print(builder.toString() + '\r');
+//		}else{
+//			System.console().writer().write(builder.toString() + "\r");
+//		}
+	}
+
+	void show(ConsolerTask task, StringBuilder builder) {
+//		builder.append(" t: " + task.task);
+//		builder.append(" s: " + task.currentSpeed);
+		builder.append(" p: " + task.percent+"%");
+	}
+
+	public void run() {
+		while (true) {
+			// long s = content;
+			try {
+				Thread.sleep(duration);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+			if (taskList.isEmpty()) {
+				continue;
+			}
+			show();
+		}
 	}
 }

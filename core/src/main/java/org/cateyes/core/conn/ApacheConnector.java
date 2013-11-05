@@ -47,38 +47,6 @@ import org.xml.sax.InputSource;
 
 public class ApacheConnector implements HttpConnector {
 
-	public static class VideoInfo {
-		long size;
-		String type;
-
-		public long getSize() {
-			return size;
-		}
-
-		public void setSize(long size) {
-			this.size = size;
-		}
-
-		public String getType() {
-			return type;
-		}
-
-		public void setType(String type) {
-			this.type = type;
-		}
-
-		public VideoInfo(long size, String type) {
-			super();
-			this.size = size;
-			this.type = type;
-		}
-
-		public VideoInfo() {
-			super();
-		}
-
-	}
-
 	final DefaultHttpClient client;
 	ExecutorService executor;
 	static Logger logger = LoggerFactory.getLogger(ApacheConnector.class);
@@ -180,7 +148,7 @@ public class ApacheConnector implements HttpConnector {
 		return doGet(uri, handler);
 	}
 
-	public VideoInfo getVideoInfo(String uri) throws Exception {
+	public ResponseInfo getVideoInfo(String uri) throws Exception {
 		HttpRequestBase request = createRequest(uri);
 		HttpEntity entity = null;
 		try {
@@ -194,9 +162,9 @@ public class ApacheConnector implements HttpConnector {
 			entity = response.getEntity();
 			if (null != entity) {
 				long size = entity.getContentLength();
-				return new VideoInfo(size, type);
+				return new ResponseInfo(size, type);
 			}
-			return new VideoInfo(0, type);
+			return new ResponseInfo(0, type);
 		} catch (Exception e) {
 			logger.error(e.getMessage(), e);
 		} finally {
@@ -221,11 +189,8 @@ public class ApacheConnector implements HttpConnector {
 					DocumentBuilder builder = factory.newDocumentBuilder();
 					return builder.parse(stream);
 				} catch (Exception e) {
-					logger.error(e.getMessage(), e);
-				} finally {
-					EntityUtils.consume(entity);
+					throw new IOException(e);
 				}
-				return null;
 			}
 		};
 		return doGet(addr, handler);
@@ -268,10 +233,10 @@ public class ApacheConnector implements HttpConnector {
 	}
 
 	public org.jsoup.nodes.Document getHtmlPage(String addr) {
-		return getPage(URI.create(addr));
+		return getHtmlPage(URI.create(addr));
 	}
 
-	public org.jsoup.nodes.Document getPage(URI uri) {
+	public org.jsoup.nodes.Document getHtmlPage(URI uri) {
 		HttpGet request = new HttpGet(uri);
 		HttpResponse response = null;
 		try {
@@ -352,7 +317,7 @@ public class ApacheConnector implements HttpConnector {
 		}
 		return false;
 	}
-	
+
 	void readHeaders(HttpMessage message) {
 		Header[] headers = message.getAllHeaders();
 		if (null == headers) {
@@ -444,31 +409,33 @@ public class ApacheConnector implements HttpConnector {
 		download(url, -1, file, null);
 	}
 
-//	@Deprecated
-//	private void download(final HttpUriRequest request, OutputStream out) {
-//		HttpEntity entity;
-//		try {
-//			HttpResponse response = client.execute(request);
-//			if (logger.isDebugEnabled()) {
-//				logger.debug("response code {}", response.getStatusLine().getStatusCode());
-//				Header[] headers = response.getAllHeaders();
-//				if (null != headers && headers.length != 0) {
-//					for (Header head : headers) {
-//						logger.info("response headers key[{}] - value[{}]", head.getName(), head.getValue());
-//					}
-//				}
-//			}
-//			entity = response.getEntity();
-//			logger.info("headlength {} ", entity.getContentLength());
-//			if (null != entity) {
-//				EntityUtils.consume(entity);
-//			}
-//		} catch (Exception e) {
-//			e.printStackTrace();
-//		} finally {
-//			request.abort();
-//		}
-//	}
+	// @Deprecated
+	// private void download(final HttpUriRequest request, OutputStream out) {
+	// HttpEntity entity;
+	// try {
+	// HttpResponse response = client.execute(request);
+	// if (logger.isDebugEnabled()) {
+	// logger.debug("response code {}",
+	// response.getStatusLine().getStatusCode());
+	// Header[] headers = response.getAllHeaders();
+	// if (null != headers && headers.length != 0) {
+	// for (Header head : headers) {
+	// logger.info("response headers key[{}] - value[{}]", head.getName(),
+	// head.getValue());
+	// }
+	// }
+	// }
+	// entity = response.getEntity();
+	// logger.info("headlength {} ", entity.getContentLength());
+	// if (null != entity) {
+	// EntityUtils.consume(entity);
+	// }
+	// } catch (Exception e) {
+	// e.printStackTrace();
+	// } finally {
+	// request.abort();
+	// }
+	// }
 
 	private <T> T doGet(final String uri, final ResponseHandler<T> hander) throws Exception {
 		HttpRequestBase request = createRequest(uri);
