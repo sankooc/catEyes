@@ -22,6 +22,8 @@ import javax.xml.bind.annotation.*;
 /**
  * @author sankooc
  */
+
+@SuppressWarnings("restriction")
 @XmlRootElement
 public class Metadata {
 	@XmlRootElement

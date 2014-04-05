@@ -35,7 +35,7 @@ import org.slf4j.LoggerFactory;
  * @author sankooc
  * 
  */
-public class SohuResolver extends AbstractResolver implements Resolver {
+public class SohuResolver extends AbstractResolver<String> implements Resolver {
 
 	static Logger logger = LoggerFactory.getLogger(SohuResolver.class);
 	static Pattern pattern = Pattern.compile("var vid=\"(\\d+)\";");
@@ -66,7 +66,6 @@ public class SohuResolver extends AbstractResolver implements Resolver {
 		String rot = data.getString("prot");
 		data = data.getJSONObject("data");
 		String title = data.getString("tvName");
-//		JSONArray clipsSize = data.getJSONArray("clipsBytes");
 		JSONArray clipsURLS = data.getJSONArray("clipsURL");
 		JSONArray suffixs = data.getJSONArray("su");
 		VolumnImpl volumn = new VolumnImpl(title, vid, Provider.SOHO);

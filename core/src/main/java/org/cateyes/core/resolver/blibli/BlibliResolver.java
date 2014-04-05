@@ -13,7 +13,7 @@ import org.cateyes.core.volumn.Volumn;
  * @author sankooc
  *
  */
-public class BlibliResolver extends AbstractResolver implements Resolver {
+public class BlibliResolver extends AbstractResolver<String> implements Resolver {
 
 	
 	static String format = "http://interface.bilibili.tv/playurl?cid=%s";

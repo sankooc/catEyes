@@ -29,7 +29,7 @@ import org.w3c.dom.NodeList;
 /**
  * @author sankooc
  */
-public class TudouResolver extends AbstractResolver implements Resolver {
+public class TudouResolver extends AbstractResolver<String> implements Resolver {
 	public static final String xmlformat = "http://v2.tudou.com/v?it=%s&st=1,2,3,4,99";
 	static XPathExpression expression_src;
 	static XPathExpression expression_title;
@@ -54,14 +54,14 @@ public class TudouResolver extends AbstractResolver implements Resolver {
 	static Logger logger = LoggerFactory.getLogger(TudouResolver.class);
 
 	public Volumn createVolumn(String uri) throws Exception {
+		Volumn volumn = null;
 //		String iid = connector.getPageRegix(uri, pattern);
 //		logger.info("tudou iid {}", iid);
-		String vid =  connector.getPageRegix(uri, pattern2);
-		logger.info("tudou vid:{}",vid);
-		Volumn volumn = null;
 //		if (null != iid) {
 //			volumn =  createVolumnFromVid(iid);
 //		}
+		String vid =  connector.getPageRegix(uri, pattern2);
+		logger.info("tudou vid:{}",vid);
 		if(null == volumn){
 			volumn = YoukuResolver.createVolumnFromVid(vid);
 		}

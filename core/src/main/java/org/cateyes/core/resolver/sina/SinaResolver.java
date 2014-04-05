@@ -23,7 +23,7 @@ import org.cateyes.core.volumn.Volumn;
 /**
  * @author sankooc
  */
-public class SinaResolver extends AbstractResolver implements Resolver {
+public class SinaResolver extends AbstractResolver<String> implements Resolver {
 
 	/* (non-Javadoc)
 	 * @see org.cateyes.core.Resolver#createVolumn(java.lang.String)

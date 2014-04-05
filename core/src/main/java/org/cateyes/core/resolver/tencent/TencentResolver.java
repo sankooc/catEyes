@@ -33,7 +33,7 @@ import org.w3c.dom.Document;
 /**
  * @author sankooc
  */
-public class TencentResolver extends AbstractResolver implements Resolver {
+public class TencentResolver extends AbstractResolver<String> implements Resolver {
 
 	static Pattern pattern = Pattern.compile("vid:\"(\\w+)\"");
 	static String descFormat = "http://vv.video.qq.com/geturl?otype=xml&platform=1&format=2&&vid=%s";
@@ -62,7 +62,7 @@ public class TencentResolver extends AbstractResolver implements Resolver {
 	}
 
 	public Volumn createVolumnFromVid(String vid) throws Exception {
-		String title = threadlocal.get();
+		String title = (String) super.threadlocal.get();
 		Volumn volumn = new VolumnImpl(title,vid,Provider.TENCENT);
 		String desc = String.format(descFormat, vid);
 		Document doc = connector.getPageAsDocument(desc);

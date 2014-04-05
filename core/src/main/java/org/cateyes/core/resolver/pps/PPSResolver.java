@@ -30,7 +30,7 @@ import org.slf4j.LoggerFactory;
 /**
  * @author sankooc
  */
-public class PPSResolver extends AbstractResolver implements Resolver {
+public class PPSResolver extends AbstractResolver<String> implements Resolver {
 
 	static Pattern pattern = Pattern.compile("url_key: \"(\\w+)\",");
 	public final static Pattern pattern_title = Pattern

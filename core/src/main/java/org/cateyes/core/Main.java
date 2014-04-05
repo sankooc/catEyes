@@ -1,18 +1,12 @@
 package org.cateyes.core;
 
 import java.io.BufferedReader;
-import java.io.Console;
 import java.io.File;
 import java.io.InputStreamReader;
 
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-//import org.cateyes.core.volumn.Volumn;
-//import org.cateyes.core.volumn.VolumnFactory;
-//import org.slf4j.Logger;
-//import org.slf4j.LoggerFactory;
 
 public class Main {
 

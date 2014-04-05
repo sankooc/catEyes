@@ -23,7 +23,7 @@ import com.jayway.jsonpath.JsonPath;
 /**
  * @author sankooc
  */
-public class YoukuResolver extends AbstractResolver implements Resolver {
+public class YoukuResolver extends AbstractResolver<String> implements Resolver {
 
 	private final static Pattern pattern = Pattern
 			.compile("var videoId2= \'(\\w+)\';");

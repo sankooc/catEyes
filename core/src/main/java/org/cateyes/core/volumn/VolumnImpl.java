@@ -113,6 +113,10 @@ public class VolumnImpl implements Volumn {
 		return fragment;
 	}
 
+	public int getHighQualityCount(){
+		return fragments.first().resources.size();
+	}
+	
 	public void addFragment(int quality, String suffix, String url) {
 		addFragment(quality, "flv", url, -1);
 	}

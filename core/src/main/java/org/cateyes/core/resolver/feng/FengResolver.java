@@ -34,7 +34,7 @@ import org.w3c.dom.Document;
 /**
  * @author sankooc
  */
-public class FengResolver extends AbstractResolver implements Resolver {
+public class FengResolver extends AbstractResolver<String> implements Resolver {
 
 	static Pattern pattern = Pattern.compile("\"id\": \"([^\"]+)\"");
 	static String format = "http://v.ifeng.com/video_info_new/%s/%s/%s.xml";

@@ -25,22 +25,22 @@ import org.cateyes.core.conn.HttpConnector;
 import org.cateyes.core.volumn.Volumn;
 
 /**
- * 尽量使用易被模型取代的编程方案 
- * 使用xpath,正则表达式,jsonpath(https://code.google.com/p/json-path/)等 避免在代码中出现过多的逻辑
+ * 尽量使用易被模型取代的编程方案 使用xpath,正则表达式,jsonpath(https://code.google.com/p/json-path/)等
+ * 避免在代码中出现过多的逻辑
+ * 
  * @author sankooc
  */
-public abstract class AbstractResolver implements Resolver {
+public abstract class AbstractResolver<T> implements Resolver {
 
 	abstract protected String[] getRegexStrings();
 
 	protected HttpConnector connector = ConnectorProvider.getCommonConnector();
-	
 
 	protected ThreadLocal<String> threadlocal = new ThreadLocal<String>();
-	
-	//video quality
-	protected int quality =-1;
-	
+
+	// video quality
+	protected int quality = -1;
+
 	private Pattern[] patterns;
 
 	protected AbstractResolver() {
@@ -59,6 +59,12 @@ public abstract class AbstractResolver implements Resolver {
 		return createVolumn(uri);
 	}
 
+	public  T getVid(String url) {
+		
+		return null;
+	}	
+	
+	
 	public boolean isPrefer(String uri) {
 		for (Pattern pattern : patterns) {
 			Matcher matcher = pattern.matcher(uri);

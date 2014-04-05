@@ -7,6 +7,8 @@
 		<version>0.0.1-SNAPSHOT</version>
 	</parent>
 	<properties>
+		<maven.compiler.source>1.6</maven.compiler.source>
+		<maven.compiler.target>1.6</maven.compiler.target>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<jpath.vesion>0.8.1</jpath.vesion>
 		<hc.version>4.2.4</hc.version>
@@ -76,6 +78,11 @@
 			<artifactId>slf4j-api</artifactId>
 			<version>${slf.version}</version>
 		</dependency>
+		<dependency>
+			<groupId>commons-codec</groupId>
+			<artifactId>commons-codec</artifactId>
+			<version>1.8</version>
+		</dependency>
 	</dependencies>
 
 	<build>
@@ -90,6 +97,7 @@
 			</resource>
 		</resources>
 		<plugins>
+
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>exec-maven-plugin</artifactId>

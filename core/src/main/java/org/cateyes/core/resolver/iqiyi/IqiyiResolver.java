@@ -27,7 +27,7 @@ import org.w3c.dom.NodeList;
  * 
  * @author sankooc
  */
-public class IqiyiResolver extends AbstractResolver implements Resolver {
+public class IqiyiResolver extends AbstractResolver<String> implements Resolver {
 
 	static XPathExpression expression1;
 	static XPathExpression expression2;

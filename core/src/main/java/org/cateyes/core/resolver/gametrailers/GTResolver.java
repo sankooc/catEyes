@@ -32,7 +32,7 @@ import com.jayway.jsonpath.JsonPath;
 /**
  * @author sankooc
  */
-public class GTResolver extends AbstractResolver implements Resolver {
+public class GTResolver extends AbstractResolver<String> implements Resolver {
 
 	Pattern pattern_data_token = Pattern.compile("data-token=\"([^\"]+)\"");
 	Pattern pattern_video_data = Pattern.compile("data-video=\"([^\"]+)\"");

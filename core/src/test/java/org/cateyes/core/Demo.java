@@ -4,8 +4,14 @@
 package org.cateyes.core;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadPoolExecutor;
 
+import org.cateyes.core.media.MediaMerger;
+import org.cateyes.core.resolver.youku.YoukuResolver;
 import org.cateyes.core.volumn.Volumn;
+import org.cateyes.core.volumn.Volumn.VolumnDownloadResult;
 import org.cateyes.core.volumn.VolumnFactory;
 import org.junit.Test;
 
@@ -39,14 +45,62 @@ public class Demo {
 	}
 	
 	
+
+	ThreadPoolExecutor downExecutor = (ThreadPoolExecutor) Executors.newFixedThreadPool(1);
+	ThreadPoolExecutor mergeExecutor = (ThreadPoolExecutor) Executors.newFixedThreadPool(5);
+	
 	@Test
-	public void youkuTest() throws Exception{
-		try {
-			Volumn volum = VolumnFactory.createVolumn("http://v.youku.com/v_show/id_XNjE1Mjk2MjM2.html");
-			volum.writeLowQuality(new File("target/youku"),null);
-		} catch (Exception e) {
-			e.printStackTrace();
+	public synchronized void youkuTest() throws Exception{
+		
+		final ArrayList<String> list = new ArrayList<String>();
+//		list.add("XNTUxNzEzNDQw");//2
+//		list.add("XNTU1MDk2MjI0");//3
+		
+//		list.add("XNTU4MzkyNjA0");//4
+//		list.add("XNTYxODA1MTUy");//5
+		list.add("XNTY0NjkzNzU2");//6
+		list.add("XNTY3OTQ2NDg0");//7
+		list.add("XNTcwOTA1MDUy");//8
+		//list.add("XNTczODU2MTc2");//9
+		//ist.add("XNTc2NjcxMjY4");//10
+		//list.add("XNTc5NDY4NTEy");//11
+		//list.add("XNTgyMjcwODg0");//12
+		for(final String sid : list){
+//			downExecutor.execute(new Runnable(){
+//				@Override
+//				public void run() {
+					try {
+						Volumn volumn = YoukuResolver.createVolumnFromVid(sid);
+						final VolumnDownloadResult result =volumn.writeHighQuality(new File("/Users/sankooc/genes"), null);
+						if(!result.isComplete()){
+							continue;
+						}
+						mergeExecutor.execute(new Runnable(){
+							@Override
+							public void run() {
+								MediaMerger.merge(result.getSource(), result.getFolder(), result.getTitle());
+								System.err.println("download"+result.getTitle()+"complete");
+							}
+						});
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
+					
+//				}
+//				
+//			});	
 		}
+		wait();
+//		try {
+//			Volumn volumn = YoukuResolver.createVolumnFromVid("XNTQ4NjA2NTA4");
+//			VolumnDownloadResult result =volumn.writeHighQuality(new File("/Users/sankooc/genes"), "the_g");
+//			MediaMerger.merge(result.getSource(), result.getFolder(), result.getTitle());
+//			
+////			Volumn volum = VolumnFactory.createVolumn("http://v.youku.com/v_show/id_XNjE1Mjk2MjM2.html");
+////			volum.writeLowQuality(new File("target/youku"),null);
+//		} catch (Exception e) {
+//			e.printStackTrace();
+//		}
 	}
 
 	

@@ -37,7 +37,7 @@ import org.w3c.dom.NodeList;
 /**
  * @author sankooc
  */
-public class PPTVResolver extends AbstractResolver implements Resolver {
+public class PPTVResolver extends AbstractResolver<String> implements Resolver {
 
 	static String format = "http://web-play.pptv.com/webplay3-151-%s.xml";
 	Pattern pattern = Pattern.compile("\"id\":(\\d+),");

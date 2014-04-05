@@ -8,7 +8,7 @@ import org.cateyes.core.volumn.Volumn;
  * 迅雷看看 
  * @author sankooc
  */
-public class XLkkResolver extends AbstractResolver implements Resolver {
+public class XLkkResolver extends AbstractResolver<String> implements Resolver {
 
 	public Volumn createVolumn(String uri) throws Exception {
 		// TODO Auto-generated method stub

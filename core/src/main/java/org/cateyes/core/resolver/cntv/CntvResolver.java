@@ -36,7 +36,7 @@ import com.jayway.jsonpath.JsonPath;
 /**
  * @author sankooc
  */
-public class CntvResolver extends AbstractResolver implements Resolver {
+public class CntvResolver extends AbstractResolver<String> implements Resolver {
 
 	public final static Pattern pattern = Pattern
 			.compile("\"videoCenterId\",\"([^\"]+)\"");

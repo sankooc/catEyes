@@ -4,7 +4,7 @@ import org.cateyes.core.resolver.AbstractResolver;
 import org.cateyes.core.resolver.Resolver;
 import org.cateyes.core.volumn.Volumn;
 
-public class AcfunResolver extends AbstractResolver implements Resolver {
+public class AcfunResolver extends AbstractResolver<String> implements Resolver {
 
 	public Volumn createVolumn(String uri) throws Exception {
 		// TODO Auto-generated method stub

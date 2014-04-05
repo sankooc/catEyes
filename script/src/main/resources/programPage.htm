@@ -1,0 +1,3509 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns=" http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text ml; charset=utf-8"  />
+<meta http-equiv="X-UA-Compatible" content="IE=EmulateIE7" />
+
+<meta name="description" content="한큐로 통하는 세상의 모든 동영상 1qdisk.com 에서 만나세요~ ">
+<meta name="keywords" content="무료 드라마, 예능프로, 스포츠,애니,시사다큐,프로그램 ">
+<meta name="robots" content="all">
+<title>1Qdisk 한큐로 통하는 세상의 모든 동영상!! </title> 
+<link rel="shortcut icon" href="/favicon.ico"> 
+<link type="text/css" rel="stylesheet" href="/common/css/public.css" />
+<link type="text/css" rel="stylesheet" href="/css/main.css" />
+<script type="text/javascript" src="/common/js/prototype.js?version=20091230" ></script>
+<script type="text/javascript" src="/common/js/common.js" ></script>
+<script type="text/javascript" src="/common/js/scrollText.js" ></script>
+<script type="text/javascript" src="/common/js/overlay.js"></script>
+
+<script type="text/javascript">
+//<![CDATA[
+
+//코멘트 레이어 제어
+function commentBtn(flag){
+	if(flag == '1' ){
+		$('programArea').show();
+		$('btn_pro1').src='/images/3d/3depTopTap11.gif';
+		$('btn_pro2').src='/images/3d/3depBtmTap11.gif';
+		$('btn_comment1').src='/images/3d/3depTopTap22.gif';
+		$('btn_comment2').src='/images/3d/3depBtmTap22.gif';
+	}else{
+		$('programArea').hide();
+		$('btn_pro1').src='/images/3d/3depTopTap12.gif';
+		$('btn_pro2').src='/images/3d/3depBtmTap12.gif';
+		$('btn_comment1').src='/images/3d/3depTopTap21.gif';
+		$('btn_comment2').src='/images/3d/3depBtmTap21.gif';
+	}
+}
+
+//추천
+function voteVod(idx,voteCnt){
+	if(Ajax.activeRequestCount > 0 ){
+		alert('추천 진행중입니다. ');
+	}else{
+		var myAjax = new Ajax.Request('/vod/voteProc.php',{
+			method:'post',
+			parameters: 'mode=add&idx='+idx+'&voteCnt='+voteCnt,
+			onSuccess: function(req)
+			{	
+				var data = eval("(" +req.responseText+ ")");
+	
+				alert(data.message);
+				if(data.result == 'true'){
+					$('voteCntArea').innerHTML = data.num;
+				}
+			},
+			onFailure: function(e)
+			{
+				 alert('추천 삭제중 오류가 있습니다.');
+			}
+		});
+	}
+}
+
+//관심프로등록
+function myVodRegist(idx){
+	if(Ajax.activeRequestCount > 0 ){
+		alert('관심프로에 등록중입니다. ');
+	}else{
+		var myAjax = new Ajax.Request('/vod/myVodProc.php',{
+			method:'post',
+			parameters: 'mode=add&idx='+idx,
+			onSuccess: function(req)
+			{	
+				var data = eval("(" +req.responseText+ ")");
+	
+				if(data.result == 'false'){
+					alert(data.message);
+				}else{
+					
+					//관심프로 추가 
+					tableAdd(data);
+					
+					alert('관심프로에 추가되었습니다.');
+
+					//찜카운트 증가 
+					var myVodCnt = $('myVodCntArea').innerHTML.gsub(',', '');
+					myVodCnt = parseInt(myVodCnt)+1;
+					//$('myVodCntArea').innerHTML = myVodCnt.numberFormat();
+					$('myVodCntArea').innerHTML = myVodCnt;
+				}
+			},
+			onFailure: function(e)
+			{
+				 alert('관심프로 추가중 오류가 있습니다.');
+			}
+		});
+	}
+}
+
+function tableAdd(data){
+	var onDate = (data.onAirDate) ? data.onAirDate : '';
+	var myVodTable = '<div id="myVodList'+data.idx+'" class="myVodList">'+
+					'<table cellpadding="0" cellspacing="0" border="0" >'+
+						'<tr>'+
+							'<th><a href="/vod/view.html?idx='+data.idx+'"><img src="'+data.img+'"  width="110" height="86" /></a></th>'+
+							'<td valign="top">'+
+								'<table cellpadding="0" cellspacing="0" border="0">'+
+								'<tr>'+
+									'<td class="myVodInfoTitle">'+data.title+'</td>'+
+								'</tr>'+
+								'<tr>'+
+									'<td class="myVodInfoTitle">'+onDate+' </td>'+
+								'</tr>'+
+								'<tr>'+
+									'<td align="left">'+
+										'<span class="myVodInfoSubTitle">지역:</span> '+data.area+'  /  <span class="myVodInfoSubTitle">언어:</span> '+data.lang+' <br />'+
+										'<span class="myVodInfoSubTitle">출연:</span> '+data.actor+'<br />'+
+										'<span class="myVodInfoSubTitle">업데이트:</span> '+data.updateTime+
+										'<span style="width:100%;text-align:right"> <a href="javascript:myVodDelete('+data.idx+')">[삭제]</a> </span> <br />'+
+									'</td>'+
+								'</tr>'+
+								'</table>'+
+							'</td>'+
+						'</tr>'+
+					'</table>'+
+					'</div>';
+	$('myVodList').innerHTML += myVodTable;
+}
+
+function myVodDelete(idx){
+	if(Ajax.activeRequestCount > 0 ){
+		alert('관심프로 삭제중입니다. ');
+	}else{
+		var myAjax = new Ajax.Request('/vod/myVodProc.php',{
+			method:'post',
+			parameters: 'mode=delete&idx='+idx,
+			onSuccess: function(req)
+			{	
+				var data = eval("(" +req.responseText+ ")");
+	
+				if(data.result == 'false'){
+					alert(data.message);
+				}else{
+					$('myVodList'+idx).remove();
+					//찜카운트 감소
+					//var myVodCnt = $('myVodCntArea').innerHTML.gsub(',', '');
+					//myVodCnt = myVodCnt-1;
+					//$('myVodCntArea').innerHTML = myVodCnt.numberFormat();
+				}
+			},
+			onFailure: function(e)
+			{
+				 alert('관심프로 삭제중 오류가 있습니다.');
+			}
+		});
+	}
+}
+
+//관심프로 리스트 
+function viewMyVod(){
+
+	var myAjax = new Ajax.Request('/vod/myVodProc.php',{
+		method:'post',
+		parameters: 'mode=listData' ,
+		onLoading: function() { 
+			$('myVodList').startWaiting('bigWaiting');
+		} ,
+		onSuccess: function(req)
+		{	
+			$('myVodList').stopWaiting();
+			$('myVodList').innerHTML = '';
+			var data = eval("(" +req.responseText+ ")");
+
+			data.each(function(v){
+				tableAdd(v);
+			});
+		},
+		onFailure: function(e)
+		{
+			alert('관심프로 전송중 오류가 있습니다.');
+		}
+	});
+}
+
+function weblinkPop(idx,webLink){
+	if(Ajax.activeRequestCount > 0 ){
+		alert('로딩중입니다 잠시만 기다려주세요. ');
+	}else{
+
+		var myAjax = new Ajax.Request('/vod/webLinkProc.php',{
+			method:'post',
+			parameters: 'idx='+idx+'&webLink='+webLink ,
+			onLoading: function() { 
+				$('vod_list_area').startWaiting('bigWaiting');
+			} ,
+			onSuccess: function(req)
+			{	
+				$('vod_list_area').stopWaiting();
+				var data = eval("(" +req.responseText+ ")");
+				if(data.result == 'true'){
+					document.webLinkFrm.action = data.webLink.URLDecode();
+					document.webLinkFrm.vo.value = data.vo;
+					document.webLinkFrm.submit();
+			
+				}else{
+					alert(data.message);
+				}
+			},
+			onFailure: function(e)
+			{
+				alert('다운로드 전송중 오류가 있습니다.');
+			}
+		});
+	}
+}
+
+//]]>
+</script>
+<script src="/common/js/protoload.js" type="text/javascript"></script> 
+<style>
+.bigWaiting {
+	background-image:url('/images/icon/bigWaiting.gif');
+	background-repeat:no-repeat;
+	background-position:center center;
+	background-color:#fff;
+}
+.myVodList{
+	text-align:left;
+	margin-top:10px;
+}
+.myVodList th{
+	padding:5px;
+	border:1px solid #d6d6d6;
+	margin-top:15px;
+	margin-left:10px;
+}
+.myVodList .myVodInfoTitle{
+	color:#01939C;
+	font-weight:bold;
+	font-size:12px;
+	text-align:left;
+	padding:2px 0px 0px 5px;
+} 
+.myVodList .myVodInfoSubTitle{
+	color:#717171;
+	--font-weight:bold;
+	font-size:12px;
+	padding:2px 0px 0px 5px;
+	line-height:18px;
+} 
+</style>
+<link type="text/css" rel="stylesheet" href="/css/vod/view.css " />
+
+</head>
+<body id="bodyId">
+<iframe id="hiddenFrame" name="hiddenFrame" width="0" height="0"></iframe>
+<link rel="stylesheet" href="http://update.1qdisk.com/QWeblink/qweblink.css">
+<iframe name='qlink' id='qlink' width=0 height=0 frameborder=0 scrolling=0></iframe>
+<form name="webLinkFrm" id="webLinkFrm" action="" method="post" target="qlink">
+<input type="hidden" name="dk" value="" />
+<input type="hidden" name="vo" value="" />
+</form>
+
+<!--top-->
+<div class="top">
+	<div id="header">
+	<div id="hd_top">
+		<form name="loginForm" action="/member/login.php" method="post"  onsubmit="return loginVaildate(this);return false;" target="hiddenFrame" style="margin:0px">
+		<input type="hidden" name="positionGrp" value="vod" />
+		<ul>
+			                 <li class="start"><a href="#" onclick="setHomepage('http://www.1qdisk.com/');"><img src="/images/new/header/hd_start.gif" alt="시작페이지로"></a>  <img style="cursor:pointer" onclick="popupWindow('/mypage/tocplus.html?mode=popup','tocplus','width=430,height=450')" src="/images/banner/top_banner03_.gif"></li>
+
+				
+							<li class="frt">
+				<span class="iipt"><input type="text" id="loginUserID" name="loginUserID" class="login_input_id_in"  onblur="loginInputBg('in','id',this)" onfocus="loginInputBg('out','id',this)"  style="width:80px;border:1px solid #e5e5e5;" /></span>
+				<span class="iipt"><input type="password" id="loginUserPW" name="loginUserPW" class="login_input_pw_in" onblur="loginInputBg('in','pw',this)" onfocus="loginInputBg('out','pw',this)" style="width:80px;border:1px solid #e5e5e5;"></span>
+				<span class="top_mn01"><input type="image" src="/images/new/header/hd_login_btn.gif" /></span>
+				<span class="top_sep"></span>
+				<span class="top_mn02"><a href="/member/join.html">회원가입</a></span>
+				<span class="top_sep"></span>
+
+								<span class="top_mn03"><a href="http://update.1qdisk.com/QUpdate/1QDisk_Setup.exe" target="_blank"><img src="/images/new/header/hd_dw_btn.gif" /></a></span>
+							</li>
+		</ul>
+		</form>
+	</div>
+ </div>
+<div style="clear:both"></div></div>
+<!--dh-->
+<div class="sy_bann">
+		
+	<div id="hd_top" style="border:0px solid red">
+    	<div class="flt"><a href="/"><img src="/images/new/header/bi.gif" alt="1Qdisk"></a></div>
+        <div id="sch">
+			<form name="searchForm" action="/vod/list.html" onsubmit="return searchFormCheck(this)">
+			<input type="hidden" name="searchFlag" value="title" />
+        	<ul style="border:0px solid red;height:47px">
+            	<li class="sch_ipt">
+					<input type="text" name="searchValue" value=""  maxlength="50" style="width:330px;height:12px;border:0;" onclick="$('searchSelectBox').hide();">
+				</li>
+                <li class="flt"><input type="image"  src="/images/new/header/gnb_sch_btn.gif" /></li>
+            </ul>
+			</form>
+
+			<ul class="sch_ntc">
+            	<li class="rd_glass"></li>
+
+                <li class="sn_txt">
+<div id="topbanner1" ></div><div id="topbanner2" style="display:none"></div><div id="topbanner3" style="display:none"></div>				</li>
+								<li class="frt"><a href="#" onclick="topBannerChange('next','3')" ><img src="/images/new/header/hd_arr_r.gif"></a></li>
+            	<li class="frt"><a href="#" onclick="topBannerChange('prev','3')" ><img src="/images/new/header/hd_arr_l.gif"></a></li>
+				
+            </ul>
+        </div>
+		
+		<div id="pro" >
+			<img src="/images/new/Main/gnb_pro.gif" alt="프로요청/이용안내" border="0" usemap="#pro_request_map">
+				
+			<map name="pro_request_map" id="pro_request_map">
+              <area shape="rect" coords="64,55,107,76" href="/community/bbs.html?id=ask" style="cursor:pointer"/>
+              <area shape="rect" coords="111,55,157,76" href="/community/bbs.html?id=use"  style="cursor:pointer"/>
+              <area shape="rect" coords="17,55,60,76" href="/mypage/index.html?p=payment" style="cursor:pointer" />
+            </map>
+		</div>
+
+        <!-- <div id="pro"><a href=""><img src="/images/new/header/gnb_pro.gif" alt="프로요청/이용안내"></a></div> -->
+        <div id="gnb">
+
+		<span style='z-index: 10; position: relative;'>
+			<span id="leftBanner"  style='z-index: 50;display:;position: absolute;top:50px;left:-90px;_left:-90px;'>
+				<a href="http://update.1qdisk.com/QUpdate/1QDisk_Setup.exe" /><img src="/images/banner/scroll/1qdisk_20090814_.gif" /></a>
+					<div style="height:8px"></div>
+					<!-- <a href="http://www.gagamart.com/main/" target="_blank"><img src="/images/banner/left/main_80x170_bn.gif" /></a> 가가마트-->
+					<!-- 2012-12-03 <a href="http://www.imiworld.net" target="_blank"><img src="/images/80-170.gif" /></a>  -->
+					
+					<a href="/community/bbs.html?id=notice&mode=v&bNo=188" ><img src="/images/banner/20110603/80x170.gif" /></a>  			</span>
+			<span id="rightBanner"  style='z-index: 50;display:;position: absolute;top:50px;left:990px;_left:990px;'>
+			<!-- <a href="/community/bbs.html?id=notice&mode=v&bNo=198" ><img src="/images/banner/right/20120402_80x170.jpg" /></a>  -->
+			<a href="/community/list.html?bid=598" ><img src="/images/banner/right/20120531_80x170.gif" /></a>
+			</span> 
+		</span>
+
+        	<ul>
+            	<li class="mn01"><a href="/vod/list.html?cate=100000"><img src="/images/new/header/gnb_mn01.gif"></a></li>
+            	<li class="mn02"><a href="/vod/list.html?cate=200000"><img src="/images/new/header/gnb_mn02.gif"></a></li>
+            	<li class="mn02"><a href="/vod/list.html?cate=300000"><img src="/images/new/header/gnb_mn03.gif"></a></li>
+            	<li class="mn02"><a href="/vod/list.html?cate=400000"><img src="/images/new/header/gnb_mn04.gif"></a></li>
+            	<li class="mn02"><a href="/vod/list.html?cate=500000"><img src="/images/new/header/gnb_mn05.gif"></a></li>
+            	<li class="mn02"><a href="/vod/list.html?cate=600000"><img src="/images/new/header/gnb_mn06.gif"></a></li>
+            	<li class="mn02"><a href="/vod/list.html?cate=800000"><img src="/images/new/header/gnb_mn07.gif"></a></li>
+            	<li class="mn02"><a href="/vod/list.html?cate=700000"><img src="/images/new/header/gnb_mn08.gif"></a></li>
+            	<li class="mn02"><img src="/images/new/header/gnb_sep.gif"></li>
+            	<li class="mn02"><a href="/release/"><img src="/images/new/header/gnb_mn09.gif"></a></li>
+            	<li class="mn02"><a href="/community/main.html"><img src="/images/new/header/gnb_mn10.gif"></a></li>
+            	<li class="mn03"><a href="#" onclick="$('layer_mn').toggle();return false;"><img src="/images/new/header/gnb_mn11.gif"></a></li>
+                <li class="ntc_txt" style="">
+				
+											<script type="text/javascript">	
+						var NoticeBox=new Array()
+						NoticeBox[0]="<a href='/community/bbs.html?id=notice&mode=v&bNo=197'>원큐 접속자 폭주 서버 장애</a>";
+						NoticeBox[1]="<a href='/community/bbs.html?id=notice&mode=v&bNo=192'>[안내] 7월26일(화) 업그레이드 사항 안내</a>";
+						NoticeBox[2]="<a href='/vod/view.html?idx=1'>[예능프로]해피투게더 시즌3</a>";
+						NoticeBox[3]="<a href='/vod/view.html?idx=25'>[예능프로]무한도전 [無限挑戰] </a>";
+						NoticeBox[4]="<a href='/vod/view.html?idx=3666'>[예능프로]일요일이 좋다 - 런닝맨 (2010..</a>";
+						NoticeBox[5]="<a href='/vod/view.html?idx=24'>[예능프로]황금어장 </a>";
+						NoticeBox[6]="<a href='/vod/view.html?idx=4981'>[영화]우리 이웃의 범죄  (Sin of a ..</a>";
+						</script>
+
+									<style>
+					#NoticeBox{width: 240px; text-align:left;height: 20px;padding:2px 0 10px 5px;border:0px solid #000}
+					#NoticeBox a{color:#fff;}
+					#searchSelectBox {top: -2px;left:0px;}
+					#searchSelectBox table {border:2px solid #700017;background-color:#fff;line-height:25px;border-top:none;}
+					#searchSelectBox td {padding-left:10px;}
+
+					</style>
+					<script type="text/javascript">
+							new pausescroller(NoticeBox, "NoticeBox", "", 5200)
+							function  searchSelect(flag){
+								document.searchForm.searchFlag.value= flag;
+								//$('searchSelectImage').src = '/images/common/mainHSchTxt_'+flag+'.gif';
+								$('searchSelectBox').hide();
+							}
+					</script>
+				
+				</li>
+                <li class="ntc_icon"></li>
+            </ul>
+            <!--layer_menu start-->
+			<div id="layer_mn" style="display:none;z-index:9999">
+            	<div id="layer_mn01">
+                    <ul>
+                        <li class="lm_icon"></li>
+                        <li class="lm_mn_ttl01">영화</li>
+                        <li class="lm_mn01">
+                        <a href="/vod/list.html?cate=100000&cateSubSel=100100">액션/무협</a>
+                        <a href="/vod/list.html?cate=100000&cateSubSel=100110"> | 코미디</a>
+                        <a href="/vod/list.html?cate=100000&cateSubSel=100120"> | 멜로/로멘틱</a>
+                        <a href="/vod/list.html?cate=100000&cateSubSel=100250"> | 서부</a>
+                        <a href="/vod/list.html?cate=100000&cateSubSel=100160"> | 전쟁</a>
+                        <a href="/vod/list.html?cate=100000&cateSubSel=100170"> | 재난</a><br />
+                        <a href="/vod/list.html?cate=100000&cateSubSel=100210">드라마</a>
+                        <a href="/vod/list.html?cate=100000&cateSubSel=100270"> | 느와르</a>
+                        <a href="/vod/list.html?cate=100000&cateSubSel=100220"> | 애니메이션</a>
+                        <a href="/vod/list.html?cate=100000&cateSubSel=100230"> | 모험</a>
+                        <a href="/vod/list.html?cate=100000&cateSubSel=100260"> | 범죄</a>
+                        <a href="/vod/list.html?cate=100000&cateSubSel=100150"> | 공포/스릴러</a>
+                        <a href="/vod/list.html?cate=100000&cateSubSel=100130"> | SF</a><br />
+                        <a href="/vod/list.html?cate=100000&cateSubSel=100180">미스터리</a>
+                        <a href="/vod/list.html?cate=100000&cateSubSel=100140"> | 판타지</a>
+                        <a href="/vod/list.html?cate=100000&cateSubSel=100240"> | 뮤지컬</a>
+                        <a href="/vod/list.html?cate=100000&cateSubSel=100280"> | 다큐</a>
+                        <a href="/vod/list.html?cate=100000&cateSubSel=100900"> | 기타</a></li>
+                    </ul> 
+                    <ul class="lm_mn_sep">
+                        <li class="lm_icon"></li>
+                        <li class="lm_mn_ttl01">드라마</li>
+                        <li class="lm_mn01">
+                        <a href="/vod/list.html?cate=200000&cateSubSel=200100">한국</a>
+                        <a href="/vod/list.html?cate=200000&cateSubSel=200110"> | 홍콩</a>
+                        <a href="/vod/list.html?cate=200000&cateSubSel=200120"> | 대만</a>
+                        <a href="/vod/list.html?cate=200000&cateSubSel=200130"> | 중국</a>
+                        <a href="/vod/list.html?cate=200000&cateSubSel=200140"> | 미국</a>
+                        <a href="/vod/list.html?cate=200000&cateSubSel=200180"> | 영국</a>
+                        <a href="/vod/list.html?cate=200000&cateSubSel=200170"> | 기타</a></li>
+                    </ul>
+                    <ul class="lm_mn_sep">
+                        <li class="lm_icon"></li>
+                        <li class="lm_mn_ttl01">예능프로</li>
+						<li class="lm_mn01">
+                        <a href="/vod/list.html?cate=300000&cateSubSel=300100">KBS</a>
+                        <a href="/vod/list.html?cate=300000&cateSubSel=300110"> | SBS</a>
+                        <a href="/vod/list.html?cate=300000&cateSubSel=300120"> | MBC</a>
+                        <a href="/vod/list.html?cate=300000&cateSubSel=300130"> | 대만</a>
+                        <a href="/vod/list.html?cate=300000&cateSubSel=300140"> | 기타</a></li>
+                    </ul>
+                    <ul class="lm_mn_sep">
+                        <li class="lm_icon"></li>
+                        <li class="lm_mn_ttl01">스포츠</li>
+						<li class="lm_mn01">
+                        <a href="/vod/list.html?cate=400000&cateSubSel=400100">스포츠</a>
+                        <a href="/vod/list.html?cate=400000&cateSubSel=400200"> | e스포츠</a></li>
+                    </ul>
+				</div>                  
+                <div id="layer_mn02">
+                    <ul>
+                        <li class="lm_icon"></li>
+                        <li class="lm_mn_ttl02">애니메이션</li>
+						<li class="lm_mn02">
+                        <a href="/vod/list.html?cate=500000&cateSubSel=500100">영화</a>
+                        <a href="/vod/list.html?cate=500000&cateSubSel=500110"> | 드라마</a>
+                        <a href="/vod/list.html?cate=500000&cateSubSel=500130"> | 만화책</a>
+                        <a href="/vod/list.html?cate=500000&cateSubSel=500120"> | 기타</a></li>
+                    </ul>
+                    <ul class="lm_mn_sep">
+                        <li class="lm_icon"></li>
+                        <li class="lm_mn_ttl02">시사다큐</li>
+						<li class="lm_mn02">
+                        <a href="/vod/list.html?cate=600000&cateSubSel=600100">시사</a>
+                        <a href="/vod/list.html?cate=600000&cateSubSel=600110"> | 다큐</a>
+                        <a href="/vod/list.html?cate=700000&cateSubSel=700900"> | 교육</a> </li>
+                    </ul>
+                    <ul class="lm_mn_sep">
+                        <li class="lm_icon"></li>
+                        <li class="lm_mn_ttl02">기타</li>
+                        <li class="lm_mn02">
+                        <a href="/vod/list.html?cate=700000&cateSubSel=700100">뮤직비디</a>
+                        <a href="/vod/list.html?cate=700000&cateSubSel=700900">오 | 기타</a></li>
+                    </ul>
+                    <ul class="lm_mn_sep">
+                        <li class="lm_icon"></li>
+                        <li class="lm_mn_ttl02">고객센터</li>
+						<li class="lm_mn02">
+                        <a href="/community/bbs.html?id=notice">공지사항</a>
+                        <a href="/community/bbs.html?id=ask"> | 프로요청</a>
+                        <a href="/community/bbs.html?id=use"> | 이용안내</a>
+                        <a href="/community/bbs.html?id=advice"> | 의견/건의</a>
+                        <a href="/community/bbs.html?id=bugs"> | 버그신고</a></li>
+                    </ul>
+                    <ul class="im_mn_day">
+                        <li class="flt"><img src="/images/new/header/day_icon.gif"></li>
+                        <li class="flt"><a href="/vod/list.html?week=1"><img src="/images/new/header/day_icon01.gif"></a></li>
+                        <li class="flt"><a href="/vod/list.html?week=2"><img src="/images/new/header/day_icon02.gif"></a></li>
+                        <li class="flt"><a href="/vod/list.html?week=3"><img src="/images/new/header/day_icon03.gif"></a></li>
+                        <li class="flt"><a href="/vod/list.html?week=4"><img src="/images/new/header/day_icon04.gif"></a></li>
+                        <li class="flt"><a href="/vod/list.html?week=5"><img src="/images/new/header/day_icon05.gif"></a></li>
+                        <li class="flt"><a href="/vod/list.html?week=6"><img src="/images/new/header/day_icon06.gif"></a></li>
+                        <li class="flt"><a href="/vod/list.html?week=0"><img src="/images/new/header/day_icon07.gif"></a></li>
+                    </ul>
+                </div>
+            </div>
+            <!--layer_menu end-->
+        </div>
+    </div>
+	<div style="clear:both"></div>
+
+
+	</div>
+
+<div id="contents">
+	<table cellpadding="0" cellspacing="0" border="0" width="963">
+	<tr>	
+		<td width="593" height="444">
+			<table width="584" cellspacing="0" cellpadding="0" border="0" style="">
+				<tbody>
+				<tr>
+					<td width="12" valign="middle" align="left">
+						<img height="467" width="10" src="/images/3d/playerLeft.gif"/>
+						</td>
+						<td class="player_bg" align="center" bgcolor="#fff">
+						<table height="444" width="100%" cellspacing="0" cellpadding="0" border="0">
+							<tbody>
+							<tr>
+								<td id="play_area" bgcolor="#ffffff" align="center"><iframe height="444" frameborder="0" width="100%" scrolling="no" id="player" src="/vod/player.html"></iframe></td>
+							</tr>
+							</tbody>
+						</table>
+					</td>
+					<td width="12" valign="middle" align="right">
+						<img height="467" width="10" src="/images/3d/playerRight.gif"/>
+					</td>
+				</tr>
+				</tbody>
+			</table>
+			<table style="margin-top:8px" width="580" border="0">
+
+				<tr>
+				<td width="8"></td>
+				<td width="570">
+				
+				<a href="" target="_blank"><img src="/banner/2/20121211140014_6792.jpg" width="560" height="80" /></a>				</td></tr>
+			</table>
+		</td>
+		<!-- <td width="20"></td> -->
+		<td valign="top">
+			<table cellpadding="0" cellspacing="0" border="0" width="380" class="vod_list_top" style="width:382px;">
+				<tr>
+					<td style="padding-left:10px">세대공감 토요일</td>
+					<td><span onclick="sortTable('video_list', 0,'int');if(this.innerHTML=='최신정렬') { this.innerHTML='순서정렬';$('orderIcon').src='/images/shipin_up.gif'}else { this.innerHTML='최신정렬';$('orderIcon').src='/images/shipin_down.gif';}" style="cursor:pointer">최신정렬</span>
+					<img src="/images/shipin_down.gif" id="orderIcon" /></td>
+				</tr>
+			</table>
+			<div class="vod_list_area" id="vod_list_area" style="height:430px;width:380px;">
+			<table id="video_list"  cellspacing="0" cellpadding="0" border="0" width="380" >
+				<tbody>
+					<tr><td height="0" colspan="6"></td></tr>
+
+<tr>
+						<td width="1" style="font-size:1px;color:#fff">163</td>
+						<td class="vod_list" ><span title="20130119" id="onAirText2013012112144874676" class="onAirText" style="text-align:left">제163회 2013.01.19</span></td>
+						
+						<!--  -->
+						<td width="36">
+													<img src="/images/btn/btn12.gif" onclick="player('http://player.youku.com/player.php/sid/XNTA0Nzc5MDIw/v.swf','2013012112144874676')" style="cursor:pointer" />
+										
+						</td>
+						
+						<td width="36">
+														<a href="#" onclick="playerTwoddo('http%3A%2F%2Fshare.vrs.sohu.com%2Fmy%2Fv.swf%26topBar%3D1%26id%3D52071756%26xuid%3Du255194579%26autoplay%3Dfalse','2013012112144874676','')"  style="cursor:pointer"><img src="/images/btn/btn22.gif" ></a>
+								
+						</td>
+						<td width="45">
+<img src="/images/btn/btn32_lead.gif" onclick="weblinkPop('2013012112144874676','http%3A%2F%2Fupdate.1qdisk.com%2FQWeblink%2Findex.asp%3Fcid%3D25f326e827df2cac2e713100314030b833522fa230aa328036c137d4374b39303b193d06')" id="webLinkBtn2013012112144874676 " style="cursor:pointer">	
+							
+						</td>
+						<td width="15"></td>
+					</tr>
+
+<tr>
+						<td width="1" style="font-size:1px;color:#fff">162</td>
+						<td class="vod_list" ><span title="20130112" id="onAirText2013011411462146802" class="onAirText" style="text-align:left">제162회 2013.01.12</span></td>
+						
+						<!--  -->
+						<td width="36">
+													<img src="/images/btn/btn12.gif" onclick="player('http://player.youku.com/player.php/sid/XNTAxNzE2MzQ4/v.swf','2013011411462146802')" style="cursor:pointer" />
+										
+						</td>
+						
+						<td width="36">
+														<a href="#" onclick="playerTwoddo('http%3A%2F%2Fshare.vrs.sohu.com%2Fmy%2Fv.swf%26topBar%3D1%26id%3D51919334%26autoplay%3Dfalse%26xuid%3Du255194579','2013011411462146802','')"  style="cursor:pointer"><img src="/images/btn/btn22.gif" ></a>
+								
+						</td>
+						<td width="45">
+<img src="/images/btn/btn32_lead.gif" onclick="weblinkPop('2013011411462146802','http%3A%2F%2Fupdate.1qdisk.com%2FQWeblink%2Findex.asp%3Fcid%3D25f326e827df2e342c222eae2bcf2c0833522e0e363734e4385b37d43a87386038a63a90378c')" id="webLinkBtn2013011411462146802 " style="cursor:pointer">	
+							
+						</td>
+						<td width="15"></td>
+					</tr>
+
+<tr>
+						<td width="1" style="font-size:1px;color:#fff">161</td>
+						<td class="vod_list" ><span title="20130105" id="onAirText2013010517492444064" class="onAirText" style="text-align:left">제161회 2013.01.05</span></td>
+						
+						<!--  -->
+						<td width="36">
+													<img src="/images/btn/btn12.gif" onclick="player('http://player.youku.com/player.php/sid/XNDk3ODIxOTMy/v.swf','2013010517492444064')" style="cursor:pointer" />
+										
+						</td>
+						
+						<td width="36">
+														<img src="/images/btn/btn21.gif" >
+								
+						</td>
+						<td width="45">
+<img src="/images/btn/btn31_lead.gif" >	
+							
+						</td>
+						<td width="15"></td>
+					</tr>
+
+<tr>
+						<td width="1" style="font-size:1px;color:#fff">160</td>
+						<td class="vod_list" ><span title="20121229" id="onAirText2012122918230078237" class="onAirText" style="text-align:left">제160회 2012.12.29</span></td>
+						
+						<!--  -->
+						<td width="36">
+													<img src="/images/btn/btn12.gif" onclick="player('http://player.youku.com/player.php/sid/XNDk0ODQwODMy/v.swf','2012122918230078237')" style="cursor:pointer" />
+										
+						</td>
+						
+						<td width="36">
+														<a href="#" onclick="playerTwoddo('http%3A%2F%2Fshare.vrs.sohu.com%2Fmy%2Fv.swf%26autoplay%3Dfalse%26id%3D51404335%26skinNum%3D1%26topBar%3D1%26xuid%3Du255194579','2012122918230078237','')"  style="cursor:pointer"><img src="/images/btn/btn22.gif" ></a>
+								
+						</td>
+						<td width="45">
+<img src="/images/btn/btn32_lead.gif" onclick="weblinkPop('2012122918230078237','http%3A%2F%2Fupdate.1qdisk.com%2FQWeblink%2Findex.asp%3Fcid%3D25f326e827df2b242dac2a0a2eeb324831c033942f1435b035273970381a35203a483676')" id="webLinkBtn2012122918230078237 " style="cursor:pointer">	
+							
+						</td>
+						<td width="15"></td>
+					</tr>
+
+<tr>
+						<td width="1" style="font-size:1px;color:#fff">159</td>
+						<td class="vod_list" ><span title="20121222" id="onAirText2012122412133581365" class="onAirText" style="text-align:left">제159회 2012.12.22</span></td>
+						
+						<!--  -->
+						<td width="36">
+													<img src="/images/btn/btn12.gif" onclick="player('http://player.youku.com/player.php/sid/XNDkyNDA2MjY0/v.swf','2012122412133581365')" style="cursor:pointer" />
+										
+						</td>
+						
+						<td width="36">
+														<a href="#" onclick="playerTwoddo('http%3A%2F%2Fshare.vrs.sohu.com%2Fmy%2Fv.swf%26topBar%3D1%26id%3D50879050%26xuid%3Du255194579%26autoplay%3Dfalse','2012122412133581365','')"  style="cursor:pointer"><img src="/images/btn/btn22.gif" ></a>
+								
+						</td>
+						<td width="45">
+<img src="/images/btn/btn32_lead.gif" onclick="weblinkPop('2012122412133581365','http%3A%2F%2Fupdate.1qdisk.com%2FQWeblink%2Findex.asp%3Fcid%3D25f326e827df2b242b5d2c5c2eeb2ff02dd335283637367c36c1330039b83ad0370438ec')" id="webLinkBtn2012122412133581365 " style="cursor:pointer">	
+							
+						</td>
+						<td width="15"></td>
+					</tr>
+
+<tr>
+						<td width="1" style="font-size:1px;color:#fff">158</td>
+						<td class="vod_list" ><span title="20121215" id="onAirText2012121712334098080" class="onAirText" style="text-align:left">제158회 2012.12.15</span></td>
+						
+						<!--  -->
+						<td width="36">
+													<img src="/images/btn/btn12.gif" onclick="player('http://player.youku.com/player.php/sid/XNDg5NDk0MzY0/v.swf','2012121712334098080')" style="cursor:pointer" />
+										
+						</td>
+						
+						<td width="36">
+														<a href="#" onclick="playerTwoddo('http%3A%2F%2Fshare.vrs.sohu.com%2Fmy%2Fv.swf%26topBar%3D1%26id%3D50740132%26xuid%3Du255194579%26autoplay%3Dfalse','2012121712334098080','')"  style="cursor:pointer"><img src="/images/btn/btn22.gif" ></a>
+								
+						</td>
+						<td width="45">
+<img src="/images/btn/btn32_lead.gif" onclick="weblinkPop('2012121712334098080','http%3A%2F%2Fupdate.1qdisk.com%2FQWeblink%2Findex.asp%3Fcid%3D25f326e827df28d82dac2f742c962cd02e9c320030aa341831263970381a3a003cbb3676')" id="webLinkBtn2012121712334098080 " style="cursor:pointer">	
+							
+						</td>
+						<td width="15"></td>
+					</tr>
+
+<tr>
+						<td width="1" style="font-size:1px;color:#fff">157</td>
+						<td class="vod_list" ><span title="20121208" id="onAirText2012121010573062939" class="onAirText" style="text-align:left">제157회 2012.12.08</span></td>
+						
+						<!--  -->
+						<td width="36">
+													<img src="/images/btn/btn12.gif" onclick="player('http://player.youku.com/player.php/sid/XNDg2MzY5MzA4/v.swf','2012121010573062939')" style="cursor:pointer" />
+										
+						</td>
+						
+						<td width="36">
+														<a href="#" onclick="playerTwoddo('http%3A%2F%2Fshare.vrs.sohu.com%2Fmy%2Fv.swf%26topBar%3D1%26id%3D50508955%26xuid%3Du255194579%26autoplay%3Dfalse','2012121010573062939','')"  style="cursor:pointer"><img src="/images/btn/btn22.gif" ></a>
+								
+						</td>
+						<td width="45">
+<img src="/images/btn/btn32_lead.gif" onclick="weblinkPop('2012121010573062939','http%3A%2F%2Fupdate.1qdisk.com%2FQWeblink%2Findex.asp%3Fcid%3D25f326e827df2cac290e2a0a307930b82f652ed82f14341831263706381a35f035623676')" id="webLinkBtn2012121010573062939 " style="cursor:pointer">	
+							
+						</td>
+						<td width="15"></td>
+					</tr>
+
+<tr>
+						<td width="1" style="font-size:1px;color:#fff">156</td>
+						<td class="vod_list" ><span title="20121201" id="onAirText2012120312120034415" class="onAirText" style="text-align:left">제156회 2012.12.01</span></td>
+						
+						<!--  -->
+						<td width="36">
+													<img src="/images/btn/btn12.gif" onclick="player('http://player.youku.com/player.php/sid/XNDgzMjQ2Mjc2/v.swf','2012120312120034415')" style="cursor:pointer" />
+										
+						</td>
+						
+						<td width="36">
+														<a href="#" onclick="playerTwoddo('http%3A%2F%2Fshare.vrs.sohu.com%2Fmy%2Fv.swf%26topBar%3D1%26id%3D50146156%26xuid%3Du255194579%26autoplay%3Dfalse','2012120312120034415','')"  style="cursor:pointer"><img src="/images/btn/btn22.gif" ></a>
+								
+						</td>
+						<td width="45">
+<img src="/images/btn/btn32_lead.gif" onclick="weblinkPop('2012120312120034415','http%3A%2F%2Fupdate.1qdisk.com%2FQWeblink%2Findex.asp%3Fcid%3D25f326e827df2b24290e2c5c2eeb2cd02e9c2e0e33d631b436c138a2374b3a003bea3676')" id="webLinkBtn2012120312120034415 " style="cursor:pointer">	
+							
+						</td>
+						<td width="15"></td>
+					</tr>
+
+<tr>
+						<td width="1" style="font-size:1px;color:#fff">155</td>
+						<td class="vod_list" ><span title="20121124" id="onAirText2012112611143350554" class="onAirText" style="text-align:left">제155회 2012.11.24</span></td>
+						
+						<!--  -->
+						<td width="36">
+													<img src="/images/btn/btn12.gif" onclick="player('http://player.youku.com/player.php/sid/XNDgwMTUxODky/v.swf','2012112611143350554')" style="cursor:pointer" />
+										
+						</td>
+						
+						<td width="36">
+														<a href="#" onclick="playerTwoddo('http%3A%2F%2Fshare.vrs.sohu.com%2Fmy%2Fv.swf%26topBar%3D1%26id%3D34045845%26xuid%3Du255194579%26autoplay%3Dfalse','2012112611143350554','')"  style="cursor:pointer"><img src="/images/btn/btn22.gif" ></a>
+								
+						</td>
+						<td width="45">
+<img src="/images/btn/btn32_lead.gif" onclick="weblinkPop('2012112611143350554','http%3A%2F%2Fupdate.1qdisk.com%2FQWeblink%2Findex.asp%3Fcid%3D25f326e827df28d82ffb2b962c962f282f6532ca3175367c35f433ce38e936c037043d06')" id="webLinkBtn2012112611143350554 " style="cursor:pointer">	
+							
+						</td>
+						<td width="15"></td>
+					</tr>
+
+<tr>
+						<td width="1" style="font-size:1px;color:#fff">154</td>
+						<td class="vod_list" ><span title="20121117" id="onAirText2012111914324730719" class="onAirText" style="text-align:left">제154회 2012.11.17</span></td>
+						
+						<!--  -->
+						<td width="36">
+													<img src="/images/btn/btn12.gif" onclick="player('http://player.youku.com/player.php/sid/XNDc3MDM4OTY0/v.swf','2012111914324730719')" style="cursor:pointer" />
+										
+						</td>
+						
+						<td width="36">
+														<a href="#" onclick="playerTwoddo('http%3A%2F%2Fshare.vrs.sohu.com%2Fmy%2Fv.swf%26topBar%3D1%26id%3D33883985%26xuid%3Du255194579%26autoplay%3Dfalse','2012111914324730719','')"  style="cursor:pointer"><img src="/images/btn/btn22.gif" ></a>
+								
+						</td>
+						<td width="45">
+<img src="/images/btn/btn32_lead.gif" onclick="weblinkPop('2012111914324730719','http%3A%2F%2Fupdate.1qdisk.com%2FQWeblink%2Findex.asp%3Fcid%3D25f326e827df28d82a982de82bcf2ff033523200317530e8385b3638381a3ad03b193a90')" id="webLinkBtn2012111914324730719 " style="cursor:pointer">	
+							
+						</td>
+						<td width="15"></td>
+					</tr>
+
+<tr>
+						<td width="1" style="font-size:1px;color:#fff">153</td>
+						<td class="vod_list" ><span title="20121110" id="onAirText2012111214345821862" class="onAirText" style="text-align:left">제153회 2012.11.10</span></td>
+						
+						<!--  -->
+						<td width="36">
+													<img src="/images/btn/btn12.gif" onclick="player('http://player.youku.com/player.php/sid/XNDc0MDg3ODk2/v.swf','2012111214345821862')" style="cursor:pointer" />
+										
+						</td>
+						
+						<td width="36">
+														<a href="#" onclick="playerTwoddo('http%3A%2F%2Fshare.vrs.sohu.com%2Fmy%2Fv.swf%26topBar%3D1%26id%3D33670073%26xuid%3Du255194579%26autoplay%3Dfalse','2012111214345821862','')"  style="cursor:pointer"><img src="/images/btn/btn22.gif" ></a>
+								
+						</td>
+						<td width="45">
+<img src="/images/btn/btn31_lead.gif" >	
+							
+						</td>
+						<td width="15"></td>
+					</tr>
+
+<tr>
+						<td width="1" style="font-size:1px;color:#fff">152</td>
+						<td class="vod_list" ><span title="20121103" id="onAirText2012110515580180860" class="onAirText" style="text-align:left">제152회 2012.11.03</span></td>
+						
+						<!--  -->
+						<td width="36">
+													<img src="/images/btn/btn12.gif" onclick="player('http://player.youku.com/player.php/sid/XNDcxMjUxMTEy/v.swf','2012110515580180860')" style="cursor:pointer" />
+										
+						</td>
+						
+						<td width="36">
+														<a href="#" onclick="playerTwoddo('http%3A%2F%2Fshare.vrs.sohu.com%2Fmy%2Fv.swf%26id%3D33384810%26topBar%3D1%26xuid%3Du255194579%26autoplay%3Dtrue%26skinNum%3D1%26topBar%3D0%26showRecommend%3D0%26autoplay%3Dtrue%26api_key%3Dc761173a5a80e7cdb7b12072a9fba645%26fbarad','2012110515580180860','')"  style="cursor:pointer"><img src="/images/btn/btn22.gif" ></a>
+								
+						</td>
+						<td width="45">
+<img src="/images/btn/btn31_lead.gif" >	
+							
+						</td>
+						<td width="15"></td>
+					</tr>
+
+<tr>
+						<td width="1" style="font-size:1px;color:#fff">151</td>
+						<td class="vod_list" ><span title="20121027" id="onAirText2012110515464670300" class="onAirText" style="text-align:left">제151회 2012.10.27</span></td>
+						
+						<!--  -->
+						<td width="36">
+													<img src="/images/btn/btn12.gif" onclick="player('http://player.youku.com/player.php/sid/XNDcxMjQ3NzMy/v.swf','2012110515464670300')" style="cursor:pointer" />
+										
+						</td>
+						
+						<td width="36">
+														<a href="#" onclick="playerTwoddo('http%3A%2F%2Fshare.vrs.sohu.com%2Fmy%2Fv.swf%26id%3D33384479%26topBar%3D1%26xuid%3Du255194579%26autoplay%3Dtrue%26skinNum%3D1%26topBar%3D0%26showRecommend%3D0%26autoplay%3Dtrue%26api_key%3Dc761173a5a80e7cdb7b12072a9fba645%26fbarad','2012110515464670300','')"  style="cursor:pointer"><img src="/images/btn/btn22.gif" ></a>
+								
+						</td>
+						<td width="45">
+<img src="/images/btn/btn31_lead.gif" >	
+							
+						</td>
+						<td width="15"></td>
+					</tr>
+
+<tr>
+						<td width="1" style="font-size:1px;color:#fff">150</td>
+						<td class="vod_list" ><span title="20121020" id="onAirText2012110515403460254" class="onAirText" style="text-align:left">제150회 2012.10.20</span></td>
+						
+						<!--  -->
+						<td width="36">
+													<img src="/images/btn/btn12.gif" onclick="player('http://player.youku.com/player.php/sid/XNDcxMjQ1ODY4/v.swf','2012110515403460254')" style="cursor:pointer" />
+										
+						</td>
+						
+						<td width="36">
+														<a href="#" onclick="playerTwoddo('http%3A%2F%2Fshare.vrs.sohu.com%2Fmy%2Fv.swf%26id%3D33384276%26topBar%3D1%26xuid%3Du255194579%26autoplay%3Dtrue%26skinNum%3D1%26topBar%3D0%26showRecommend%3D0%26autoplay%3Dtrue%26api_key%3Dc761173a5a80e7cdb7b12072a9fba645%26fbarad','2012110515403460254','')"  style="cursor:pointer"><img src="/images/btn/btn22.gif" ></a>
+								
+						</td>
+						<td width="45">
+<img src="/images/btn/btn31_lead.gif" >	
+							
+						</td>
+						<td width="15"></td>
+					</tr>
+
+<tr>
+						<td width="1" style="font-size:1px;color:#fff">149</td>
+						<td class="vod_list" ><span title="20121013" id="onAirText2012101323362942316" class="onAirText" style="text-align:left">제149회 2012.10.13</span></td>
+						
+						<!--  -->
+						<td width="36">
+													<img src="/images/btn/btn12.gif" onclick="player('http://player.youku.com/player.php/sid/XNDYxNTA3NzU2/v.swf','2012101323362942316')" style="cursor:pointer" />
+										
+						</td>
+						
+						<td width="36">
+														<a href="#" onclick="playerTwoddo('http%3A%2F%2Fshare.vrs.sohu.com%2Fmy%2Fv.swf%26id%3D32633851%26topBar%3D1%26xuid%3Du255194579%26autoplay%3Dtrue%26skinNum%3D1%26topBar%3D0%26showRecommend%3D0%26autoplay%3Dtrue%26api_key%3Dc761173a5a80e7cdb7b12072a9fba645%26fbarad','2012101323362942316','')"  style="cursor:pointer"><img src="/images/btn/btn22.gif" ></a>
+								
+						</td>
+						<td width="45">
+<img src="/images/btn/btn31_lead.gif" >	
+							
+						</td>
+						<td width="15"></td>
+					</tr>
+
+<tr>
+						<td width="1" style="font-size:1px;color:#fff">148</td>
+						<td class="vod_list" ><span title="20121006" id="onAirText2012100623172024629" class="onAirText" style="text-align:left">제148회 2012.10.06</span></td>
+						
+						<!--  -->
+						<td width="36">
+													<img src="/images/btn/btn11.gif" >
+										
+						</td>
+						
+						<td width="36">
+														<a href="#" onclick="playerTwoddo('http%3A%2F%2Fshare.vrs.sohu.com%2Fmy%2Fv.swf%26id%3D32424636%26topBar%3D1%26xuid%3Du255194579%26autoplay%3Dtrue%26skinNum%3D1%26topBar%3D0%26showRecommend%3D0%26autoplay%3Dtrue%26api_key%3Dc761173a5a80e7cdb7b12072a9fba645%26fbarad','2012100623172024629','')"  style="cursor:pointer"><img src="/images/btn/btn22.gif" ></a>
+								
+						</td>
+						<td width="45">
+<img src="/images/btn/btn31_lead.gif" >	
+							
+						</td>
+						<td width="15"></td>
+					</tr>
+
+<tr>
+						<td width="1" style="font-size:1px;color:#fff">147</td>
+						<td class="vod_list" ><span title="20120929" id="onAirText2012092918220157687" class="onAirText" style="text-align:left">제147회 2012.09.29</span></td>
+						
+						<!--  -->
+						<td width="36">
+													<img src="/images/btn/btn12.gif" onclick="player('http://player.youku.com/player.php/sid/XNDU2MTMwMTA4/v.swf','2012092918220157687')" style="cursor:pointer" />
+										
+						</td>
+						
+						<td width="36">
+														<a href="#" onclick="playerTwoddo('http%3A%2F%2Fshare.vrs.sohu.com%2Fmy%2Fv.swf%26id%3D32310698%26topBar%3D1%26xuid%3Du255194579%26autoplay%3Dtrue%26skinNum%3D1%26topBar%3D0%26showRecommend%3D0%26autoplay%3Dtrue%26api_key%3Dc761173a5a80e7cdb7b12072a9fba645%26fbarad','2012092918220157687','')"  style="cursor:pointer"><img src="/images/btn/btn22.gif" ></a>
+								
+						</td>
+						<td width="45">
+<img src="/images/btn/btn31_lead.gif" >	
+							
+						</td>
+						<td width="15"></td>
+					</tr>
+
+<tr>
+						<td width="1" style="font-size:1px;color:#fff">114</td>
+						<td class="vod_list" ><span title="20120901" id="onAirText2012090116462872096" class="onAirText" style="text-align:left">제114회 2012.09.01</span></td>
+						
+						<!--  -->
+						<td width="36">
+													<img src="/images/btn/btn12.gif" onclick="player('http://player.youku.com/player.php/sid/XNDQ1NjgwMTUy/v.swf','2012090116462872096')" style="cursor:pointer" />
+										
+						</td>
+						
+						<td width="36">
+														<a href="#" onclick="playerTwoddo('http%3A%2F%2Fshare.vrs.sohu.com%2Fmy%2Fv.swf%26autoplay%3Dfalse%26id%3D31244570%26skinNum%3D1%26topBar%3D1%26xuid%3Du255194579','2012090116462872096','')"  style="cursor:pointer"><img src="/images/btn/btn22.gif" ></a>
+								
+						</td>
+						<td width="45">
+<img src="/images/btn/btn31_lead.gif" >	
+							
+						</td>
+						<td width="15"></td>
+					</tr>
+
+<tr>
+						<td width="1" style="font-size:1px;color:#fff">113</td>
+						<td class="vod_list" ><span title="20120630" id="onAirText2012063017114044456" class="onAirText" style="text-align:left">제113회 2012.06.30</span></td>
+						
+						<!--  -->
+						<td width="36">
+													<img src="/images/btn/btn12.gif" onclick="player('http://player.youku.com/player.php/sid/XNDIyMDI3NjE2/v.swf','2012063017114044456')" style="cursor:pointer" />
+										
+						</td>
+						
+						<td width="36">
+														<a href="#" onclick="playerTwoddo('http%3A%2F%2Fshare.vrs.sohu.com%2Fmy%2Fv.swf%26id%3D25464790%26skinNum%3D1%26topBar%3D0%26showRecommend%3D0%26autoplay%3Dtrue%26api_key%3Dc761173a5a80e7cdb7b12072a9fba645%26fbarad','2012063017114044456','')"  style="cursor:pointer"><img src="/images/btn/btn22.gif" ></a>
+								
+						</td>
+						<td width="45">
+<img src="/images/btn/btn31_lead.gif" >	
+							
+						</td>
+						<td width="15"></td>
+					</tr>
+
+<tr>
+						<td width="1" style="font-size:1px;color:#fff">112</td>
+						<td class="vod_list" ><span title="20120602" id="onAirText2012060216004668133" class="onAirText" style="text-align:left">제112회 2012.06.02</span></td>
+						
+						<!--  -->
+						<td width="36">
+													<img src="/images/btn/btn12.gif" onclick="player('http://player.youku.com/player.php/sid/XNDA2NjI0NDA0/v.swf','2012060216004668133')" style="cursor:pointer" />
+										
+						</td>
+						
+						<td width="36">
+														<a href="#" onclick="playerTwoddo('http%3A%2F%2Fshare.vrs.sohu.com%2Fmy%2Fv.swf%26id%3D22384011%26skinNum%3D1%26topBar%3D0%26showRecommend%3D0%26autoplay%3Dtrue%26api_key%3Dc761173a5a80e7cdb7b12072a9fba645%26fbarad','2012060216004668133','')"  style="cursor:pointer"><img src="/images/btn/btn22.gif" ></a>
+								
+						</td>
+						<td width="45">
+<img src="/images/btn/btn31_lead.gif" >	
+							
+						</td>
+						<td width="15"></td>
+					</tr>
+
+<tr>
+						<td width="1" style="font-size:1px;color:#fff">111</td>
+						<td class="vod_list" ><span title="20120414" id="onAirText2012041423060184831" class="onAirText" style="text-align:left">제111회 2012.04.14</span></td>
+						
+						<!--  -->
+						<td width="36">
+													<img src="/images/btn/btn12.gif" onclick="player('http://player.youku.com/player.php/sid/XMzgxMzcwODgw/v.swf','2012041423060184831')" style="cursor:pointer" />
+										
+						</td>
+						
+						<td width="36">
+														<a href="#" onclick="playerTwoddo('http%3A%2F%2Fwww.tudou.com%2Fv%2FEofW9_xkVoU%2F%26resourceId%3D0_04_02_99%26autoPlay%3Dtrue%2Fv.swf','2012041423060184831','')"  style="cursor:pointer"><img src="/images/btn/btn22.gif" ></a>
+								
+						</td>
+						<td width="45">
+<img src="/images/btn/btn31_lead.gif" >	
+							
+						</td>
+						<td width="15"></td>
+					</tr>
+
+<tr>
+						<td width="1" style="font-size:1px;color:#fff">110</td>
+						<td class="vod_list" ><span title="20120407" id="onAirText2012040717214899394" class="onAirText" style="text-align:left">제110회 2012.04.07</span></td>
+						
+						<!--  -->
+						<td width="36">
+													<img src="/images/btn/btn12.gif" onclick="player('http://player.youku.com/player.php/sid/XMzc3NTU0ODA0/v.swf','2012040717214899394')" style="cursor:pointer" />
+										
+						</td>
+						
+						<td width="36">
+														<a href="#" onclick="playerTwoddo('http%3A%2F%2Fwww.tudou.com%2Fv%2Fj9oThCXXIlY%2F%26rpid%3D68582042%26resourceId%3D68582042_04_11_99%2Fv.swf','2012040717214899394','125465642')"  style="cursor:pointer"><img src="/images/btn/btn22.gif" ></a>
+								
+						</td>
+						<td width="45">
+<img src="/images/btn/btn31_lead.gif" >	
+							
+						</td>
+						<td width="15"></td>
+					</tr>
+
+<tr>
+						<td width="1" style="font-size:1px;color:#fff">109</td>
+						<td class="vod_list" ><span title="20120331" id="onAirText2012033115170285189" class="onAirText" style="text-align:left">제109회 2012.03.31</span></td>
+						
+						<!--  -->
+						<td width="36">
+													<img src="/images/btn/btn12.gif" onclick="player('http://player.youku.com/player.php/sid/XMzc0MjI2MjM2/v.swf','2012033115170285189')" style="cursor:pointer" />
+										
+						</td>
+						
+						<td width="36">
+														<a href="#" onclick="playerTwoddo('http%3A%2F%2Fwww.tudou.com%2Fv%2FVwIOHd_lSCo%2F%26rpid%3D68582042%26resourceId%3D68582042_04_11_99%2Fv.swf','2012033115170285189','124834758')"  style="cursor:pointer"><img src="/images/btn/btn22.gif" ></a>
+								
+						</td>
+						<td width="45">
+<img src="/images/btn/btn31_lead.gif" >	
+							
+						</td>
+						<td width="15"></td>
+					</tr>
+
+<tr>
+						<td width="1" style="font-size:1px;color:#fff">108</td>
+						<td class="vod_list" ><span title="20120317" id="onAirText2012032011395769840" class="onAirText" style="text-align:left">제108회 2012.03.17</span></td>
+						
+						<!--  -->
+						<td width="36">
+													<img src="/images/btn/btn12.gif" onclick="player('http://player.youku.com/player.php/sid/XMzY4NTE3MjQ4/v.swf','2012032011395769840')" style="cursor:pointer" />
+										
+						</td>
+						
+						<td width="36">
+														<a href="#" onclick="playerTwoddo('http%3A%2F%2Fwww.tudou.com%2Fv%2FanWrdhHHIo8%2F%26rpid%3D68582042%26resourceId%3D68582042_04_11_99%2Fv.swf','2012032011395769840','123874057')"  style="cursor:pointer"><img src="/images/btn/btn22.gif" ></a>
+								
+						</td>
+						<td width="45">
+<img src="/images/btn/btn31_lead.gif" >	
+							
+						</td>
+						<td width="15"></td>
+					</tr>
+
+<tr>
+						<td width="1" style="font-size:1px;color:#fff">107</td>
+						<td class="vod_list" ><span title="20120225" id="onAirText2012022513344939583" class="onAirText" style="text-align:left">제107회 2012.02.25</span></td>
+						
+						<!--  -->
+						<td width="36">
+													<img src="/images/btn/btn12.gif" onclick="player('http://player.youku.com/player.php/sid/XMzU2NjQ1MDA0/v.swf','2012022513344939583')" style="cursor:pointer" />
+										
+						</td>
+						
+						<td width="36">
+														<a href="#" onclick="playerTwoddo('http%3A%2F%2Fwww.tudou.com%2Fv%2FIz9Q1t5NUcI%2F%26rpid%3D68582042%26resourceId%3D68582042_04_11_99%2Fv.swf','2012022513344939583','')"  style="cursor:pointer"><img src="/images/btn/btn22.gif" ></a>
+								
+						</td>
+						<td width="45">
+<img src="/images/btn/btn31_lead.gif" >	
+							
+						</td>
+						<td width="15"></td>
+					</tr>
+
+<tr>
+						<td width="1" style="font-size:1px;color:#fff">106</td>
+						<td class="vod_list" ><span title="20120218" id="onAirText2012022513343154720" class="onAirText" style="text-align:left">제106회 2012.02.18</span></td>
+						
+						<!--  -->
+						<td width="36">
+													<img src="/images/btn/btn12.gif" onclick="player('http://player.youku.com/player.php/sid/XMzU2NjQzMzI0/v.swf','2012022513343154720')" style="cursor:pointer" />
+										
+						</td>
+						
+						<td width="36">
+														<a href="#" onclick="playerTwoddo('http%3A%2F%2Fwww.tudou.com%2Fv%2Fi3n1a-6KJyc%2F%26rpid%3D68582042%26resourceId%3D68582042_04_11_99%2Fv.swf','2012022513343154720','')"  style="cursor:pointer"><img src="/images/btn/btn22.gif" ></a>
+								
+						</td>
+						<td width="45">
+<img src="/images/btn/btn31_lead.gif" >	
+							
+						</td>
+						<td width="15"></td>
+					</tr>
+
+<tr>
+						<td width="1" style="font-size:1px;color:#fff">105</td>
+						<td class="vod_list" ><span title="20120211" id="onAirText2012021123273788201" class="onAirText" style="text-align:left">제105회 2012.02.11</span></td>
+						
+						<!--  -->
+						<td width="36">
+													<img src="/images/btn/btn12.gif" onclick="player('http://player.youku.com/player.php/sid/XMzUxNTExNzg0/v.swf','2012021123273788201')" style="cursor:pointer" />
+										
+						</td>
+						
+						<td width="36">
+														<a href="#" onclick="playerTwoddo('http%3A%2F%2Fwww.tudou.com%2Fv%2Fwihbul6J6sw%2F%26rpid%3D68582042%26resourceId%3D68582042_04_11_99%2Fv.swf','2012021123273788201','')"  style="cursor:pointer"><img src="/images/btn/btn22.gif" ></a>
+								
+						</td>
+						<td width="45">
+<img src="/images/btn/btn31_lead.gif" >	
+							
+						</td>
+						<td width="15"></td>
+					</tr>
+
+<tr>
+						<td width="1" style="font-size:1px;color:#fff">104</td>
+						<td class="vod_list" ><span title="20120204" id="onAirText2012020414221342681" class="onAirText" style="text-align:left">제104회 2012.02.04</span></td>
+						
+						<!--  -->
+						<td width="36">
+													<img src="/images/btn/btn11.gif" >
+										
+						</td>
+						
+						<td width="36">
+														<a href="#" onclick="playerTwoddo('http%3A%2F%2Fwww.tudou.com%2Fv%2FnRp4lE_1EX4%2F%26rpid%3D68582042%26resourceId%3D68582042_04_11_99%2Fv.swf','2012020414221342681','')"  style="cursor:pointer"><img src="/images/btn/btn22.gif" ></a>
+								
+						</td>
+						<td width="45">
+<img src="/images/btn/btn31_lead.gif" >	
+							
+						</td>
+						<td width="15"></td>
+					</tr>
+
+<tr>
+						<td width="1" style="font-size:1px;color:#fff">103</td>
+						<td class="vod_list" ><span title="20120128" id="onAirText2012012813312721724" class="onAirText" style="text-align:left">제103회 2012.01.28</span></td>
+						
+						<!--  -->
+						<td width="36">
+													<img src="/images/btn/btn12.gif" onclick="player('http://player.youku.com/player.php/sid/XMzQ2NTc3MTEy/v.swf','2012012813312721724')" style="cursor:pointer" />
+										
+						</td>
+						
+						<td width="36">
+														<a href="#" onclick="playerTwoddo('http%3A%2F%2Fwww.tudou.com%2Fv%2FPttrdg4k1fo%2F%26rpid%3D68582042%26resourceId%3D68582042_04_11_99%2Fv.swf','2012012813312721724','')"  style="cursor:pointer"><img src="/images/btn/btn22.gif" ></a>
+								
+						</td>
+						<td width="45">
+<img src="/images/btn/btn31_lead.gif" >	
+							
+						</td>
+						<td width="15"></td>
+					</tr>
+
+<tr>
+						<td width="1" style="font-size:1px;color:#fff">102</td>
+						<td class="vod_list" ><span title="20120121" id="onAirText2012012113190235241" class="onAirText" style="text-align:left">제102회 2012.01.21</span></td>
+						
+						<!--  -->
+						<td width="36">
+													<img src="/images/btn/btn12.gif" onclick="player('http://player.youku.com/player.php/sid/XMzQ0OTY2NzY4/v.swf','2012012113190235241')" style="cursor:pointer" />
+										
+						</td>
+						
+						<td width="36">
+														<a href="#" onclick="playerTwoddo('http%3A%2F%2Fwww.tudou.com%2Fv%2F9eGX_7IgnUc%2F%26rpid%3D68582042%26resourceId%3D68582042_04_11_99%2Fv.swf','2012012113190235241','')"  style="cursor:pointer"><img src="/images/btn/btn22.gif" ></a>
+								
+						</td>
+						<td width="45">
+<img src="/images/btn/btn31_lead.gif" >	
+							
+						</td>
+						<td width="15"></td>
+					</tr>
+
+<tr>
+						<td width="1" style="font-size:1px;color:#fff">101</td>
+						<td class="vod_list" ><span title="20120114" id="onAirText2012011417585496803" class="onAirText" style="text-align:left">제101회 2012.01.14</span></td>
+						
+						<!--  -->
+						<td width="36">
+													<img src="/images/btn/btn12.gif" onclick="player('http://player.youku.com/player.php/sid/XMzQyNzc5NzUy/v.swf','2012011417585496803')" style="cursor:pointer" />
+										
+						</td>
+						
+						<td width="36">
+														<a href="#" onclick="playerTwoddo('http%3A%2F%2Fwww.tudou.com%2Fv%2Fo8Tvoi52YQ0%2F%26rpid%3D68582042%26resourceId%3D68582042_04_11_99%2Fv.swf','2012011417585496803','')"  style="cursor:pointer"><img src="/images/btn/btn22.gif" ></a>
+								
+						</td>
+						<td width="45">
+<img src="/images/btn/btn31_lead.gif" >	
+							
+						</td>
+						<td width="15"></td>
+					</tr>
+
+<tr>
+						<td width="1" style="font-size:1px;color:#fff">100</td>
+						<td class="vod_list" ><span title="20120107" id="onAirText2012010717231062260" class="onAirText" style="text-align:left">제100회 2012.01.07</span></td>
+						
+						<!--  -->
+						<td width="36">
+													<img src="/images/btn/btn12.gif" onclick="player('http://player.youku.com/player.php/sid/XMzQwNjEzMTMy/v.swf','2012010717231062260')" style="cursor:pointer" />
+										
+						</td>
+						
+						<td width="36">
+														<a href="#" onclick="playerTwoddo('http%3A%2F%2Fwww.tudou.com%2Fv%2FIfRtBd9TDgE%2F%26rpid%3D68582042%26resourceId%3D68582042_04_11_99%2Fv.swf','2012010717231062260','')"  style="cursor:pointer"><img src="/images/btn/btn22.gif" ></a>
+								
+						</td>
+						<td width="45">
+<img src="/images/btn/btn31_lead.gif" >	
+							
+						</td>
+						<td width="15"></td>
+					</tr>
+
+<tr>
+						<td width="1" style="font-size:1px;color:#fff">99</td>
+						<td class="vod_list" ><span title="20111231" id="onAirText2011123115310793483" class="onAirText" style="text-align:left">제99회 2011.12.31</span></td>
+						
+						<!--  -->
+						<td width="36">
+													<img src="/images/btn/btn12.gif" onclick="player('http://player.youku.com/player.php/sid/XMzM4MTYxNDIw/v.swf','2011123115310793483')" style="cursor:pointer" />
+										
+						</td>
+						
+						<td width="36">
+														<a href="#" onclick="playerTwoddo('http%3A%2F%2Fwww.tudou.com%2Fv%2FLjEg16FXIq0%2Fv.swf','2011123115310793483','')"  style="cursor:pointer"><img src="/images/btn/btn22.gif" ></a>
+								
+						</td>
+						<td width="45">
+<img src="/images/btn/btn31_lead.gif" >	
+							
+						</td>
+						<td width="15"></td>
+					</tr>
+
+<tr>
+						<td width="1" style="font-size:1px;color:#fff">98</td>
+						<td class="vod_list" ><span title="20111224" id="onAirText2011122616013935878" class="onAirText" style="text-align:left">제98회 2011.12.24</span></td>
+						
+						<!--  -->
+						<td width="36">
+													<img src="/images/btn/btn12.gif" onclick="player('http://player.youku.com/player.php/sid/XMzM2Mzc1Njcy/v.swf','2011122616013935878')" style="cursor:pointer" />
+										
+						</td>
+						
+						<td width="36">
+														<a href="#" onclick="playerTwoddo('http%3A%2F%2Fwww.tudou.com%2Fv%2F-TBDXXHOG6k%2Fv.swf','2011122616013935878','')"  style="cursor:pointer"><img src="/images/btn/btn22.gif" ></a>
+								
+						</td>
+						<td width="45">
+<img src="/images/btn/btn31_lead.gif" >	
+							
+						</td>
+						<td width="15"></td>
+					</tr>
+
+<tr>
+						<td width="1" style="font-size:1px;color:#fff">97</td>
+						<td class="vod_list" ><span title="20111217" id="onAirText2011121713275185297" class="onAirText" style="text-align:left">제97회 2011.12.17</span></td>
+						
+						<!--  -->
+						<td width="36">
+													<img src="/images/btn/btn12.gif" onclick="player('http://player.youku.com/player.php/sid/XMzMzMzM3MDI0/v.swf','2011121713275185297')" style="cursor:pointer" />
+										
+						</td>
+						
+						<td width="36">
+														<a href="#" onclick="playerTwoddo('http%3A%2F%2Fwww.tudou.com%2Fv%2FJsF9gmFVuJA%2Fv.swf','2011121713275185297','')"  style="cursor:pointer"><img src="/images/btn/btn22.gif" ></a>
+								
+						</td>
+						<td width="45">
+<img src="/images/btn/btn31_lead.gif" >	
+							
+						</td>
+						<td width="15"></td>
+					</tr>
+
+<tr>
+						<td width="1" style="font-size:1px;color:#fff">96</td>
+						<td class="vod_list" ><span title="20111210" id="onAirText2011121013351529286" class="onAirText" style="text-align:left">제96회 2011.12.10</span></td>
+						
+						<!--  -->
+						<td width="36">
+													<img src="/images/btn/btn12.gif" onclick="player('http://player.youku.com/player.php/sid/XMzMxMDE2NTQw/v.swf','2011121013351529286')" style="cursor:pointer" />
+										
+						</td>
+						
+						<td width="36">
+														<a href="#" onclick="playerTwoddo('http%3A%2F%2Fwww.tudou.com%2Fv%2FTO3pGKnmNW0%2Fv.swf','2011121013351529286','')"  style="cursor:pointer"><img src="/images/btn/btn22.gif" ></a>
+								
+						</td>
+						<td width="45">
+<img src="/images/btn/btn31_lead.gif" >	
+							
+						</td>
+						<td width="15"></td>
+					</tr>
+
+<tr>
+						<td width="1" style="font-size:1px;color:#fff">95</td>
+						<td class="vod_list" ><span title="20111203" id="onAirText2011120313275229916" class="onAirText" style="text-align:left">제95회 2011.12.03</span></td>
+						
+						<!--  -->
+						<td width="36">
+													<img src="/images/btn/btn12.gif" onclick="player('http://player.youku.com/player.php/sid/XMzI4NjcxNDA4/v.swf','2011120313275229916')" style="cursor:pointer" />
+										
+						</td>
+						
+						<td width="36">
+														<img src="/images/btn/btn21.gif" >
+								
+						</td>
+						<td width="45">
+<img src="/images/btn/btn31_lead.gif" >	
+							
+						</td>
+						<td width="15"></td>
+					</tr>
+
+<tr>
+						<td width="1" style="font-size:1px;color:#fff">94</td>
+						<td class="vod_list" ><span title="20111126" id="onAirText2011112613543265037" class="onAirText" style="text-align:left">제94회 2011.11.26</span></td>
+						
+						<!--  -->
+						<td width="36">
+													<img src="/images/btn/btn12.gif" onclick="player('http://player.youku.com/player.php/sid/XMzI2Mzc5NjIw/v.swf','2011112613543265037')" style="cursor:pointer" />
+										
+						</td>
+						
+						<td width="36">
+														<a href="#" onclick="playerTwoddo('http%3A%2F%2Fwww.tudou.com%2Fv%2FmII6u5ZuwW0%2Fv.swf','2011112613543265037','')"  style="cursor:pointer"><img src="/images/btn/btn22.gif" ></a>
+								
+						</td>
+						<td width="45">
+<img src="/images/btn/btn31_lead.gif" >	
+							
+						</td>
+						<td width="15"></td>
+					</tr>
+
+<tr>
+						<td width="1" style="font-size:1px;color:#fff">93</td>
+						<td class="vod_list" ><span title="20111112" id="onAirText2011111216234386569" class="onAirText" style="text-align:left">제93회 2011.11.12</span></td>
+						
+						<!--  -->
+						<td width="36">
+													<img src="/images/btn/btn12.gif" onclick="player('http://player.youku.com/player.php/sid/XMzIxNzgzMTYw/v.swf','2011111216234386569')" style="cursor:pointer" />
+										
+						</td>
+						
+						<td width="36">
+														<img src="/images/btn/btn21.gif" >
+								
+						</td>
+						<td width="45">
+<img src="/images/btn/btn31_lead.gif" >	
+							
+						</td>
+						<td width="15"></td>
+					</tr>
+
+<tr>
+						<td width="1" style="font-size:1px;color:#fff">91</td>
+						<td class="vod_list" ><span title="20111029" id="onAirText2011102915511527599" class="onAirText" style="text-align:left">제91회 2011.10.29</span></td>
+						
+						<!--  -->
+						<td width="36">
+													<img src="/images/btn/btn12.gif" onclick="player('http://player.youku.com/player.php/sid/XMzE3MzExNjcy/v.swf','2011102915511527599')" style="cursor:pointer" />
+										
+						</td>
+						
+						<td width="36">
+														<a href="#" onclick="playerTwoddo('http%3A%2F%2Fwww.tudou.com%2Fv%2FJz3wjrdEv9g%2Fv.swf','2011102915511527599','')"  style="cursor:pointer"><img src="/images/btn/btn22.gif" ></a>
+								
+						</td>
+						<td width="45">
+<img src="/images/btn/btn31_lead.gif" >	
+							
+						</td>
+						<td width="15"></td>
+					</tr>
+
+<tr>
+						<td width="1" style="font-size:1px;color:#fff">90</td>
+						<td class="vod_list" ><span title="20111022" id="onAirText2011102215211420392" class="onAirText" style="text-align:left">제90회 2011.10.22</span></td>
+						
+						<!--  -->
+						<td width="36">
+													<img src="/images/btn/btn12.gif" onclick="player('http://player.youku.com/player.php/sid/XMzE1MDYyOTA0/v.swf','2011102215211420392')" style="cursor:pointer" />
+										
+						</td>
+						
+						<td width="36">
+														<a href="#" onclick="playerTwoddo('http%3A%2F%2Fwww.tudou.com%2Fv%2FwhrkGtlBGBA%2Fv.swf','2011102215211420392','')"  style="cursor:pointer"><img src="/images/btn/btn22.gif" ></a>
+								
+						</td>
+						<td width="45">
+<img src="/images/btn/btn31_lead.gif" >	
+							
+						</td>
+						<td width="15"></td>
+					</tr>
+
+<tr>
+						<td width="1" style="font-size:1px;color:#fff">89</td>
+						<td class="vod_list" ><span title="20111015" id="onAirText2011101516265377982" class="onAirText" style="text-align:left">제89회 2011.10.15</span></td>
+						
+						<!--  -->
+						<td width="36">
+													<img src="/images/btn/btn12.gif" onclick="player('http://player.youku.com/player.php/sid/XMzEyOTQyNTc2/v.swf','2011101516265377982')" style="cursor:pointer" />
+										
+						</td>
+						
+						<td width="36">
+														<a href="#" onclick="playerTwoddo('http%3A%2F%2Fwww.tudou.com%2Fv%2FobC5vxedSnw%2Fv.swf','2011101516265377982','')"  style="cursor:pointer"><img src="/images/btn/btn22.gif" ></a>
+								
+						</td>
+						<td width="45">
+<img src="/images/btn/btn31_lead.gif" >	
+							
+						</td>
+						<td width="15"></td>
+					</tr>
+
+<tr>
+						<td width="1" style="font-size:1px;color:#fff">88</td>
+						<td class="vod_list" ><span title="20111008" id="onAirText2011100814252154166" class="onAirText" style="text-align:left">제88회 2011.10.08</span></td>
+						
+						<!--  -->
+						<td width="36">
+													<img src="/images/btn/btn12.gif" onclick="player('http://player.youku.com/player.php/sid/XMzEwODQ0ODE2/v.swf','2011100814252154166')" style="cursor:pointer" />
+										
+						</td>
+						
+						<td width="36">
+														<a href="#" onclick="playerTwoddo('http%3A%2F%2Fwww.tudou.com%2Fv%2FULyYgB2PDZY%2Fv.swf','2011100814252154166','')"  style="cursor:pointer"><img src="/images/btn/btn22.gif" ></a>
+								
+						</td>
+						<td width="45">
+<img src="/images/btn/btn31_lead.gif" >	
+							
+						</td>
+						<td width="15"></td>
+					</tr>
+
+<tr>
+						<td width="1" style="font-size:1px;color:#fff">87</td>
+						<td class="vod_list" ><span title="20111001" id="onAirText2011100117130151767" class="onAirText" style="text-align:left">제87회 2011.10.01</span></td>
+						
+						<!--  -->
+						<td width="36">
+													<img src="/images/btn/btn12.gif" onclick="player('http://player.youku.com/player.php/sid/XMzA4ODQ5Nzcy/v.swf','2011100117130151767')" style="cursor:pointer" />
+										
+						</td>
+						
+						<td width="36">
+														<a href="#" onclick="playerTwoddo('http%3A%2F%2Fwww.tudou.com%2Fv%2FUVNMD1ijtrM%2Fv.swf','2011100117130151767','')"  style="cursor:pointer"><img src="/images/btn/btn22.gif" ></a>
+								
+						</td>
+						<td width="45">
+<img src="/images/btn/btn31_lead.gif" >	
+							
+						</td>
+						<td width="15"></td>
+					</tr>
+
+<tr>
+						<td width="1" style="font-size:1px;color:#fff">86</td>
+						<td class="vod_list" ><span title="20110924" id="onAirText2011092417545270210" class="onAirText" style="text-align:left">제86회 2011.09.24</span></td>
+						
+						<!--  -->
+						<td width="36">
+													<img src="/images/btn/btn12.gif" onclick="player('http://player.youku.com/player.php/sid/XMzA2ODYwNzc2/v.swf','2011092417545270210')" style="cursor:pointer" />
+										
+						</td>
+						
+						<td width="36">
+														<a href="#" onclick="playerTwoddo('http%3A%2F%2Fwww.tudou.com%2Fv%2FZ4QrMJVct2s%2Fv.swf','2011092417545270210','')"  style="cursor:pointer"><img src="/images/btn/btn22.gif" ></a>
+								
+						</td>
+						<td width="45">
+<img src="/images/btn/btn31_lead.gif" >	
+							
+						</td>
+						<td width="15"></td>
+					</tr>
+
+<tr>
+						<td width="1" style="font-size:1px;color:#fff">85</td>
+						<td class="vod_list" ><span title="20110910" id="onAirText2011091017172743499" class="onAirText" style="text-align:left">제85회 2011.09.10</span></td>
+						
+						<!--  -->
+						<td width="36">
+													<img src="/images/btn/btn12.gif" onclick="player('http://player.youku.com/player.php/sid/XMzAyOTQwOTky/v.swf','2011091017172743499')" style="cursor:pointer" />
+										
+						</td>
+						
+						<td width="36">
+														<a href="#" onclick="playerTwoddo('http%3A%2F%2Fwww.tudou.com%2Fv%2FiPBgCMIA9Xc%2Fv.swf','2011091017172743499','')"  style="cursor:pointer"><img src="/images/btn/btn22.gif" ></a>
+								
+						</td>
+						<td width="45">
+<img src="/images/btn/btn31_lead.gif" >	
+							
+						</td>
+						<td width="15"></td>
+					</tr>
+
+<tr>
+						<td width="1" style="font-size:1px;color:#fff">84</td>
+						<td class="vod_list" ><span title="20110903" id="onAirText2011090314564663608" class="onAirText" style="text-align:left">제84회 2011.09.03</span></td>
+						
+						<!--  -->
+						<td width="36">
+													<img src="/images/btn/btn12.gif" onclick="player('http://player.youku.com/player.php/sid/XMzAwOTM1NTI0/v.swf','2011090314564663608')" style="cursor:pointer" />
+										
+						</td>
+						
+						<td width="36">
+														<a href="#" onclick="playerTwoddo('http%3A%2F%2Fwww.tudou.com%2Fv%2FQFEhyosRF4E%2Fv.swf','2011090314564663608','')"  style="cursor:pointer"><img src="/images/btn/btn22.gif" ></a>
+								
+						</td>
+						<td width="45">
+<img src="/images/btn/btn31_lead.gif" >	
+							
+						</td>
+						<td width="15"></td>
+					</tr>
+
+<tr>
+						<td width="1" style="font-size:1px;color:#fff">83</td>
+						<td class="vod_list" ><span title="20110827" id="onAirText2011082715170735021" class="onAirText" style="text-align:left">제83회 2011.08.27</span></td>
+						
+						<!--  -->
+						<td width="36">
+													<img src="/images/btn/btn12.gif" onclick="player('http://player.youku.com/player.php/sid/XMjk4ODY4NTMy/v.swf','2011082715170735021')" style="cursor:pointer" />
+										
+						</td>
+						
+						<td width="36">
+														<a href="#" onclick="playerTwoddo('http%3A%2F%2Fwww.tudou.com%2Fv%2FYFbkbCK5aGY%2Fv.swf','2011082715170735021','')"  style="cursor:pointer"><img src="/images/btn/btn22.gif" ></a>
+								
+						</td>
+						<td width="45">
+<img src="/images/btn/btn31_lead.gif" >	
+							
+						</td>
+						<td width="15"></td>
+					</tr>
+
+<tr>
+						<td width="1" style="font-size:1px;color:#fff">82</td>
+						<td class="vod_list" ><span title="20110820" id="onAirText2011082016370444861" class="onAirText" style="text-align:left">제82회 2011.08.20</span></td>
+						
+						<!--  -->
+						<td width="36">
+													<img src="/images/btn/btn12.gif" onclick="player('http://player.youku.com/player.php/sid/XMjk2NjMwMjQw/v.swf','2011082016370444861')" style="cursor:pointer" />
+										
+						</td>
+						
+						<td width="36">
+														<a href="#" onclick="playerTwoddo('http%3A%2F%2Fwww.tudou.com%2Fv%2FdgbZBKvqIyA%2Fv.swf','2011082016370444861','')"  style="cursor:pointer"><img src="/images/btn/btn22.gif" ></a>
+								
+						</td>
+						<td width="45">
+<img src="/images/btn/btn31_lead.gif" >	
+							
+						</td>
+						<td width="15"></td>
+					</tr>
+
+<tr>
+						<td width="1" style="font-size:1px;color:#fff">81</td>
+						<td class="vod_list" ><span title="20110813" id="onAirText2011081315452192390" class="onAirText" style="text-align:left">제81회 2011.08.13</span></td>
+						
+						<!--  -->
+						<td width="36">
+													<img src="/images/btn/btn12.gif" onclick="player('http://player.youku.com/player.php/sid/XMjk0MzE2NDMy/v.swf','2011081315452192390')" style="cursor:pointer" />
+										
+						</td>
+						
+						<td width="36">
+														<a href="#" onclick="playerTwoddo('http%3A%2F%2Fwww.tudou.com%2Fv%2F7MgAMhyH9a0%2Fv.swf','2011081315452192390','')"  style="cursor:pointer"><img src="/images/btn/btn22.gif" ></a>
+								
+						</td>
+						<td width="45">
+<img src="/images/btn/btn31_lead.gif" >	
+							
+						</td>
+						<td width="15"></td>
+					</tr>
+
+<tr>
+						<td width="1" style="font-size:1px;color:#fff">80</td>
+						<td class="vod_list" ><span title="20110806" id="onAirText2011080617165474560" class="onAirText" style="text-align:left">제80회 2011.08.06</span></td>
+						
+						<!--  -->
+						<td width="36">
+													<img src="/images/btn/btn11.gif" >
+										
+						</td>
+						
+						<td width="36">
+														<a href="#" onclick="playerTwoddo('http%3A%2F%2Fwww.tudou.com%2Fv%2FDYevdcEUo4c%2Fv.swf','2011080617165474560','')"  style="cursor:pointer"><img src="/images/btn/btn22.gif" ></a>
+								
+						</td>
+						<td width="45">
+<img src="/images/btn/btn31_lead.gif" >	
+							
+						</td>
+						<td width="15"></td>
+					</tr>
+
+<tr>
+						<td width="1" style="font-size:1px;color:#fff">79</td>
+						<td class="vod_list" ><span title="20110730" id="onAirText2011073017021535245" class="onAirText" style="text-align:left">제79회 2011.07.30</span></td>
+						
+						<!--  -->
+						<td width="36">
+													<img src="/images/btn/btn12.gif" onclick="player('http://player.youku.com/player.php/sid/XMjg5NzI0MTAw/v.swf','2011073017021535245')" style="cursor:pointer" />
+										
+						</td>
+						
+						<td width="36">
+														<a href="#" onclick="playerTwoddo('http%3A%2F%2Fwww.tudou.com%2Fv%2F-GjZus3wwDU%2Fv.swf','2011073017021535245','')"  style="cursor:pointer"><img src="/images/btn/btn22.gif" ></a>
+								
+						</td>
+						<td width="45">
+<img src="/images/btn/btn31_lead.gif" >	
+							
+						</td>
+						<td width="15"></td>
+					</tr>
+
+<tr>
+						<td width="1" style="font-size:1px;color:#fff">78</td>
+						<td class="vod_list" ><span title="20110723" id="onAirText2011072314142920718" class="onAirText" style="text-align:left">제78회 2011.07.23</span></td>
+						
+						<!--  -->
+						<td width="36">
+													<img src="/images/btn/btn12.gif" onclick="player('http://player.youku.com/player.php/sid/XMjg3NTk5NTM2/v.swf','2011072314142920718')" style="cursor:pointer" />
+										
+						</td>
+						
+						<td width="36">
+														<a href="#" onclick="playerTwoddo('http%3A%2F%2Fwww.tudou.com%2Fv%2FGIr8cabj_TQ%2Fv.swf','2011072314142920718','')"  style="cursor:pointer"><img src="/images/btn/btn22.gif" ></a>
+								
+						</td>
+						<td width="45">
+<img src="/images/btn/btn31_lead.gif" >	
+							
+						</td>
+						<td width="15"></td>
+					</tr>
+
+<tr>
+						<td width="1" style="font-size:1px;color:#fff">77</td>
+						<td class="vod_list" ><span title="20110716" id="onAirText2011071614410320148" class="onAirText" style="text-align:left">제77회 2011.07.16</span></td>
+						
+						<!--  -->
+						<td width="36">
+													<img src="/images/btn/btn12.gif" onclick="player('http://player.youku.com/player.php/sid/XMjg1NTYwNzU2/v.swf','2011071614410320148')" style="cursor:pointer" />
+										
+						</td>
+						
+						<td width="36">
+														<a href="#" onclick="playerTwoddo('http%3A%2F%2Fwww.tudou.com%2Fv%2F9frfbblWlV8%2Fv.swf','2011071614410320148','')"  style="cursor:pointer"><img src="/images/btn/btn22.gif" ></a>
+								
+						</td>
+						<td width="45">
+<img src="/images/btn/btn31_lead.gif" >	
+							
+						</td>
+						<td width="15"></td>
+					</tr>
+
+<tr>
+						<td width="1" style="font-size:1px;color:#fff">76</td>
+						<td class="vod_list" ><span title="20110709" id="onAirText2011070915095616278" class="onAirText" style="text-align:left">제76회 2011.07.09</span></td>
+						
+						<!--  -->
+						<td width="36">
+													<img src="/images/btn/btn12.gif" onclick="player('http://player.youku.com/player.php/sid/XMjgzNTA3NDM2/v.swf','2011070915095616278')" style="cursor:pointer" />
+										
+						</td>
+						
+						<td width="36">
+														<a href="#" onclick="playerTwoddo('http%3A%2F%2Fwww.tudou.com%2Fv%2F9Oyi9kJNDkM%2Fv.swf','2011070915095616278','')"  style="cursor:pointer"><img src="/images/btn/btn22.gif" ></a>
+								
+						</td>
+						<td width="45">
+<img src="/images/btn/btn31_lead.gif" >	
+							
+						</td>
+						<td width="15"></td>
+					</tr>
+
+<tr>
+						<td width="1" style="font-size:1px;color:#fff">75</td>
+						<td class="vod_list" ><span title="20110702" id="onAirText2011070212531662910" class="onAirText" style="text-align:left">제75회 2011.07.02</span></td>
+						
+						<!--  -->
+						<td width="36">
+													<img src="/images/btn/btn12.gif" onclick="player('http://player.youku.com/player.php/sid/XMjgxMzkxNjA4/v.swf','2011070212531662910')" style="cursor:pointer" />
+										
+						</td>
+						
+						<td width="36">
+														<a href="#" onclick="playerTwoddo('http%3A%2F%2Fwww.tudou.com%2Fv%2FU-j8zQmvLnY%2Fv.swf','2011070212531662910','')"  style="cursor:pointer"><img src="/images/btn/btn22.gif" ></a>
+								
+						</td>
+						<td width="45">
+<img src="/images/btn/btn31_lead.gif" >	
+							
+						</td>
+						<td width="15"></td>
+					</tr>
+
+<tr>
+						<td width="1" style="font-size:1px;color:#fff">74</td>
+						<td class="vod_list" ><span title="20110625" id="onAirText2011062517082861114" class="onAirText" style="text-align:left">제74회 2011.06.25</span></td>
+						
+						<!--  -->
+						<td width="36">
+													<img src="/images/btn/btn12.gif" onclick="player('http://player.youku.com/player.php/sid/XMjc5MzIzNjI4/v.swf','2011062517082861114')" style="cursor:pointer" />
+										
+						</td>
+						
+						<td width="36">
+														<a href="#" onclick="playerTwoddo('http%3A%2F%2Fwww.tudou.com%2Fv%2Fi-ExfYM_OYQ%2Fv.swf','2011062517082861114','')"  style="cursor:pointer"><img src="/images/btn/btn22.gif" ></a>
+								
+						</td>
+						<td width="45">
+<img src="/images/btn/btn31_lead.gif" >	
+							
+						</td>
+						<td width="15"></td>
+					</tr>
+
+<tr>
+						<td width="1" style="font-size:1px;color:#fff">73</td>
+						<td class="vod_list" ><span title="20110618" id="onAirText2011061817060777305" class="onAirText" style="text-align:left">제73회 2011.06.18</span></td>
+						
+						<!--  -->
+						<td width="36">
+													<img src="/images/btn/btn12.gif" onclick="player('http://player.youku.com/player.php/sid/XMjc3MjA1NTEy/v.swf','2011061817060777305')" style="cursor:pointer" />
+										
+						</td>
+						
+						<td width="36">
+														<a href="#" onclick="playerTwoddo('http%3A%2F%2Fwww.tudou.com%2Fv%2FLslYPJymLaI%2Fv.swf','2011061817060777305','')"  style="cursor:pointer"><img src="/images/btn/btn22.gif" ></a>
+								
+						</td>
+						<td width="45">
+<img src="/images/btn/btn31_lead.gif" >	
+							
+						</td>
+						<td width="15"></td>
+					</tr>
+
+<tr>
+						<td width="1" style="font-size:1px;color:#fff">72</td>
+						<td class="vod_list" ><span title="20110611" id="onAirText2011061116150849170" class="onAirText" style="text-align:left">제72회 2011.06.11</span></td>
+						
+						<!--  -->
+						<td width="36">
+													<img src="/images/btn/btn12.gif" onclick="player('http://player.youku.com/player.php/sid/XMjc1MDc2MDQ4/v.swf','2011061116150849170')" style="cursor:pointer" />
+										
+						</td>
+						
+						<td width="36">
+														<a href="#" onclick="playerTwoddo('http%3A%2F%2Fwww.tudou.com%2Fv%2FZJ1y-qpVb5E%2Fv.swf','2011061116150849170','')"  style="cursor:pointer"><img src="/images/btn/btn22.gif" ></a>
+								
+						</td>
+						<td width="45">
+<img src="/images/btn/btn31_lead.gif" >	
+							
+						</td>
+						<td width="15"></td>
+					</tr>
+
+<tr>
+						<td width="1" style="font-size:1px;color:#fff">71</td>
+						<td class="vod_list" ><span title="20110604" id="onAirText2011060417490253131" class="onAirText" style="text-align:left">제71회 2011.06.04</span></td>
+						
+						<!--  -->
+						<td width="36">
+													<img src="/images/btn/btn12.gif" onclick="player('http://player.youku.com/player.php/sid/XMjczMDE3ODEy/v.swf','2011060417490253131')" style="cursor:pointer" />
+										
+						</td>
+						
+						<td width="36">
+														<a href="#" onclick="playerTwoddo('http%3A%2F%2Fwww.tudou.com%2Fv%2FngSWmv6VXRA%2Fv.swf','2011060417490253131','')"  style="cursor:pointer"><img src="/images/btn/btn22.gif" ></a>
+								
+						</td>
+						<td width="45">
+<img src="/images/btn/btn31_lead.gif" >	
+							
+						</td>
+						<td width="15"></td>
+					</tr>
+
+<tr>
+						<td width="1" style="font-size:1px;color:#fff">70</td>
+						<td class="vod_list" ><span title="20110528" id="onAirText2011052815085060525" class="onAirText" style="text-align:left">제70회 2011.05.28</span></td>
+						
+						<!--  -->
+						<td width="36">
+													<img src="/images/btn/btn12.gif" onclick="player('http://player.youku.com/player.php/sid/XMjcwODQ5MDY0/v.swf','2011052815085060525')" style="cursor:pointer" />
+										
+						</td>
+						
+						<td width="36">
+														<a href="#" onclick="playerTwoddo('http%3A%2F%2Fwww.tudou.com%2Fv%2FyOads_pZP8I%2Fv.swf','2011052815085060525','')"  style="cursor:pointer"><img src="/images/btn/btn22.gif" ></a>
+								
+						</td>
+						<td width="45">
+<img src="/images/btn/btn31_lead.gif" >	
+							
+						</td>
+						<td width="15"></td>
+					</tr>
+
+<tr>
+						<td width="1" style="font-size:1px;color:#fff">69</td>
+						<td class="vod_list" ><span title="20110521" id="onAirText2011052114154891904" class="onAirText" style="text-align:left">제69회 2011.05.21</span></td>
+						
+						<!--  -->
+						<td width="36">
+													<img src="/images/btn/btn12.gif" onclick="player('http://player.youku.com/player.php/sid/XMjY4Nzk0MjQ0/v.swf','2011052114154891904')" style="cursor:pointer" />
+										
+						</td>
+						
+						<td width="36">
+														<a href="#" onclick="playerTwoddo('http%3A%2F%2Fwww.tudou.com%2Fv%2F5buBOsuDwUA%2Fv.swf','2011052114154891904','')"  style="cursor:pointer"><img src="/images/btn/btn22.gif" ></a>
+								
+						</td>
+						<td width="45">
+<img src="/images/btn/btn31_lead.gif" >	
+							
+						</td>
+						<td width="15"></td>
+					</tr>
+
+<tr>
+						<td width="1" style="font-size:1px;color:#fff">68</td>
+						<td class="vod_list" ><span title="20110514" id="onAirText2011051415375893882" class="onAirText" style="text-align:left">제68회 2011.05.14</span></td>
+						
+						<!--  -->
+						<td width="36">
+													<img src="/images/btn/btn12.gif" onclick="player('http://player.youku.com/player.php/sid/XMjY2ODQyMjI0/v.swf','2011051415375893882')" style="cursor:pointer" />
+										
+						</td>
+						
+						<td width="36">
+														<a href="#" onclick="playerTwoddo('http%3A%2F%2Fwww.tudou.com%2Fv%2F40fAgzeKFAI%2Fv.swf','2011051415375893882','')"  style="cursor:pointer"><img src="/images/btn/btn22.gif" ></a>
+								
+						</td>
+						<td width="45">
+<img src="/images/btn/btn31_lead.gif" >	
+							
+						</td>
+						<td width="15"></td>
+					</tr>
+
+<tr>
+						<td width="1" style="font-size:1px;color:#fff">67</td>
+						<td class="vod_list" ><span title="20110507" id="onAirText2011050714271396263" class="onAirText" style="text-align:left">제67회 2011.05.07</span></td>
+						
+						<!--  -->
+						<td width="36">
+													<img src="/images/btn/btn12.gif" onclick="player('http://player.youku.com/player.php/sid/XMjY0OTI2MTEy/v.swf','2011050714271396263')" style="cursor:pointer" />
+										
+						</td>
+						
+						<td width="36">
+														<a href="#" onclick="playerTwoddo('http%3A%2F%2Fwww.tudou.com%2Fv%2FyTtZXg7W4SE%2Fv.swf','2011050714271396263','')"  style="cursor:pointer"><img src="/images/btn/btn22.gif" ></a>
+								
+						</td>
+						<td width="45">
+<img src="/images/btn/btn31_lead.gif" >	
+							
+						</td>
+						<td width="15"></td>
+					</tr>
+
+<tr>
+						<td width="1" style="font-size:1px;color:#fff">66</td>
+						<td class="vod_list" ><span title="20110430" id="onAirText2011043016324750491" class="onAirText" style="text-align:left">제66회 2011.04.30</span></td>
+						
+						<!--  -->
+						<td width="36">
+													<img src="/images/btn/btn12.gif" onclick="player('http://player.youku.com/player.php/sid/XMjYzMDQ3NzQw/v.swf','2011043016324750491')" style="cursor:pointer" />
+										
+						</td>
+						
+						<td width="36">
+														<a href="#" onclick="playerTwoddo('http%3A%2F%2Fwww.tudou.com%2Fv%2FrGAuLTmZreI%2Fv.swf','2011043016324750491','')"  style="cursor:pointer"><img src="/images/btn/btn22.gif" ></a>
+								
+						</td>
+						<td width="45">
+<img src="/images/btn/btn31_lead.gif" >	
+							
+						</td>
+						<td width="15"></td>
+					</tr>
+
+<tr>
+						<td width="1" style="font-size:1px;color:#fff">65</td>
+						<td class="vod_list" ><span title="20110423" id="onAirText2011042314343791257" class="onAirText" style="text-align:left">제65회 2011.04.23</span></td>
+						
+						<!--  -->
+						<td width="36">
+													<img src="/images/btn/btn12.gif" onclick="player('http://player.youku.com/player.php/sid/XMjYxMTcxNzk2/v.swf','2011042314343791257')" style="cursor:pointer" />
+										
+						</td>
+						
+						<td width="36">
+														<a href="#" onclick="playerTwoddo('http%3A%2F%2Fwww.tudou.com%2Fv%2FE_vkTNxAuH8%2Fv.swf','2011042314343791257','')"  style="cursor:pointer"><img src="/images/btn/btn22.gif" ></a>
+								
+						</td>
+						<td width="45">
+<img src="/images/btn/btn31_lead.gif" >	
+							
+						</td>
+						<td width="15"></td>
+					</tr>
+
+<tr>
+						<td width="1" style="font-size:1px;color:#fff">64</td>
+						<td class="vod_list" ><span title="20110416" id="onAirText2011041615340263535" class="onAirText" style="text-align:left">제64회 2011.04.16</span></td>
+						
+						<!--  -->
+						<td width="36">
+													<img src="/images/btn/btn11.gif" >
+										
+						</td>
+						
+						<td width="36">
+														<a href="#" onclick="playerTwoddo('http%3A%2F%2Fwww.tudou.com%2Fv%2FklmwzUE4Xu8%2Fv.swf','2011041615340263535','')"  style="cursor:pointer"><img src="/images/btn/btn22.gif" ></a>
+								
+						</td>
+						<td width="45">
+<img src="/images/btn/btn31_lead.gif" >	
+							
+						</td>
+						<td width="15"></td>
+					</tr>
+
+<tr>
+						<td width="1" style="font-size:1px;color:#fff">63</td>
+						<td class="vod_list" ><span title="20110409" id="onAirText2011040914372160954" class="onAirText" style="text-align:left">제63회 2011.04.09</span></td>
+						
+						<!--  -->
+						<td width="36">
+													<img src="/images/btn/btn11.gif" >
+										
+						</td>
+						
+						<td width="36">
+														<a href="#" onclick="playerTwoddo('http%3A%2F%2Fwww.tudou.com%2Fv%2FhIAf6yz3gNs%2Fv.swf','2011040914372160954','')"  style="cursor:pointer"><img src="/images/btn/btn22.gif" ></a>
+								
+						</td>
+						<td width="45">
+<img src="/images/btn/btn31_lead.gif" >	
+							
+						</td>
+						<td width="15"></td>
+					</tr>
+
+<tr>
+						<td width="1" style="font-size:1px;color:#fff">62</td>
+						<td class="vod_list" ><span title="20110402" id="onAirText2011040213442833087" class="onAirText" style="text-align:left">제62회 2011.04.02</span></td>
+						
+						<!--  -->
+						<td width="36">
+													<img src="/images/btn/btn12.gif" onclick="player('http://www.tudou.com/v/6uaqDQyQeto/v.swf','2011040213442833087')" style="cursor:pointer" />
+										
+						</td>
+						
+						<td width="36">
+														<img src="/images/btn/btn21.gif" >
+								
+						</td>
+						<td width="45">
+<img src="/images/btn/btn31_lead.gif" >	
+							
+						</td>
+						<td width="15"></td>
+					</tr>
+
+<tr>
+						<td width="1" style="font-size:1px;color:#fff">61</td>
+						<td class="vod_list" ><span title="20110319" id="onAirText2011031914024319954" class="onAirText" style="text-align:left">제61회 2011.03.19</span></td>
+						
+						<!--  -->
+						<td width="36">
+													<img src="/images/btn/btn12.gif" onclick="player('http://www.tudou.com/v/UKRpkc3Nprc/v.swf','2011031914024319954')" style="cursor:pointer" />
+										
+						</td>
+						
+						<td width="36">
+														<img src="/images/btn/btn21.gif" >
+								
+						</td>
+						<td width="45">
+<img src="/images/btn/btn31_lead.gif" >	
+							
+						</td>
+						<td width="15"></td>
+					</tr>
+
+<tr>
+						<td width="1" style="font-size:1px;color:#fff">60</td>
+						<td class="vod_list" ><span title="20110312" id="onAirText2011031212235992424" class="onAirText" style="text-align:left">제60회 2011.03.12</span></td>
+						
+						<!--  -->
+						<td width="36">
+													<img src="/images/btn/btn12.gif" onclick="player('http://www.tudou.com/v/AE7bIIVp7X4/v.swf','2011031212235992424')" style="cursor:pointer" />
+										
+						</td>
+						
+						<td width="36">
+														<img src="/images/btn/btn21.gif" >
+								
+						</td>
+						<td width="45">
+<img src="/images/btn/btn32_lead.gif" onclick="weblinkPop('2011031212235992424','http%3A%2F%2Fupdate.1qdisk.com%2FQWeblink%2Findex.asp%3Fcid%3D25f326e827df28d82c2231002bcf2e6030f7306c32403748352737d435ad36c03562381a')" id="webLinkBtn2011031212235992424 " style="cursor:pointer">	
+							
+						</td>
+						<td width="15"></td>
+					</tr>
+
+<tr>
+						<td width="1" style="font-size:1px;color:#fff">59</td>
+						<td class="vod_list" ><span title="20110305" id="onAirText2011030513490141327" class="onAirText" style="text-align:left">제59회 2011.03.05</span></td>
+						
+						<!--  -->
+						<td width="36">
+													<img src="/images/btn/btn12.gif" onclick="player('http://www.tudou.com/v/r1bVD--JnNI/v.swf','2011030513490141327')" style="cursor:pointer" />
+										
+						</td>
+						
+						<td width="36">
+														<img src="/images/btn/btn21.gif" >
+								
+						</td>
+						<td width="45">
+<img src="/images/btn/btn32_lead.gif" onclick="weblinkPop('2011030513490141327','http%3A%2F%2Fupdate.1qdisk.com%2FQWeblink%2Findex.asp%3Fcid%3D25f326e827df2d70290e2eae2fb22e603289306c330b3748345a330034de393037d5381a')" id="webLinkBtn2011030513490141327 " style="cursor:pointer">	
+							
+						</td>
+						<td width="15"></td>
+					</tr>
+
+<tr>
+						<td width="1" style="font-size:1px;color:#fff">58</td>
+						<td class="vod_list" ><span title="20110226" id="onAirText2011022615141365837" class="onAirText" style="text-align:left">제58회 2011.02.26</span></td>
+						
+						<!--  -->
+						<td width="36">
+													<img src="/images/btn/btn12.gif" onclick="player('http://www.tudou.com/v/uepW3nh5oBs/v.swf','2011022615141365837')" style="cursor:pointer" />
+										
+						</td>
+						
+						<td width="36">
+														<img src="/images/btn/btn21.gif" >
+								
+						</td>
+						<td width="45">
+<img src="/images/btn/btn31_lead.gif" >	
+							
+						</td>
+						<td width="15"></td>
+					</tr>
+
+<tr>
+						<td width="1" style="font-size:1px;color:#fff">57</td>
+						<td class="vod_list" ><span title="20110219" id="onAirText2011021913275393618" class="onAirText" style="text-align:left">제57회 2011.02.19</span></td>
+						
+						<!--  -->
+						<td width="36">
+													<img src="/images/btn/btn12.gif" onclick="player('http://www.tudou.com/v/bptTrA1pFtM/v.swf','2011021913275393618')" style="cursor:pointer" />
+										
+						</td>
+						
+						<td width="36">
+														<img src="/images/btn/btn21.gif" >
+								
+						</td>
+						<td width="45">
+<img src="/images/btn/btn31_lead.gif" >	
+							
+						</td>
+						<td width="15"></td>
+					</tr>
+
+<tr>
+						<td width="1" style="font-size:1px;color:#fff">56</td>
+						<td class="vod_list" ><span title="20110212" id="onAirText2011021212011979065" class="onAirText" style="text-align:left">제56회 2011.02.12</span></td>
+						
+						<!--  -->
+						<td width="36">
+													<img src="/images/btn/btn12.gif" onclick="player('http://www.tudou.com/v/z6Xh_QTT0wU/v.swf','2011021212011979065')" style="cursor:pointer" />
+										
+						</td>
+						
+						<td width="36">
+														<img src="/images/btn/btn21.gif" >
+								
+						</td>
+						<td width="45">
+<img src="/images/btn/btn31_lead.gif" >	
+							
+						</td>
+						<td width="15"></td>
+					</tr>
+
+<tr>
+						<td width="1" style="font-size:1px;color:#fff">55</td>
+						<td class="vod_list" ><span title="20110205" id="onAirText2011020513430168662" class="onAirText" style="text-align:left">제55회 2011.02.05</span></td>
+						
+						<!--  -->
+						<td width="36">
+													<img src="/images/btn/btn12.gif" onclick="player('http://www.tudou.com/v/_dX1_k6NfQw/v.swf','2011020513430168662')" style="cursor:pointer" />
+										
+						</td>
+						
+						<td width="36">
+														<img src="/images/btn/btn21.gif" >
+								
+						</td>
+						<td width="45">
+<img src="/images/btn/btn31_lead.gif" >	
+							
+						</td>
+						<td width="15"></td>
+					</tr>
+
+<tr>
+						<td width="1" style="font-size:1px;color:#fff">54</td>
+						<td class="vod_list" ><span title="20110129" id="onAirText2011012913001277869" class="onAirText" style="text-align:left">제54회 2011.01.29</span></td>
+						
+						<!--  -->
+						<td width="36">
+													<img src="/images/btn/btn12.gif" onclick="player('http://www.tudou.com/v/C9W7pY5jLs0/v.swf','2011012913001277869')" style="cursor:pointer" />
+										
+						</td>
+						
+						<td width="36">
+														<img src="/images/btn/btn21.gif" >
+								
+						</td>
+						<td width="45">
+<img src="/images/btn/btn31_lead.gif" >	
+							
+						</td>
+						<td width="15"></td>
+					</tr>
+
+<tr>
+						<td width="1" style="font-size:1px;color:#fff">53</td>
+						<td class="vod_list" ><span title="20110122" id="onAirText2011012213333852173" class="onAirText" style="text-align:left">제53회 2011.01.22</span></td>
+						
+						<!--  -->
+						<td width="36">
+													<img src="/images/btn/btn12.gif" onclick="player('http://www.tudou.com/v/SGFJJI85VrY/v.swf','2011012213333852173')" style="cursor:pointer" />
+										
+						</td>
+						
+						<td width="36">
+														<img src="/images/btn/btn21.gif" >
+								
+						</td>
+						<td width="45">
+<img src="/images/btn/btn31_lead.gif" >	
+							
+						</td>
+						<td width="15"></td>
+					</tr>
+
+<tr>
+						<td width="1" style="font-size:1px;color:#fff">52</td>
+						<td class="vod_list" ><span title="20110115" id="onAirText2011011514050065723" class="onAirText" style="text-align:left">제52회 2011.01.15</span></td>
+						
+						<!--  -->
+						<td width="36">
+													<img src="/images/btn/btn12.gif" onclick="player('http://www.tudou.com/v/5hQdsxBNw6Y/v.swf','2011011514050065723')" style="cursor:pointer" />
+										
+						</td>
+						
+						<td width="36">
+														<img src="/images/btn/btn21.gif" >
+								
+						</td>
+						<td width="45">
+<img src="/images/btn/btn31_lead.gif" >	
+							
+						</td>
+						<td width="15"></td>
+					</tr>
+
+<tr>
+						<td width="1" style="font-size:1px;color:#fff">51</td>
+						<td class="vod_list" ><span title="20110108" id="onAirText2011010813382419992" class="onAirText" style="text-align:left">제51회 2011.01.08</span></td>
+						
+						<!--  -->
+						<td width="36">
+													<img src="/images/btn/btn12.gif" onclick="player('http://www.tudou.com/v/tFtH2Wu7XLE/v.swf','2011010813382419992')" style="cursor:pointer" />
+										
+						</td>
+						
+						<td width="36">
+														<img src="/images/btn/btn21.gif" >
+								
+						</td>
+						<td width="45">
+<img src="/images/btn/btn31_lead.gif" >	
+							
+						</td>
+						<td width="15"></td>
+					</tr>
+
+<tr>
+						<td width="1" style="font-size:1px;color:#fff">50</td>
+						<td class="vod_list" ><span title="20110101" id="onAirText2011010113013089106" class="onAirText" style="text-align:left">제50회 2011.01.01</span></td>
+						
+						<!--  -->
+						<td width="36">
+													<img src="/images/btn/btn12.gif" onclick="player('http://www.tudou.com/v/-pY7o9dS3vs/v.swf','2011010113013089106')" style="cursor:pointer" />
+										
+						</td>
+						
+						<td width="36">
+														<img src="/images/btn/btn21.gif" >
+								
+						</td>
+						<td width="45">
+<img src="/images/btn/btn31_lead.gif" >	
+							
+						</td>
+						<td width="15"></td>
+					</tr>
+
+<tr>
+						<td width="1" style="font-size:1px;color:#fff">49</td>
+						<td class="vod_list" ><span title="20101225" id="onAirText2010122514445866375" class="onAirText" style="text-align:left">제49회 2010.12.25</span></td>
+						
+						<!--  -->
+						<td width="36">
+													<img src="/images/btn/btn12.gif" onclick="player('http://www.tudou.com/v/fJX0syvAERM/v.swf','2010122514445866375')" style="cursor:pointer" />
+										
+						</td>
+						
+						<td width="36">
+														<img src="/images/btn/btn21.gif" >
+								
+						</td>
+						<td width="45">
+<img src="/images/btn/btn31_lead.gif" >	
+							
+						</td>
+						<td width="15"></td>
+					</tr>
+
+<tr>
+						<td width="1" style="font-size:1px;color:#fff">48</td>
+						<td class="vod_list" ><span title="20101218" id="onAirText2010121812074128755" class="onAirText" style="text-align:left">제48회 2010.12.18</span></td>
+						
+						<!--  -->
+						<td width="36">
+													<img src="/images/btn/btn12.gif" onclick="player('http://www.tudou.com/v/sFC3bSv3dXs/v.swf','2010121812074128755')" style="cursor:pointer" />
+										
+						</td>
+						
+						<td width="36">
+														<img src="/images/btn/btn21.gif" >
+								
+						</td>
+						<td width="45">
+<img src="/images/btn/btn31_lead.gif" >	
+							
+						</td>
+						<td width="15"></td>
+					</tr>
+
+<tr>
+						<td width="1" style="font-size:1px;color:#fff">47</td>
+						<td class="vod_list" ><span title="20101211" id="onAirText2010121116321422951" class="onAirText" style="text-align:left">제47회 2010.12.11</span></td>
+						
+						<!--  -->
+						<td width="36">
+													<img src="/images/btn/btn12.gif" onclick="player('http://www.tudou.com/v/PVlSGxKOp7s/v.swf','2010121116321422951')" style="cursor:pointer" />
+										
+						</td>
+						
+						<td width="36">
+														<img src="/images/btn/btn21.gif" >
+								
+						</td>
+						<td width="45">
+<img src="/images/btn/btn31_lead.gif" >	
+							
+						</td>
+						<td width="15"></td>
+					</tr>
+
+<tr>
+						<td width="1" style="font-size:1px;color:#fff">46</td>
+						<td class="vod_list" ><span title="20101204" id="onAirText2010120414430072442" class="onAirText" style="text-align:left">제46회 2010.12.04</span></td>
+						
+						<!--  -->
+						<td width="36">
+													<img src="/images/btn/btn12.gif" onclick="player('http://www.tudou.com/v/6Eygo_cDMp8/v.swf','2010120414430072442')" style="cursor:pointer" />
+										
+						</td>
+						
+						<td width="36">
+														<img src="/images/btn/btn21.gif" >
+								
+						</td>
+						<td width="45">
+<img src="/images/btn/btn31_lead.gif" >	
+							
+						</td>
+						<td width="15"></td>
+					</tr>
+
+<tr>
+						<td width="1" style="font-size:1px;color:#fff">45</td>
+						<td class="vod_list" ><span title="20101120" id="onAirText2010112018131574529" class="onAirText" style="text-align:left">제45회 2010.11.20</span></td>
+						
+						<!--  -->
+						<td width="36">
+													<img src="/images/btn/btn12.gif" onclick="player('http://www.tudou.com/v/NcpMcKjXFB4/v.swf','2010112018131574529')" style="cursor:pointer" />
+										
+						</td>
+						
+						<td width="36">
+														<img src="/images/btn/btn21.gif" >
+								
+						</td>
+						<td width="45">
+<img src="/images/btn/btn31_lead.gif" >	
+							
+						</td>
+						<td width="15"></td>
+					</tr>
+
+<tr>
+						<td width="1" style="font-size:1px;color:#fff">44</td>
+						<td class="vod_list" ><span title="20101113" id="onAirText2010111313521798758" class="onAirText" style="text-align:left">제44회 2010.11.13</span></td>
+						
+						<!--  -->
+						<td width="36">
+													<img src="/images/btn/btn12.gif" onclick="player('http://www.tudou.com/v/rzGMNjdx_B0/v.swf','2010111313521798758')" style="cursor:pointer" />
+										
+						</td>
+						
+						<td width="36">
+														<img src="/images/btn/btn21.gif" >
+								
+						</td>
+						<td width="45">
+<img src="/images/btn/btn31_lead.gif" >	
+							
+						</td>
+						<td width="15"></td>
+					</tr>
+
+<tr>
+						<td width="1" style="font-size:1px;color:#fff">43</td>
+						<td class="vod_list" ><span title="20101106" id="onAirText2010110617304450565" class="onAirText" style="text-align:left">제43회 2010.11.06</span></td>
+						
+						<!--  -->
+						<td width="36">
+													<img src="/images/btn/btn12.gif" onclick="player('http://www.tudou.com/v/BnYwoevrpbE','2010110617304450565')" style="cursor:pointer" />
+										
+						</td>
+						
+						<td width="36">
+														<img src="/images/btn/btn21.gif" >
+								
+						</td>
+						<td width="45">
+<img src="/images/btn/btn31_lead.gif" >	
+							
+						</td>
+						<td width="15"></td>
+					</tr>
+
+<tr>
+						<td width="1" style="font-size:1px;color:#fff">42</td>
+						<td class="vod_list" ><span title="20101030" id="onAirText2010103015574975760" class="onAirText" style="text-align:left">제42회 2010.10.30</span></td>
+						
+						<!--  -->
+						<td width="36">
+													<img src="/images/btn/btn12.gif" onclick="player('http://www.tudou.com/v/xYKXlWpYXfM','2010103015574975760')" style="cursor:pointer" />
+										
+						</td>
+						
+						<td width="36">
+														<img src="/images/btn/btn21.gif" >
+								
+						</td>
+						<td width="45">
+<img src="/images/btn/btn31_lead.gif" >	
+							
+						</td>
+						<td width="15"></td>
+					</tr>
+
+<tr>
+						<td width="1" style="font-size:1px;color:#fff">41</td>
+						<td class="vod_list" ><span title="20101023" id="onAirText2010102317552292345" class="onAirText" style="text-align:left">제41회 2010.10.23</span></td>
+						
+						<!--  -->
+						<td width="36">
+													<img src="/images/btn/btn12.gif" onclick="player('http://www.tudou.com/v/HKBKb_mRnP4','2010102317552292345')" style="cursor:pointer" />
+										
+						</td>
+						
+						<td width="36">
+														<img src="/images/btn/btn21.gif" >
+								
+						</td>
+						<td width="45">
+<img src="/images/btn/btn31_lead.gif" >	
+							
+						</td>
+						<td width="15"></td>
+					</tr>
+
+<tr>
+						<td width="1" style="font-size:1px;color:#fff">40</td>
+						<td class="vod_list" ><span title="20101016" id="onAirText2010101615393067104" class="onAirText" style="text-align:left">제40회 2010.10.16</span></td>
+						
+						<!--  -->
+						<td width="36">
+													<img src="/images/btn/btn12.gif" onclick="player('http://www.tudou.com/v/I-x9ySJeOvo','2010101615393067104')" style="cursor:pointer" />
+										
+						</td>
+						
+						<td width="36">
+														<img src="/images/btn/btn21.gif" >
+								
+						</td>
+						<td width="45">
+<img src="/images/btn/btn31_lead.gif" >	
+							
+						</td>
+						<td width="15"></td>
+					</tr>
+
+<tr>
+						<td width="1" style="font-size:1px;color:#fff">39</td>
+						<td class="vod_list" ><span title="20101009" id="onAirText2010100916333969303" class="onAirText" style="text-align:left">제39회 2010.10.09</span></td>
+						
+						<!--  -->
+						<td width="36">
+													<img src="/images/btn/btn12.gif" onclick="player('http://www.tudou.com/v/R3s3LDMnQac','2010100916333969303')" style="cursor:pointer" />
+										
+						</td>
+						
+						<td width="36">
+														<img src="/images/btn/btn21.gif" >
+								
+						</td>
+						<td width="45">
+<img src="/images/btn/btn31_lead.gif" >	
+							
+						</td>
+						<td width="15"></td>
+					</tr>
+
+<tr>
+						<td width="1" style="font-size:1px;color:#fff">38</td>
+						<td class="vod_list" ><span title="20101002" id="onAirText2010100214373212044" class="onAirText" style="text-align:left">제38회 2010.10.02</span></td>
+						
+						<!--  -->
+						<td width="36">
+													<img src="/images/btn/btn12.gif" onclick="player('http://www.tudou.com/v/ZFLTl6Ajrl0','2010100214373212044')" style="cursor:pointer" />
+										
+						</td>
+						
+						<td width="36">
+														<img src="/images/btn/btn21.gif" >
+								
+						</td>
+						<td width="45">
+<img src="/images/btn/btn31_lead.gif" >	
+							
+						</td>
+						<td width="15"></td>
+					</tr>
+
+<tr>
+						<td width="1" style="font-size:1px;color:#fff">37</td>
+						<td class="vod_list" ><span title="20100925" id="onAirText2010092516223949371" class="onAirText" style="text-align:left">제37회 2010.09.25</span></td>
+						
+						<!--  -->
+						<td width="36">
+													<img src="/images/btn/btn12.gif" onclick="player('http://www.tudou.com/v/ZTIg8ku5wG8','2010092516223949371')" style="cursor:pointer" />
+										
+						</td>
+						
+						<td width="36">
+														<img src="/images/btn/btn21.gif" >
+								
+						</td>
+						<td width="45">
+<img src="/images/btn/btn31_lead.gif" >	
+							
+						</td>
+						<td width="15"></td>
+					</tr>
+
+<tr>
+						<td width="1" style="font-size:1px;color:#fff">36</td>
+						<td class="vod_list" ><span title="20100918" id="onAirText2010091814433176724" class="onAirText" style="text-align:left">제36회 2010.09.18</span></td>
+						
+						<!--  -->
+						<td width="36">
+													<img src="/images/btn/btn12.gif" onclick="player('http://www.tudou.com/v/YD1HSIBK1Tw','2010091814433176724')" style="cursor:pointer" />
+										
+						</td>
+						
+						<td width="36">
+														<img src="/images/btn/btn21.gif" >
+								
+						</td>
+						<td width="45">
+<img src="/images/btn/btn31_lead.gif" >	
+							
+						</td>
+						<td width="15"></td>
+					</tr>
+
+<tr>
+						<td width="1" style="font-size:1px;color:#fff">35</td>
+						<td class="vod_list" ><span title="20100911" id="onAirText2010091116564938970" class="onAirText" style="text-align:left">제35회 2010.09.11</span></td>
+						
+						<!--  -->
+						<td width="36">
+													<img src="/images/btn/btn12.gif" onclick="player('http://player.youku.com/player.php/sid/XMjA1NTYwODAw/v.swf','2010091116564938970')" style="cursor:pointer" />
+										
+						</td>
+						
+						<td width="36">
+														<img src="/images/btn/btn21.gif" >
+								
+						</td>
+						<td width="45">
+<img src="/images/btn/btn31_lead.gif" >	
+							
+						</td>
+						<td width="15"></td>
+					</tr>
+
+<tr>
+						<td width="1" style="font-size:1px;color:#fff">34</td>
+						<td class="vod_list" ><span title="20100904" id="onAirText2010090415371394403" class="onAirText" style="text-align:left">제34회 2010.09.04</span></td>
+						
+						<!--  -->
+						<td width="36">
+													<img src="/images/btn/btn12.gif" onclick="player('http://www.tudou.com/v/pL5irsFm3f4','2010090415371394403')" style="cursor:pointer" />
+										
+						</td>
+						
+						<td width="36">
+														<img src="/images/btn/btn21.gif" >
+								
+						</td>
+						<td width="45">
+<img src="/images/btn/btn32_lead.gif" onclick="weblinkPop('2010090415371394403','http%3A%2F%2Fwww.tudou.com%2Fv%2FpL5irsFm3f4')" id="webLinkBtn2010090415371394403 " style="cursor:pointer">	
+							
+						</td>
+						<td width="15"></td>
+					</tr>
+
+<tr>
+						<td width="1" style="font-size:1px;color:#fff">33</td>
+						<td class="vod_list" ><span title="20100828" id="onAirText2010082815163635842" class="onAirText" style="text-align:left">제33회 2010.08.28</span></td>
+						
+						<!--  -->
+						<td width="36">
+													<img src="/images/btn/btn12.gif" onclick="player('http://www.tudou.com/v/R_s6xZqAtg0','2010082815163635842')" style="cursor:pointer" />
+										
+						</td>
+						
+						<td width="36">
+														<img src="/images/btn/btn21.gif" >
+								
+						</td>
+						<td width="45">
+<img src="/images/btn/btn31_lead.gif" >	
+							
+						</td>
+						<td width="15"></td>
+					</tr>
+
+<tr>
+						<td width="1" style="font-size:1px;color:#fff">32</td>
+						<td class="vod_list" ><span title="20100821" id="onAirText2010082114300123432" class="onAirText" style="text-align:left">제32회 2010.08.21</span></td>
+						
+						<!--  -->
+						<td width="36">
+													<img src="/images/btn/btn12.gif" onclick="player('http://www.tudou.com/v/Eyh2pQyti44','2010082114300123432')" style="cursor:pointer" />
+										
+						</td>
+						
+						<td width="36">
+														<img src="/images/btn/btn21.gif" >
+								
+						</td>
+						<td width="45">
+<img src="/images/btn/btn31_lead.gif" >	
+							
+						</td>
+						<td width="15"></td>
+					</tr>
+
+<tr>
+						<td width="1" style="font-size:1px;color:#fff">31</td>
+						<td class="vod_list" ><span title="20100814" id="onAirText2010081416134489714" class="onAirText" style="text-align:left">제31회 2010.08.14</span></td>
+						
+						<!--  -->
+						<td width="36">
+													<img src="/images/btn/btn12.gif" onclick="player('http://www.tudou.com/v/3mudARWQ_v4','2010081416134489714')" style="cursor:pointer" />
+										
+						</td>
+						
+						<td width="36">
+														<img src="/images/btn/btn21.gif" >
+								
+						</td>
+						<td width="45">
+<img src="/images/btn/btn31_lead.gif" >	
+							
+						</td>
+						<td width="15"></td>
+					</tr>
+
+<tr>
+						<td width="1" style="font-size:1px;color:#fff">30</td>
+						<td class="vod_list" ><span title="20100807" id="onAirText2010080714551721494" class="onAirText" style="text-align:left">제30회 2010.08.07</span></td>
+						
+						<!--  -->
+						<td width="36">
+													<img src="/images/btn/btn12.gif" onclick="player('http://www.tudou.com/v/oXRwPOHJ-EY','2010080714551721494')" style="cursor:pointer" />
+										
+						</td>
+						
+						<td width="36">
+														<img src="/images/btn/btn21.gif" >
+								
+						</td>
+						<td width="45">
+<img src="/images/btn/btn31_lead.gif" >	
+							
+						</td>
+						<td width="15"></td>
+					</tr>
+
+<tr>
+						<td width="1" style="font-size:1px;color:#fff">29</td>
+						<td class="vod_list" ><span title="20100731" id="onAirText2010073113263913446" class="onAirText" style="text-align:left">제29회 2010.07.31</span></td>
+						
+						<!--  -->
+						<td width="36">
+													<img src="/images/btn/btn12.gif" onclick="player('http://www.tudou.com/v/YEcX9AUd1wI','2010073113263913446')" style="cursor:pointer" />
+										
+						</td>
+						
+						<td width="36">
+														<img src="/images/btn/btn21.gif" >
+								
+						</td>
+						<td width="45">
+<img src="/images/btn/btn31_lead.gif" >	
+							
+						</td>
+						<td width="15"></td>
+					</tr>
+
+<tr>
+						<td width="1" style="font-size:1px;color:#fff">28</td>
+						<td class="vod_list" ><span title="20100724" id="onAirText2010072414333940033" class="onAirText" style="text-align:left">제28회 2010.07.24</span></td>
+						
+						<!--  -->
+						<td width="36">
+													<img src="/images/btn/btn12.gif" onclick="player('http://player.youku.com/player.php/sid/XMTkyMjc2NDQw/v.swf','2010072414333940033')" style="cursor:pointer" />
+										
+						</td>
+						
+						<td width="36">
+														<img src="/images/btn/btn21.gif" >
+								
+						</td>
+						<td width="45">
+<img src="/images/btn/btn31_lead.gif" >	
+							
+						</td>
+						<td width="15"></td>
+					</tr>
+
+<tr>
+						<td width="1" style="font-size:1px;color:#fff">27</td>
+						<td class="vod_list" ><span title="20100717" id="onAirText2010071715582387260" class="onAirText" style="text-align:left">제27회 2010.07.17</span></td>
+						
+						<!--  -->
+						<td width="36">
+													<img src="/images/btn/btn12.gif" onclick="player('http://player.youku.com/player.php/sid/XMTkwNDQwMTQ4/v.swf','2010071715582387260')" style="cursor:pointer" />
+										
+						</td>
+						
+						<td width="36">
+														<img src="/images/btn/btn21.gif" >
+								
+						</td>
+						<td width="45">
+<img src="/images/btn/btn31_lead.gif" >	
+							
+						</td>
+						<td width="15"></td>
+					</tr>
+
+<tr>
+						<td width="1" style="font-size:1px;color:#fff">26</td>
+						<td class="vod_list" ><span title="20100710" id="onAirText2010071018560358056" class="onAirText" style="text-align:left">제26회 2010.07.10</span></td>
+						
+						<!--  -->
+						<td width="36">
+													<img src="/images/btn/btn12.gif" onclick="player('http://player.youku.com/player.php/sid/XMTg4NTU0MjIw/v.swf','2010071018560358056')" style="cursor:pointer" />
+										
+						</td>
+						
+						<td width="36">
+														<img src="/images/btn/btn21.gif" >
+								
+						</td>
+						<td width="45">
+<img src="/images/btn/btn31_lead.gif" >	
+							
+						</td>
+						<td width="15"></td>
+					</tr>
+
+<tr>
+						<td width="1" style="font-size:1px;color:#fff">25</td>
+						<td class="vod_list" ><span title="20100703" id="onAirText2010070317242813767" class="onAirText" style="text-align:left">제25회 2010.07.03</span></td>
+						
+						<!--  -->
+						<td width="36">
+													<img src="/images/btn/btn12.gif" onclick="player('http://player.youku.com/player.php/sid/XMTg2NjgyNTIw/v.swf','2010070317242813767')" style="cursor:pointer" />
+										
+						</td>
+						
+						<td width="36">
+														<img src="/images/btn/btn21.gif" >
+								
+						</td>
+						<td width="45">
+<img src="/images/btn/btn31_lead.gif" >	
+							
+						</td>
+						<td width="15"></td>
+					</tr>
+
+<tr>
+						<td width="1" style="font-size:1px;color:#fff">24</td>
+						<td class="vod_list" ><span title="20100626" id="onAirText2010062615292321709" class="onAirText" style="text-align:left">제24회 2010.06.26</span></td>
+						
+						<!--  -->
+						<td width="36">
+													<img src="/images/btn/btn12.gif" onclick="player('http://player.youku.com/player.php/sid/XMTg0NzA1Nzg4/v.swf','2010062615292321709')" style="cursor:pointer" />
+										
+						</td>
+						
+						<td width="36">
+														<img src="/images/btn/btn21.gif" >
+								
+						</td>
+						<td width="45">
+<img src="/images/btn/btn31_lead.gif" >	
+							
+						</td>
+						<td width="15"></td>
+					</tr>
+
+<tr>
+						<td width="1" style="font-size:1px;color:#fff">23</td>
+						<td class="vod_list" ><span title="20100619" id="onAirText2010061914404347535" class="onAirText" style="text-align:left">제23회 2010.06.19</span></td>
+						
+						<!--  -->
+						<td width="36">
+													<img src="/images/btn/btn12.gif" onclick="player('http://player.youku.com/player.php/sid/XMTgyODM5NTY4/v.swf','2010061914404347535')" style="cursor:pointer" />
+										
+						</td>
+						
+						<td width="36">
+														<img src="/images/btn/btn21.gif" >
+								
+						</td>
+						<td width="45">
+<img src="/images/btn/btn31_lead.gif" >	
+							
+						</td>
+						<td width="15"></td>
+					</tr>
+
+<tr>
+						<td width="1" style="font-size:1px;color:#fff">22</td>
+						<td class="vod_list" ><span title="20100612" id="onAirText2010061212513840841" class="onAirText" style="text-align:left">제22회 2010.06.12</span></td>
+						
+						<!--  -->
+						<td width="36">
+													<img src="/images/btn/btn12.gif" onclick="player('http://player.youku.com/player.php/sid/XMTgwOTA1OTcy/v.swf','2010061212513840841')" style="cursor:pointer" />
+										
+						</td>
+						
+						<td width="36">
+														<img src="/images/btn/btn21.gif" >
+								
+						</td>
+						<td width="45">
+<img src="/images/btn/btn31_lead.gif" >	
+							
+						</td>
+						<td width="15"></td>
+					</tr>
+
+<tr>
+						<td width="1" style="font-size:1px;color:#fff">21</td>
+						<td class="vod_list" ><span title="20100605" id="onAirText2010060516572688935" class="onAirText" style="text-align:left">제21회 2010.06.05</span></td>
+						
+						<!--  -->
+						<td width="36">
+													<img src="/images/btn/btn12.gif" onclick="player('http://player.youku.com/player.php/sid/XMTc4OTUyMzcy/v.swf','2010060516572688935')" style="cursor:pointer" />
+										
+						</td>
+						
+						<td width="36">
+														<img src="/images/btn/btn21.gif" >
+								
+						</td>
+						<td width="45">
+<img src="/images/btn/btn31_lead.gif" >	
+							
+						</td>
+						<td width="15"></td>
+					</tr>
+
+<tr>
+						<td width="1" style="font-size:1px;color:#fff">20</td>
+						<td class="vod_list" ><span title="20100529" id="onAirText2010052917212882660" class="onAirText" style="text-align:left">제20회 2010.05.29</span></td>
+						
+						<!--  -->
+						<td width="36">
+													<img src="/images/btn/btn12.gif" onclick="player('http://player.youku.com/player.php/sid/XMTc2OTUwODYw/v.swf','2010052917212882660')" style="cursor:pointer" />
+										
+						</td>
+						
+						<td width="36">
+														<img src="/images/btn/btn21.gif" >
+								
+						</td>
+						<td width="45">
+<img src="/images/btn/btn31_lead.gif" >	
+							
+						</td>
+						<td width="15"></td>
+					</tr>
+
+<tr>
+						<td width="1" style="font-size:1px;color:#fff">19</td>
+						<td class="vod_list" ><span title="20100522" id="onAirText2010052217045971153" class="onAirText" style="text-align:left">제19회 2010.05.22</span></td>
+						
+						<!--  -->
+						<td width="36">
+													<img src="/images/btn/btn12.gif" onclick="player('http://player.youku.com/player.php/sid/XMTc1MDk0Mjcy/v.swf','2010052217045971153')" style="cursor:pointer" />
+										
+						</td>
+						
+						<td width="36">
+														<img src="/images/btn/btn21.gif" >
+								
+						</td>
+						<td width="45">
+<img src="/images/btn/btn31_lead.gif" >	
+							
+						</td>
+						<td width="15"></td>
+					</tr>
+
+<tr>
+						<td width="1" style="font-size:1px;color:#fff">18</td>
+						<td class="vod_list" ><span title="20100515" id="onAirText2010051517092680619" class="onAirText" style="text-align:left">제18회 2010.05.15</span></td>
+						
+						<!--  -->
+						<td width="36">
+													<img src="/images/btn/btn12.gif" onclick="player('http://player.youku.com/player.php/sid/XMTczMjA2NTY4/v.swf','2010051517092680619')" style="cursor:pointer" />
+										
+						</td>
+						
+						<td width="36">
+														<img src="/images/btn/btn21.gif" >
+								
+						</td>
+						<td width="45">
+<img src="/images/btn/btn31_lead.gif" >	
+							
+						</td>
+						<td width="15"></td>
+					</tr>
+
+<tr>
+						<td width="1" style="font-size:1px;color:#fff">17</td>
+						<td class="vod_list" ><span title="20100508" id="onAirText2010050817105956617" class="onAirText" style="text-align:left">제17회 2010.05.08</span></td>
+						
+						<!--  -->
+						<td width="36">
+													<img src="/images/btn/btn12.gif" onclick="player('http://player.youku.com/player.php/sid/XMTcxMzU0NzI4/v.swf','2010050817105956617')" style="cursor:pointer" />
+										
+						</td>
+						
+						<td width="36">
+														<img src="/images/btn/btn21.gif" >
+								
+						</td>
+						<td width="45">
+<img src="/images/btn/btn31_lead.gif" >	
+							
+						</td>
+						<td width="15"></td>
+					</tr>
+
+<tr>
+						<td width="1" style="font-size:1px;color:#fff">16</td>
+						<td class="vod_list" ><span title="20100501" id="onAirText2010050116451951732" class="onAirText" style="text-align:left">제16회 2010.05.01</span></td>
+						
+						<!--  -->
+						<td width="36">
+													<img src="/images/btn/btn12.gif" onclick="player('http://player.youku.com/player.php/sid/XMTY5NTEzNTI0/v.swf','2010050116451951732')" style="cursor:pointer" />
+										
+						</td>
+						
+						<td width="36">
+														<img src="/images/btn/btn21.gif" >
+								
+						</td>
+						<td width="45">
+<img src="/images/btn/btn31_lead.gif" >	
+							
+						</td>
+						<td width="15"></td>
+					</tr>
+
+<tr>
+						<td width="1" style="font-size:1px;color:#fff">15</td>
+						<td class="vod_list" ><span title="20100424" id="onAirText2010042415493833873" class="onAirText" style="text-align:left">제15회 2010.04.24</span></td>
+						
+						<!--  -->
+						<td width="36">
+													<img src="/images/btn/btn12.gif" onclick="player('http://player.youku.com/player.php/sid/XMTY3NjMzNzAw/v.swf','2010042415493833873')" style="cursor:pointer" />
+										
+						</td>
+						
+						<td width="36">
+														<img src="/images/btn/btn21.gif" >
+								
+						</td>
+						<td width="45">
+<img src="/images/btn/btn32_lead.gif" onclick="weblinkPop('2010042415493833873','http%3A%2F%2Fupdate.1qdisk.com%2FQWeblink%2Findex.asp%3Fcid%3D25f326e827df2be82c222f742d5d30b832893394363730e831f33706381a3790356239be')" id="webLinkBtn2010042415493833873 " style="cursor:pointer">	
+							
+						</td>
+						<td width="15"></td>
+					</tr>
+
+<tr>
+						<td width="1" style="font-size:1px;color:#fff">14</td>
+						<td class="vod_list" ><span title="20100417" id="onAirText2010041717190422695" class="onAirText" style="text-align:left">제14회 2010.04.17</span></td>
+						
+						<!--  -->
+						<td width="36">
+													<img src="/images/btn/btn12.gif" onclick="player('http://player.youku.com/player.php/sid/XMTY1ODYwODcy/v.swf','2010041717190422695')" style="cursor:pointer" />
+										
+						</td>
+						
+						<td width="36">
+														<img src="/images/btn/btn21.gif" >
+								
+						</td>
+						<td width="45">
+<img src="/images/btn/btn31_lead.gif" >	
+							
+						</td>
+						<td width="15"></td>
+					</tr>
+
+<tr>
+						<td width="1" style="font-size:1px;color:#fff">13</td>
+						<td class="vod_list" ><span title="20100410" id="onAirText2010041016561657759" class="onAirText" style="text-align:left">제13회 2010.04.10</span></td>
+						
+						<!--  -->
+						<td width="36">
+													<img src="/images/btn/btn12.gif" onclick="player('http://player.youku.com/player.php/sid/XMTY0MTAxNTM2/v.swf','2010041016561657759')" style="cursor:pointer" />
+										
+						</td>
+						
+						<td width="36">
+														<img src="/images/btn/btn21.gif" >
+								
+						</td>
+						<td width="45">
+<img src="/images/btn/btn31_lead.gif" >	
+							
+						</td>
+						<td width="15"></td>
+					</tr>
+
+<tr>
+						<td width="1" style="font-size:1px;color:#fff">12</td>
+						<td class="vod_list" ><span title="20100403" id="onAirText2010040318171632386" class="onAirText" style="text-align:left">제12회 2010.04.03</span></td>
+						
+						<!--  -->
+						<td width="36">
+													<img src="/images/btn/btn12.gif" onclick="player('http://player.youku.com/player.php/sid/XMTYyNDM3Mzg0/v.swf','2010040318171632386')" style="cursor:pointer" />
+										
+						</td>
+						
+						<td width="36">
+														<img src="/images/btn/btn21.gif" >
+								
+						</td>
+						<td width="45">
+<img src="/images/btn/btn31_lead.gif" >	
+							
+						</td>
+						<td width="15"></td>
+					</tr>
+
+<tr>
+						<td width="1" style="font-size:1px;color:#fff">11</td>
+						<td class="vod_list" ><span title="20100327" id="onAirText2010032718012554321" class="onAirText" style="text-align:left">제11회 2010.03.27</span></td>
+						
+						<!--  -->
+						<td width="36">
+													<img src="/images/btn/btn12.gif" onclick="player('http://player.youku.com/player.php/sid/XMTYwODI3Mjcy/v.swf','2010032718012554321')" style="cursor:pointer" />
+										
+						</td>
+						
+						<td width="36">
+														<img src="/images/btn/btn21.gif" >
+								
+						</td>
+						<td width="45">
+<img src="/images/btn/btn31_lead.gif" >	
+							
+						</td>
+						<td width="15"></td>
+					</tr>
+
+<tr>
+						<td width="1" style="font-size:1px;color:#fff">10</td>
+						<td class="vod_list" ><span title="20100320" id="onAirText2010032019212985201" class="onAirText" style="text-align:left">제10회 2010.03.20</span></td>
+						
+						<!--  -->
+						<td width="36">
+													<img src="/images/btn/btn12.gif" onclick="player('http://player.youku.com/player.php/sid/XMTU5MjYxOTg4/v.swf','2010032019212985201')" style="cursor:pointer" />
+										
+						</td>
+						
+						<td width="36">
+														<img src="/images/btn/btn21.gif" >
+								
+						</td>
+						<td width="45">
+<img src="/images/btn/btn31_lead.gif" >	
+							
+						</td>
+						<td width="15"></td>
+					</tr>
+
+<tr>
+						<td width="1" style="font-size:1px;color:#fff">9</td>
+						<td class="vod_list" ><span title="20100313" id="onAirText2010031316235897125" class="onAirText" style="text-align:left">제9회 2010.03.13</span></td>
+						
+						<!--  -->
+						<td width="36">
+													<img src="/images/btn/btn12.gif" onclick="player('http://player.youku.com/player.php/sid/XMTU3NzA4MTcy/v.swf','2010031316235897125')" style="cursor:pointer" />
+										
+						</td>
+						
+						<td width="36">
+														<img src="/images/btn/btn21.gif" >
+								
+						</td>
+						<td width="45">
+<img src="/images/btn/btn31_lead.gif" >	
+							
+						</td>
+						<td width="15"></td>
+					</tr>
+
+<tr>
+						<td width="1" style="font-size:1px;color:#fff">8</td>
+						<td class="vod_list" ><span title="20100306" id="onAirText2010030615093531861" class="onAirText" style="text-align:left">제8회 2010.03.06</span></td>
+						
+						<!--  -->
+						<td width="36">
+													<img src="/images/btn/btn12.gif" onclick="player('http://player.youku.com/player.php/sid/XMTU2MjEwMjUy/v.swf','2010030615093531861')" style="cursor:pointer" />
+										
+						</td>
+						
+						<td width="36">
+														<img src="/images/btn/btn21.gif" >
+								
+						</td>
+						<td width="45">
+<img src="/images/btn/btn31_lead.gif" >	
+							
+						</td>
+						<td width="15"></td>
+					</tr>
+
+<tr>
+						<td width="1" style="font-size:1px;color:#fff">7</td>
+						<td class="vod_list" ><span title="20100227" id="onAirText2010022713333788862" class="onAirText" style="text-align:left">제7회 2010.02.27</span></td>
+						
+						<!--  -->
+						<td width="36">
+													<img src="/images/btn/btn12.gif" onclick="player('http://player.youku.com/player.php/sid/XMTU0Njc0MDMy/v.swf','2010022713333788862')" style="cursor:pointer" />
+										
+						</td>
+						
+						<td width="36">
+														<img src="/images/btn/btn21.gif" >
+								
+						</td>
+						<td width="45">
+<img src="/images/btn/btn31_lead.gif" >	
+							
+						</td>
+						<td width="15"></td>
+					</tr>
+
+<tr>
+						<td width="1" style="font-size:1px;color:#fff">6</td>
+						<td class="vod_list" ><span title="20100220" id="onAirText2010022013512853453" class="onAirText" style="text-align:left">제6회 2010.02.20</span></td>
+						
+						<!--  -->
+						<td width="36">
+													<img src="/images/btn/btn12.gif" onclick="player('http://player.youku.com/player.php/sid/XMTUzMTU5MDc2/v.swf','2010022013512853453')" style="cursor:pointer" />
+										
+						</td>
+						
+						<td width="36">
+														<img src="/images/btn/btn21.gif" >
+								
+						</td>
+						<td width="45">
+<img src="/images/btn/btn31_lead.gif" >	
+							
+						</td>
+						<td width="15"></td>
+					</tr>
+
+<tr>
+						<td width="1" style="font-size:1px;color:#fff">5</td>
+						<td class="vod_list" ><span title="20100213" id="onAirText2010021313455490863" class="onAirText" style="text-align:left">100213 설특집</span></td>
+						
+						<!--  -->
+						<td width="36">
+													<img src="/images/btn/btn12.gif" onclick="player('http://player.youku.com/player.php/sid/XMTUyMDE3OTEy/v.swf','2010021313455490863')" style="cursor:pointer" />
+										
+						</td>
+						
+						<td width="36">
+														<img src="/images/btn/btn21.gif" >
+								
+						</td>
+						<td width="45">
+<img src="/images/btn/btn31_lead.gif" >	
+							
+						</td>
+						<td width="15"></td>
+					</tr>
+
+<tr>
+						<td width="1" style="font-size:1px;color:#fff">4</td>
+						<td class="vod_list" ><span title="20100206" id="onAirText2010020613555823667" class="onAirText" style="text-align:left">제4회 2010.02.06</span></td>
+						
+						<!--  -->
+						<td width="36">
+													<img src="/images/btn/btn12.gif" onclick="player('http://player.youku.com/player.php/sid/XMTUwNjA2NjYw/v.swf','2010020613555823667')" style="cursor:pointer" />
+										
+						</td>
+						
+						<td width="36">
+														<img src="/images/btn/btn21.gif" >
+								
+						</td>
+						<td width="45">
+<img src="/images/btn/btn31_lead.gif" >	
+							
+						</td>
+						<td width="15"></td>
+					</tr>
+
+<tr>
+						<td width="1" style="font-size:1px;color:#fff">3</td>
+						<td class="vod_list" ><span title="20100130" id="onAirText2010013019151739563" class="onAirText" style="text-align:left">제3회 2010.01.30</span></td>
+						
+						<!--  -->
+						<td width="36">
+													<img src="/images/btn/btn12.gif" onclick="player('http://player.youku.com/player.php/sid/XMTQ5MTY0NDE2/v.swf','2010013019151739563')" style="cursor:pointer" />
+										
+						</td>
+						
+						<td width="36">
+														<img src="/images/btn/btn21.gif" >
+								
+						</td>
+						<td width="45">
+<img src="/images/btn/btn31_lead.gif" >	
+							
+						</td>
+						<td width="15"></td>
+					</tr>
+
+<tr>
+						<td width="1" style="font-size:1px;color:#fff">2</td>
+						<td class="vod_list" ><span title="20100123" id="onAirText2010012314450965066" class="onAirText" style="text-align:left">제2회 2010.01.23</span></td>
+						
+						<!--  -->
+						<td width="36">
+													<img src="/images/btn/btn12.gif" onclick="player('http://player.youku.com/player.php/sid/XMTQ3NTgyNjM2/v.swf','2010012314450965066')" style="cursor:pointer" />
+										
+						</td>
+						
+						<td width="36">
+														<img src="/images/btn/btn21.gif" >
+								
+						</td>
+						<td width="45">
+<img src="/images/btn/btn31_lead.gif" >	
+							
+						</td>
+						<td width="15"></td>
+					</tr>
+
+<tr>
+						<td width="1" style="font-size:1px;color:#fff">1</td>
+						<td class="vod_list" ><span title="20100116" id="onAirText2010011611420577729" class="onAirText" style="text-align:left">제1회 2010.01.16</span></td>
+						
+						<!--  -->
+						<td width="36">
+													<img src="/images/btn/btn12.gif" onclick="player('http://player.youku.com/player.php/sid/XMTQ1OTg1MDYw/v.swf','2010011611420577729')" style="cursor:pointer" />
+										
+						</td>
+						
+						<td width="36">
+														<img src="/images/btn/btn21.gif" >
+								
+						</td>
+						<td width="45">
+<img src="/images/btn/btn31_lead.gif" >	
+							
+						</td>
+						<td width="15"></td>
+					</tr>
+				</tbody>
+			</table>
+			</div>
+			<!-- <table cellpadding="0" cellspacing="0" border="0" width="342" style="margin-top:10px">
+				<tr>
+					<td><a href="http://update.1qdisk.com/QUpdate/1QDisk_Setup.exe" target="_blank"><img src="/images/btn_download.gif"></a>
+						
+					</td>
+					<td><a href="http://app.gomtv.com/gom/GOMPLAYERSETUP.EXE" target="_blank"><img src="/images/btn_gomIcon.gif" ></a></td>
+				</tr>
+			</table>
+ -->
+			<table cellpadding="0" cellspacing="0" border="0" width="342" style="margin-top:10px">
+				<tr>
+					<td><a href="http://update.1qdisk.com/QUpdate/1QDisk_Setup.exe" target="_blank"><img src="/images/new/cst_btn01.jpg"></a></td>
+					<td><a href="http://app.gomtv.com/gom/GOMPLAYERSETUP.EXE" target="_blank"><img src="/images/new/cst_btn02.jpg"></a></td>
+					<td><a href="http://file.naver.com/pc/view.html?fnum=307914&cat=43" target="_blank"><img src="/images/new/cst_btn03.jpg"></a></td>
+					<td><a href="http://file.naver.com/pc/view.html?fnum=305251&cat=44" target="_blank"><img src="/images/new/cst_btn04.jpg"></a></td>
+				</tr>
+			</table>
+
+
+		</td>
+	</tr>
+	
+	</table>
+
+	<div style="margin-top:10px;border:0px solid #000" >
+	<table cellpadding="0" cellspacing="0" border="0" bordercolor="red">
+	<tr>
+		<td valign="top">
+
+		<!--3Deps commentBox S-->
+		<table cellpadding="0" cellspacing="0" border="0" width="628" >
+		<tr>
+			<td align="left">
+				<table cellpadding="0" cellspacing="0" border="0" style="text-align:left;">
+					<tr>
+						<td><img src="/images/3d/3depTopTap11.gif" style="cursor:pointer" onclick="commentBtn('1')" id="btn_pro1" /></td>
+						<td><img src="/images/3d/3depTopTap22.gif" style="cursor:pointer" onclick="commentBtn('2')" id="btn_comment1" /></td>
+						<td style="width:152px; padding-left:20px;"><img src="/images/shipin.gif" align="absmiddle">&nbsp;추천: <span id="voteCntArea">34</span>, 찜: <span id="myVodCntArea">2</span></td>
+						<td style="padding-left:30px;"><img src="/images/shipin_e.gif" onclick="voteVod('2722','34')" style="cursor:pointer"></td>
+						<td style="padding-left:10px;"><img src="/images/shipin_d.gif" onclick="myVodRegist('2722')" style="cursor:pointer"></td>
+					</tr>
+				</table>
+			</td>
+		</tr>
+		<tr>
+			<td><img src="/images/3d/3depComBoxTop.gif"></td>
+		</tr>
+		<tr>
+			<td background="/images/3d/3depComBoxBg.gif">
+				<table width="98%" cellspacing="0" cellpadding="0" border="0"  id="programArea" >
+					<tr>
+						<td style="padding-left:20px;">
+						<strong>제목:</strong>
+						세대공감 토요일						<br/>
+						<strong>지역:</strong>
+						한국						<br/>
+						<strong>언어:</strong>
+						한국어						<br/>
+						<strong>발행시간:</strong>
+						        						<br/>
+						<strong>출연:</strong>
+						강석우, 이지애						<br/>
+						<strong>소개:</strong>
+						<br/>
+						<div id='Content_View' style="position:relative; width:600px; background-color:#ffffff; overflow-x:scroll; overflow-y:hidden; scrollbar-face-color: white; scrollbar-shadow-color: white; scrollbar-highlight-color: white; scrollbar-3dlight-color: white; scrollbar-darkshadow-color: white; scrollbar-track-color: white; scrollbar-arrow-color: white;">
+						<table width="600" border="0" cellspacing="0" cellpadding="0">
+						  <tr>
+							<td width="600" style="word-wrap:break-word;word-break:break-all;">
+							<TABLE>
+
+<TR>
+<TD class=txt>젊은 시절 즐겨 봤던 방송을 다시 보며 과거 열광하던 스타를 떠올리고, 추억을 곱씹을 수 있게 도와주는 토요일의 활력 충전 프로그램이다. </TD></TR></TABLE>							</td>
+						   </tr>
+						  </table>
+						</div>
+						
+						</td>
+					</tr>
+				</table>
+				</td>
+			</tr>
+			<tr>
+				<td background="/images/3d/3depComBoxBg.gif" style="padding-left:20px">
+					<div id="commentArea" >
+					<table cellpadding="0" cellspacing="0" border="0" >
+						<tr>
+							<td style="padding-left:20px; text-align:left; padding-top:10px;"><img src="/images/shipin_04.gif" ><font class="shipin_center_b1">총 0개 </font></td>
+						</tr>
+					</table>
+
+					<span id="commentListArea">
+					
+					<div class="commentList">한마디 올려주세요 ^^ </div>
+
+					</span>
+					<table cellpadding="0" cellspacing="0" border="0" >
+						<tr>
+							<td colspan="3" style="font-size:11px;letter-spacing: -1px;line-height:20px;padding-top:20px;padding-bottom:5px;border-bottom:1px solid #eaeaea">
+							
+							1.국가,민족,정치,종교와 관련된 글과 특정지역 특정집단에 대한 선전성 글, 비방,악담,욕설 등 게시물과 답글은 금지합니다.<br /> 
+								2. 홍보광고,중복게시물,불건전한 야한글,타인의 불쾌를 자아내는 게시물은 금지이며 발견 즉시 무통보 삭제 처리합니다. 
+							</td>
+						</tr>
+						<tr>
+							<td height="5"></td>
+						</tr>
+						<tr>
+							<td>
+								<table cellpadding="0" cellspacing="3" border="0">
+									<tr>
+										<td><img src="/images/bullet01_plk.gif" onclick="insertText($('commentContent'),'{I_01}')" style="cursor:hand"></td>
+										<td style="padding-left:5px;"><img src="/images/bullet02_plk.gif" onclick="insertText($('commentContent'),'{I_02}')" style="cursor:hand"></td>
+										<td style="padding-left:5px;"><img src="/images/bullet03_plk.gif" onclick="insertText($('commentContent'),'{I_03}')" style="cursor:hand"></td>
+										<td style="padding-left:5px;"><img src="/images/bullet04_plk.gif" onclick="insertText($('commentContent'),'{I_04}')" style="cursor:hand"></td>
+									</tr>
+									<tr>
+										<td><img src="/images/bullet05_plk.gif" onclick="insertText($('commentContent'),'{I_05}')" style="cursor:hand"></td>
+										<td style="padding-left:5px;"><img src="/images/bullet06_plk.gif" onclick="insertText($('commentContent'),'{I_06}')" style="cursor:hand"></td>
+										<td style="padding-left:5px;"><img src="/images/bullet07_plk.gif" onclick="insertText($('commentContent'),'{I_07}')" style="cursor:hand"></td>
+										<td style="padding-left:5px;"><img src="/images/bullet08_plk.gif" onclick="insertText($('commentContent'),'{I_08}')" style="cursor:hand"></td>
+									</tr>
+									<tr>
+										<td><img src="/images/bullet09_plk.gif" onclick="insertText($('commentContent'),'{I_09}')" style="cursor:hand"></td>
+										<td style="padding-left:5px;"><img src="/images/bullet10_plk.gif" onclick="insertText($('commentContent'),'{I_10}')" style="cursor:hand"></td>
+										<td style="padding-left:5px;"><img src="/images/bullet11_plk.gif" onclick="insertText($('commentContent'),'{I_11}')" style="cursor:hand"></td>
+										<td style="padding-left:5px;"><img src="/images/bullet12_plk.gif" onclick="insertText($('commentContent'),'{I_12}')" style="cursor:hand"></td>
+									</tr>
+									<tr>
+										<td><img src="/images/bullet13_plk.gif" onclick="insertText($('commentContent'),'{I_13}')" style="cursor:hand"></td>
+										<td style="padding-left:5px;"><img src="/images/bullet14_plk.gif" onclick="insertText($('commentContent'),'{I_14}')" style="cursor:hand"></td>
+										<td style="padding-left:5px;"><img src="/images/bullet15_plk.gif" onclick="insertText($('commentContent'),'{I_15}')" style="cursor:hand"></td>
+										<td style="padding-left:5px;"><img src="/images/bullet16_plk.gif" onclick="insertText($('commentContent'),'{I_16}')" style="cursor:hand"></td>
+									</tr>
+								</table>
+							</td>
+							<td style="padding-left:15px;">
+								<form id="commentForm" name="commentForm" method="post" action="/vod/commentProc.php" target="hiddenFrame" onsubmit="return commentWrite()">
+								<input type="hidden" name="commentVodKey" value="2722">
+								<input type="hidden" id="commentCnt" name="commentCnt" value="0">
+								<label>
+								
+								
+								<textarea id="commentContent" name="commentContent" cols="65" rows="7" style="width:350px;border:1px solid #b2b2b2" onkeyup="lengthCheck($('commentContent'),'byteValue',300)"></textarea>
+
+								</label>
+							 </td>
+							 <td style="padding-left:20px;"><input type="image" src="/images/new/btn_review_w_plk.jpg" style="cursor:hand">
+							 <!--[if IE 8]> <br /> <![endif]-->
+							 <input type="text" size="3" id="byteValue" class="hiddenInput" value="300"/><span style="font-size:11px;color:#114477;height:20px">자</span> 
+							 </td>
+						</tr>
+						</form>
+					</table>
+					</div>
+
+				</td>
+			</tr>
+			<tr>
+				<td><img src="/images/3d/3depComBoxBtm.gif"></td>
+			</tr>
+			<tr>
+				<td align="left" valign="top">
+					<table cellpadding="0" cellspacing="0" border="0" align="left">
+						<td><img src="/images/3d/3depBtmTap11.gif" style="cursor:hand" onclick="commentBtn('1')" id="btn_pro2" /></td>
+						<td><img src="/images/3d/3depBtmTap22.gif" style="cursor:hand" onclick="commentBtn('2')" id="btn_comment2" /></td>
+					</table>
+				</td>
+			</tr>
+		</table>
+		<!--3Deps commentBox E-->
+	</td>
+	<td style="width:10px;"></td>
+	<td valign="top" align="right">
+		<!--3Deps Myfavorite S-->
+		<table cellpadding="0" cellspacing="0" border="0">
+			<tr>
+				<td><img src="/images/3d/3dFavoBoxTop.gif"></td>
+			</tr>
+			<tr>
+				<td style="width:327px;">
+					<table cellpadding="0" cellspacing="0" border="0" background="/images/3d/3dFavoBoxBg.gif" style="height:150px;width:327px;" >
+						<tr>
+							<td style="padding:5px" align="center" id="myVodList">
+			회원가입하시면 "나의 관심프로"를 사용할수 있습니다.						
+							</td>
+						</tr>
+					</table>
+				</td>
+			</tr>
+			<tr>
+				<td><img src="/images/3d/3dFavoBoxBtm.gif"></td>
+			</tr>
+		</table>
+		<!--3Deps Myfavorite E-->
+	</td>
+</tr>
+</table>
+	</div>
+</div>
+
+
+<div id="foot">
+ 			
+		 <div id="footer">
+			<ul>
+				<li class="mn"><a href="/"><img src="/images/new/footer/btm_mn01.gif" /></a></li>
+        	<li class="flt"><a href="/customer/page.html?p=privacy"><img src="/images/new/footer/btm_mn02.gif" /></a></li>
+        	<li class="flt"><a href="/community/page.html?p=adinfo"><img src="/images/new/footer/btm_mn03.gif" /></a></li>
+        	<li class="flt"><a href="/community/bbs.html?id=notice"><img src="/images/new/footer/btm_mn04.gif" /></a></li>
+            <li class="top"><a href="#top"><img src="/images/new/footer/btm_btn.gif" /></a></li>
+			</ul>
+			<ul class="crb">
+				<li class="bi"><a href="#"><img src="/images/new/footer/btm_bi.gif" /></a></li>
+				<li class="cpr">ⓒ 2009 1qdisk.com    <a href="http://www.miibeian.gov.cn/ " target="_blank">京ICP备09101505号</a> <script src="http://s88.cnzz.com/stat.php?id=1560710&web_id=1560710&show=pic" language="JavaScript" charset="gb2312"></script><br />免责声明：1qdisk.com 视频来源于优酷网、我乐网等视频共享网站，如果涉及<br />
+				到侵权问题请 联系我们，我们将及时进行删除处理。 </li>
+			</ul>
+		</div>
+		<script type="text/javascript" src="/common/js/anchorsBlur.js" ></script>
+		<script type="text/javascript">
+		//<![CDATA[
+		bodyOnloadCheck =true;
+		//]]>
+		</script>
+
+</div>
+
+</body>
+</html>
+

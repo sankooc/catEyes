@@ -26,7 +26,7 @@ import com.jayway.jsonpath.JsonPath;
 /**
  * @author sankooc
  */
-public class LeshResolver extends AbstractResolver implements Resolver {
+public class LeshResolver extends AbstractResolver<String> implements Resolver {
 
 	Pattern pattern = Pattern.compile("  vid:(\\d+),");
 	String format = "http://app.letv.com/v.php?id=%s";

@@ -23,7 +23,7 @@ import org.cateyes.core.volumn.Volumn;
 /**
  * @author sankooc
  */
-public class YoutubeResolver extends AbstractResolver implements Resolver {
+public class YoutubeResolver extends AbstractResolver<String> implements Resolver {
 
 	/* (non-Javadoc)
 	 * @see org.cateyes.core.Resolver#createVolumn(java.lang.String)
